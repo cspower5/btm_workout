@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Break The Monotony Workout App Home</title>
+</head>
+<body>
+    <h1>Welcome to the Workout App</h1>
+    <p>Choose an option below:</p>
+    <ul>
+        <li><a href="/select_body_part">Find Random Exercises</a></li>
+        <li><a href="/insert_exercise">Add a New Exercise</a></li>
+    </ul>
+
+    <h2>Database Tools</h2>
+    <p>Refresh your database with the latest exercises from the API.</p>
+    <button id="refresh-db-btn">Refresh Database</button>
+    <p id="message"></p>
+
+    <script>
+        document.getElementById('refresh-db-btn').addEventListener('click', () => {
+            const messageElement = document.getElementById('message');
+            messageElement.textContent = "Refreshing database, please wait...";
+
+            fetch('/api/refresh_db', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                messageElement.textContent = data.message;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                messageElement.textContent = "Failed to refresh database. Check server logs.";
+            });
+        });
+    </script>
+</body>
+</html>
+
