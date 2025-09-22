@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Insert New Exercise</title>
+</head>
+<body>
+    <h1>Add a New Exercise</h1>
+    <form id="insert-form">
+        <label for="name">Name:</label><br>
+        <input type="text" id="name" name="name" required><br><br>
+
+        <label for="bodyPart">Body Part:</label><br>
+        <input type="text" id="bodyPart" name="bodyPart" required><br><br>
+
+        <label for="equipment">Equipment:</label><br>
+        <input type="text" id="equipment" name="equipment" required><br><br>
+
+        <label for="target">Target Muscle:</label><br>
+        <input type="text" id="target" name="target" required><br><br>
+
+        <label for="gifUrl">GIF URL (optional):</label><br>
+        <input type="url" id="gifUrl" name="gifUrl"><br><br>
+
+        <button type="submit">Submit Exercise</button>
+    </form>
+    
+    <p id="message"></p>
+    
+    <p><a href="/">Back to Home</a></p>
+
+    <script>
+        document.getElementById('insert-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const messageElement = document.getElementById('message');
+
+            const newExercise = {
+                name: form.name.value,
+                bodyPart: form.bodyPart.value,
+                equipment: form.equipment.value,
+                target: form.target.value,
+                gifUrl: form.gifUrl.value || ''
+            };
+
+            fetch('/api/insert_exercise', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newExercise),
+            })
+            .then(response => response.json())
+            .then(data => {
+                messageElement.textContent = data.message || data.error;
+                if (data.message) {
+                    form.reset(); // Clear the form on success
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                messageElement.textContent = "Failed to submit exercise.";
+            });
+        });
+    </script>
+</body>
+</html>

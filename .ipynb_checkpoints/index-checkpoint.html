@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Workout Body Parts</title>
+</head>
+<body>
+    <h1>Available Body Parts</h1>
+    <ul id="body-parts-list">
+        </ul>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Make a GET request to the API endpoint
+            fetch('/api/body_parts')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const list = document.getElementById('body-parts-list');
+                    data.forEach(part => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = part;
+                        list.appendChild(listItem);
+                    });
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                    const list = document.getElementById('body-parts-list');
+                    list.innerHTML = '<li>Error loading body parts.</li>';
+                });
+        });
+    </script>
+</body>
+</html>

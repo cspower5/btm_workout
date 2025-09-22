@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Find Exercises</title>
+</head>
+<body>
+    <h1>Find Exercises</h1>
+    
+    <label for="body-part-select">Select a body part:</label>
+    <select id="body-part-select">
+        <!-- Options will be populated by JavaScript -->
+    </select>
+    <button id="get-exercises-btn">Get 3 Random Exercises</button>
+    
+    <div id="exercises-container">
+        <!-- Exercises will be displayed here -->
+    </div>
+
+    <p><a href="/">Back to Home</a></p>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const selectElement = document.getElementById('body-part-select');
+            const container = document.getElementById('exercises-container');
+            const getExercisesBtn = document.getElementById('get-exercises-btn');
+
+            // Function to populate the dropdown
+            function populateBodyParts() {
+                fetch('/api/body_parts')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (Array.isArray(data)) {
+                            selectElement.innerHTML = ''; // Clear previous options
+                            data.forEach(part => {
+                                const option = document.createElement('option');
+                                option.value = part;
+                                option.textContent = part;
+                                selectElement.appendChild(option);
+                            });
+                        } else {
+                            console.error('Data is not an array:', data);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching body parts:', error);
+                        container.innerHTML = '<p>Could not load body parts.</p>';
+                    });
+            }
+
+            // Function to get and display random exercises
+            function getRandomExercises() {
+                const selectedPart = selectElement.value;
+                if (!selectedPart) {
+                    container.innerHTML = '<p>Please select a body part.</p>';
+                    return;
+                }
+
+                container.innerHTML = '<p>Loading exercises...</p>';
+
+                fetch('/api/get_random_exercises', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ bodyPart: selectedPart })
+                })
+                .then(response => response.json())
+                .then(exercises => {
+                    container.innerHTML = '';
+                    if (exercises.length === 0) {
+                        container.innerHTML = '<p>No exercises found for this body part.</p>';
+                    } else {
+                        exercises.forEach(exercise => {
+                            const exerciseDiv = document.createElement('div');
+                            exerciseDiv.style.border = '1px solid #ccc';
+                            exerciseDiv.style.padding = '10px';
+                            exerciseDiv.style.margin = '10px';
+                            exerciseDiv.style.borderRadius = '8px';
+                            
+                            const name = document.createElement('h3');
+                            name.textContent = exercise.name;
+                            exerciseDiv.appendChild(name);
+
+                            const bodyPart = document.createElement('p');
+                            bodyPart.innerHTML = `<strong>Body Part:</strong> ${exercise.bodyPart}`;
+                            exerciseDiv.appendChild(bodyPart);
+
+                            const equipment = document.createElement('p');
+                            equipment.innerHTML = `<strong>Equipment:</strong> ${exercise.equipment}`;
+                            exerciseDiv.appendChild(equipment);
+
+                            const gif = document.createElement('img');
+                            gif.src = exercise.gifUrl || ''; // Use a placeholder if URL is missing
+                            gif.alt = `GIF of ${exercise.name}`;
+                            gif.style.maxWidth = '100%';
+                            gif.style.height = 'auto';
+                            exerciseDiv.appendChild(gif);
+                            
+                            container.appendChild(exerciseDiv);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching exercises:', error);
+                    container.innerHTML = '<p>Failed to get exercises. Check server logs.</p>';
+                });
+            }
+
+            // Event listeners
+            getExercisesBtn.addEventListener('click', getRandomExercises);
+            
+            // Initial call to populate the dropdown on page load
+            populateBodyParts();
+        });
+    </script>
+</body>
+</html>
+
