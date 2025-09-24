@@ -3,42 +3,51 @@ from dotenv import load_dotenv
 from urllib.parse import quote_plus
 import pymongo
 from pymongo import MongoClient
+from pymongo.errors import ConnectionFailure
 
-# Initialize the db variable to None, so it always has a value.
 db = None
 client = None
 
-try:
-    # 1. Load environment variables
-    load_dotenv()
-    MONGO_USER = os.getenv("MONGO_USER")
-    MONGO_PASS = os.getenv("MONGO_PASS")
-    MONGO_HOST = os.getenv("MONGO_HOST")
-    MONGO_DB = os.getenv("MONGO_DB")
+def connect_db():
+    global db, client
+    try:
+        load_dotenv()
+        MONGO_USER = os.getenv("MONGO_USER")
+        MONGO_PASS = os.getenv("MONGO_PASS")
+        MONGO_HOST = os.getenv("MONGO_HOST")
+        MONGO_DB = os.getenv("MONGO_DB")
 
-    # 2. Check for the necessary environment variables
-    if not all([MONGO_USER, MONGO_PASS, MONGO_HOST, MONGO_DB]):
-        print("Error: One or more required environment variables are missing.")
-    else:
-        # 3. Construct the MongoDB connection URL
+        if not all([MONGO_USER, MONGO_PASS, MONGO_HOST, MONGO_DB]):
+            print("Error: One or more required environment variables are missing.")
+            return
+
         encoded_password = quote_plus(MONGO_PASS)
         MONGO_URI = f"mongodb://{MONGO_USER}:{encoded_password}@{MONGO_HOST}/{MONGO_DB}"
-
-        # 4. Connect to the MongoDB client
         client = MongoClient(MONGO_URI)
-        
-        # 5. Ping the database to force a connection and validate it
         client.admin.command('ping')
-        
-        # 6. If the connection is successful, get the database object
         db = client.get_database(MONGO_DB)
         print("Successfully connected to MongoDB.")
+    except ConnectionFailure as e:
+        print(f"Error: Could not connect to MongoDB. Please check your connection string. {e}")
+        db = None
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        db = None
 
-except pymongo.errors.ConnectionFailure as e:
-    print(f"Error: Could not connect to MongoDB. Please check your connection string. {e}")
-    if client:
-        client.close()
-except Exception as e:
-    print(f"An unexpected error occurred during database connection: {e}")
-    if client:
-        client.close()
+def get_db():
+    global db, client
+    if client is not None:
+        try:
+            # Check if the connection is still alive with a ping
+            client.admin.command('ping')
+            return db
+        except ConnectionFailure:
+            print("Connection dropped. Reconnecting...")
+            db = None
+            client = None
+    
+    # Reconnect if db is None or if the ping failed
+    if db is None:
+        connect_db()
+    
+    return db
