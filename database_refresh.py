@@ -2,7 +2,7 @@ import requests
 import os
 import sys
 from dotenv import load_dotenv
-from btm_workout_db_connect import db
+from btm_workout_db_connect import get_db
 
 # 1. Load environment variables from the .env file
 # This assumes the .env file is in the same directory as this script.
@@ -20,6 +20,7 @@ def insert_exercises_if_not_exist():
     Fetches all exercises from the API and inserts them into the database
     only if they do not already exist.
     """
+    db = get_db()
     if db is None:
         print("Database connection is not available.")
         return 0
@@ -27,7 +28,6 @@ def insert_exercises_if_not_exist():
     try:
         exercises_collection = db['exercises']
         
-        # Now we use the environment variable directly!
         api_url = "https://exercisedb.p.rapidapi.com/exercises"
         headers = {
             "X-RapidAPI-Key": RAPIDAPI_KEY,
@@ -41,12 +41,29 @@ def insert_exercises_if_not_exist():
         inserted_count = 0
 
         for exercise in api_exercises:
-            # Check if an exercise with the same name already exists
-            existing_exercise = exercises_collection.find_one({"name": exercise.get("name")})
+            # Check if an exercise with the same name, bodyPart, and equipment already exists
+            existing_exercise = exercises_collection.find_one({
+                "name": exercise.get("name"),
+                "bodyPart": exercise.get("bodyPart"),
+                "equipment": exercise.get("equipment")
+            })
 
             if not existing_exercise:
-                # Insert the new exercise
-                exercises_collection.insert_one(exercise)
+                # Build a new dictionary with only the fields you need
+                clean_exercise = {
+                    "name": exercise.get("name"),
+                    "target": exercise.get("target"),
+                    "equipment": exercise.get("equipment"),
+                    "bodyPart": exercise.get("bodyPart"),
+                    "gifUrl": exercise.get("gifUrl"),
+                    "secondaryMuscles": exercise.get("secondaryMuscles"),
+                    "instructions": exercise.get("instructions"),
+                    "description": exercise.get("description"),
+                    "difficulty": exercise.get("difficulty")
+                }
+                
+                # Insert the new, clean exercise
+                exercises_collection.insert_one(clean_exercise)
                 inserted_count += 1
 
         return inserted_count

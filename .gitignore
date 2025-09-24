@@ -1,1 +1,9 @@
 .env
+# Node
+/client/node_modules
+/client/dist
+.env
+
+# Python
+/venv
+__pycache__
