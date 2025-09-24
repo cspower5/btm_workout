@@ -1,0 +1,44 @@
+.manage-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+}
+
+.item-list {
+    list-style: none;
+    padding: 0;
+}
+
+.item-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.item-list-item:last-child {
+    border-bottom: none;
+}
+
+.item-list-item span {
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.item-list-item button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.item-list-item button:hover {
+    background-color: #c82333;
+}
