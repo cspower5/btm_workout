@@ -6,10 +6,11 @@ from database_refresh import insert_exercises_if_not_exist
 from pymongo.errors import DuplicateKeyError
 
 # Define the path to the React build folder
-react_build_folder = os.path.join(os.path.dirname(__file__), 'client/dist')
+#react_build_folder = os.path.join(os.path.dirname(__file__), 'client/dist')
 
 # Configure Flask to serve static files from the React build
-app = Flask(__name__, static_folder=react_build_folder, template_folder=react_build_folder)
+#app = Flask(__name__, static_folder=react_build_folder, template_folder=react_build_folder)
+app = Flask(__name__)
 
 # Apply CORS to the entire application
 CORS(app)
@@ -250,21 +251,21 @@ def api_difficulties():
 # ======================================================================
 # Catch-All Route (This MUST be the last route in the file)
 # ======================================================================
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
-def serve(path):
+#@app.route('/', defaults={'path': ''})
+#@app.route('/<path:path>')
+#def serve(path):
     # This check ensures that if the browser is asking for an API, 
     # the server stops and doesn't try to serve a static index.html file.
-    if path.startswith('api/'):
+    #if path.startswith('api/'):
         # If the request starts with 'api/', it means the specific /api/v1/ route
         # did not match. We force a standard 404 for debugging.
-        return jsonify({"error": "API route not matched. Check server logs."}), 404
+        #return jsonify({"error": "API route not matched. Check server logs."}), 404
 
     # The rest of the logic serves static files or the main index.html
-    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
-        return send_from_directory(app.static_folder, path)
-    else:
-        return send_from_directory(app.static_folder, 'index.html')
+    #if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+        #return send_from_directory(app.static_folder, path)
+    #else:
+        #return send_from_directory(app.static_folder, 'index.html')
 
 if __name__ == '__main__':
     connect_db()
