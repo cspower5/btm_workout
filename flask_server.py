@@ -253,6 +253,14 @@ def api_difficulties():
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
+    # This check ensures that if the browser is asking for an API, 
+    # the server stops and doesn't try to serve a static index.html file.
+    if path.startswith('api/'):
+        # If the request starts with 'api/', it means the specific /api/v1/ route
+        # did not match. We force a standard 404 for debugging.
+        return jsonify({"error": "API route not matched. Check server logs."}), 404
+
+    # The rest of the logic serves static files or the main index.html
     if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
         return send_from_directory(app.static_folder, path)
     else:
