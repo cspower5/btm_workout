@@ -11,12 +11,22 @@ function WorkoutPage() {
   const [selectedBodyPart, setSelectedBodyPart] = useState('');
   const [exerciseCount, setExerciseCount] = useState(3);
 
-  const fetchBodyParts = async () => {
+  // WorkoutPage.jsx - Replace your existing fetchBodyParts function with this
+
+  // FIX: Implemented a simple retry loop to handle server wake-up delays
+  const fetchBodyParts = async (retries = 3) => {
     try {
       const data = await getBodyParts();
       setBodyParts(data);
     } catch (err) {
-      setError('Failed to fetch body parts.');
+      if (retries > 0) {
+        // Wait 1.5 seconds and try the call again
+        await new Promise(resolve => setTimeout(resolve, 1500)); 
+        console.warn(`Initial fetch failed. Retrying... Attempts remaining: ${retries - 1}`);
+        return fetchBodyParts(retries - 1);
+      }
+      // Only set error if all retries fail
+      setError('Failed to fetch body parts. The backend may be asleep or unreachable.');
       console.error(err);
     }
   };
