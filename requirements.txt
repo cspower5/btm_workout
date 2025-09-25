@@ -3,3 +3,4 @@ Flask-Cors
 pymongo
 gunicorn
 python-dotenv
+requests
