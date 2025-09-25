@@ -6,11 +6,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build", 
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
+    "postbuild": "cp dist/index.html dist/404.html",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist --no-history"
+    "deploy": "npm run build && cp dist/index.html dist/404.html && gh-pages -d dist --no-history"
   },
   "dependencies": {
     "axios": "^1.12.2",

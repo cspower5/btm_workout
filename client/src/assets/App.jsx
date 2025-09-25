@@ -12,7 +12,7 @@ import logo from './../assets/images/btm_workout_logo.png';
 
 function App() {
   return (
-    <Router>
+    <Router basename="/btm_workout">
       <div className="App">
         <header className="App-header">
           <h1>Break The Monotony Workout</h1>
