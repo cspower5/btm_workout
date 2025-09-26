@@ -8,11 +8,24 @@ from pymongo.errors import DuplicateKeyError
 
 # Configure Flask as an API-ONLY server
 app = Flask(__name__)
+# This hook handles the browser's OPTIONS pre-flight request globally.
+@app.before_request
+def before_request_hook():
+    if request.method == 'OPTIONS':
+        return app.make_default_options_response()
+
+# This hook injects the CORS headers into every final response.
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
 
 # Apply CORS to explicitly allow requests from your live GitHub Pages domain
 # This fixes the 'Access-Control-Allow-Origin' missing error.
 #CORS(app, origins=["https://cspower5.github.io"])
-CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
+#CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
 
 # ======================================================================
 # API Endpoints (Routes use /api/v1/ prefix)
