@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS, cross_origin # <-- Keep CORS and Import cross_origin
 from btm_workout_db_connect import connect_db, get_db
-from database_refresh import insert_exercises_if_not_exist
+from database_refresh import insert_exercises_if_not_exist # <-- CORRECT IMPORT
 from pymongo.errors import DuplicateKeyError
 import os # Keep os for environmental variables
 
@@ -9,11 +9,11 @@ import os # Keep os for environmental variables
 app = Flask(__name__)
 
 # ======================================================================
-# CORS FIX: DELETE MANUAL HOOKS AND USE DECORATOR ON ALL ROUTES
+# CORS FIX: Manual CORS hooks removed. Decorator is used on all routes.
 # ======================================================================
 
-# NOTE: The manual @app.before_request and @app.after_request blocks 
-# are REMOVED here. We rely entirely on the @cross_origin decorator.
+# The manual @app.before_request and @app.after_request hooks are intentionally 
+# removed as they were conflicting with the production environment.
 
 # ======================================================================
 # API Endpoints (Routes use /api/v1/ prefix)
@@ -21,7 +21,7 @@ app = Flask(__name__)
 
 # API endpoint to handle inserting a new exercise
 @app.route('/api/v1/insert_exercise', methods=['POST'])
-@cross_origin(origins=['https://cspower5.github.io']) # <--- FIX APPLIED
+@cross_origin(origins=['https://cspower5.github.io']) 
 def api_insert_exercise():
     db = get_db()
     if db is None:
@@ -34,7 +34,6 @@ def api_insert_exercise():
         if not all(k in data for k in ('name', 'bodyPart', 'equipment', 'target')):
             return jsonify({"error": "Missing required fields."}), 400
         
-        # Note: 'category' field removed as per previous discussions/cleanup
         data.pop('category', None) 
 
         result = exercises_collection.insert_one(data)
@@ -51,7 +50,7 @@ def api_insert_exercise():
 
 # API endpoint to get 3 random exercises for a selected body part
 @app.route('/api/v1/get_random_exercises', methods=['POST'])
-@cross_origin(origins=['https://cspower5.github.io']) # <--- FIX APPLIED
+@cross_origin(origins=['https://cspower5.github.io']) 
 def api_get_random_exercises():
     db = get_db()
     if db is None:
@@ -75,41 +74,42 @@ def api_get_random_exercises():
         random_exercises = list(exercises_collection.aggregate(pipeline))
 
         for exercise in random_exercises:
-            # Safely remove the MongoDB specific ID before returning to frontend
             exercise.pop('_id', None) 
 
         if not random_exercises:
              return jsonify({"error": f"No exercises found for body part: {selected_body_part}."}), 404
 
-        return jsonify(random_exercises)
+        return jsonify(random_exercises), 200
     except Exception as e:
         print(f"Error getting random exercises: {e}")
         return jsonify({"error": "Failed to retrieve exercises."}), 500
 
-# API endpoint to refresh the database with new exercises
+# API endpoint to refresh the database with new exercises from ExerciseDB
 @app.route('/api/v1/refresh_db', methods=['POST'])
-@cross_origin(origins=['https://cspower5.github.io']) # <--- FIX APPLIED
+@cross_origin(origins=['https://cspower5.github.io']) # <--- FIX APPLIED TO REFRESH ROUTE
 def api_refresh_db():
     try:
-        # This function should be defined in database_refresh.py 
+        # Calls the function from database_refresh.py
         count = insert_exercises_if_not_exist()
-        return jsonify({"message": f"Database refresh complete. {count} new exercises added."}), 200
+        if count > 0:
+            return jsonify({"message": f"Database refresh complete. {count} new exercises added from ExerciseDB."}), 200
+        else:
+            return jsonify({"message": "Database refresh attempted, but no new exercises were added (they may already exist or the API call failed)."}), 200
     except Exception as e:
-        return jsonify({"error": "Failed to refresh database."}), 500
+        return jsonify({"error": f"Failed to refresh database: {e}"}), 500
 
 # API endpoint to get a single exercise by its name
 @app.route('/api/v1/exercise/<string:name>')
-@cross_origin(origins=['https://cspower5.github.io']) # <--- FIX APPLIED
+@cross_origin(origins=['https://cspower5.github.io']) 
 def api_get_exercise_details(name):
     db = get_db()
     if db is None:
         return jsonify({"error": "Database not connected."}), 500
     try:
         exercises_collection = db['exercises']
-        exercise = exercises_collection.find_one({"name": name})
+        exercise = exercises_collection.find_one({"name": name}, {'_id': 0})
         
         if exercise:
-            exercise.pop('_id', None)
             return jsonify(exercise)
         else:
             return jsonify({"error": "Exercise not found."}), 404
@@ -120,7 +120,7 @@ def api_get_exercise_details(name):
 
 # API endpoint to handle adding a new body part
 @app.route('/api/v1/add_body_part', methods=['POST'])
-@cross_origin(origins=['https://cspower5.github.io']) # <--- FIX APPLIED
+@cross_origin(origins=['https://cspower5.github.io']) 
 def api_add_body_part():
     db = get_db()
     if db is None:
@@ -139,7 +139,7 @@ def api_add_body_part():
 
 # API endpoint to handle adding new equipment
 @app.route('/api/v1/add_equipment', methods=['POST'])
-@cross_origin(origins=['https://cspower5.github.io']) # <--- FIX APPLIED
+@cross_origin(origins=['https://cspower5.github.io']) 
 def api_add_equipment():
     db = get_db()
     if db is None:
@@ -158,7 +158,7 @@ def api_add_equipment():
 
 # API endpoint to delete an exercise by its name
 @app.route('/api/v1/delete_exercise/<path:name>', methods=['DELETE'])
-@cross_origin(origins=['https://cspower5.github.io']) # <--- FIX APPLIED
+@cross_origin(origins=['https://cspower5.github.io']) 
 def api_delete_exercise(name):
     db = get_db()
     if db is None:
@@ -174,7 +174,7 @@ def api_delete_exercise(name):
 
 # API endpoint to delete a body part by its name
 @app.route('/api/v1/delete_body_part/<string:name>', methods=['DELETE'])
-@cross_origin(origins=['https://cspower5.github.io']) # <--- FIX APPLIED
+@cross_origin(origins=['https://cspower5.github.io']) 
 def api_delete_body_part(name):
     db = get_db()
     if db is None:
@@ -182,7 +182,6 @@ def api_delete_body_part(name):
     try:
         result = db.body_parts.delete_one({"name": name})
         
-        # Also delete associated exercises
         exercises_deleted = db.exercises.delete_many({"bodyPart": name})
 
         if result.deleted_count == 1:
@@ -196,7 +195,7 @@ def api_delete_body_part(name):
 
 # API endpoint to delete equipment by its name
 @app.route('/api/v1/delete_equipment/<string:name>', methods=['DELETE'])
-@cross_origin(origins=['https://cspower5.github.io']) # <--- FIX APPLIED
+@cross_origin(origins=['https://cspower5.github.io']) 
 def api_delete_equipment(name):
     db = get_db()
     if db is None:
@@ -204,7 +203,6 @@ def api_delete_equipment(name):
     try:
         result = db.equipment.delete_one({"name": name})
 
-        # Also delete associated exercises
         exercises_deleted = db.exercises.delete_many({"equipment": name})
 
         if result.deleted_count == 1:
@@ -218,22 +216,22 @@ def api_delete_equipment(name):
 
 # API endpoint to get a list of all body parts (used by frontend dropdowns)
 @app.route('/api/v1/body_parts_list')
-@cross_origin(origins=['https://cspower5.github.io']) # <--- FIX APPLIED
+@cross_origin(origins=['https://cspower5.github.io']) 
 def api_body_parts_list_all():
     db = get_db()
     if db is None:
         return jsonify({"error": "Database not connected."}), 500
     try:
-        # NOTE: This endpoint assumes the frontend expects a list of dictionaries 
-        # containing the body part name (e.g., [{"name": "Legs"}, ...]).
-        body_parts = list(db.body_parts.find({}, {"_id": 0}))
-        return jsonify(body_parts)
+        # Use MongoDB's distinct command to get unique body parts
+        body_parts = db.exercises.distinct("bodyPart") 
+        # The frontend expects a list of strings, so we return the result of distinct()
+        return jsonify(body_parts) 
     except Exception as e:
         return jsonify({"error": f"Failed to retrieve body parts list: {str(e)}"}), 500
 
 # API endpoint to get a list of all equipment
 @app.route('/api/v1/equipment_list')
-@cross_origin(origins=['https://cspower5.github.io']) # <--- FIX APPLIED
+@cross_origin(origins=['https://cspower5.github.io']) 
 def api_equipment_list():
     db = get_db()
     if db is None:
@@ -246,7 +244,7 @@ def api_equipment_list():
 
 # API endpoint to get a list of all exercises
 @app.route('/api/v1/exercises_list')
-@cross_origin(origins=['https://cspower5.github.io']) # <--- FIX APPLIED
+@cross_origin(origins=['https://cspower5.github.io']) 
 def api_exercises_list():
     db = get_db()
     if db is None:
@@ -259,7 +257,7 @@ def api_exercises_list():
 
 # API endpoint to get a list of all difficulties
 @app.route('/api/v1/difficulties')
-@cross_origin(origins=['https://cspower5.github.io']) # <--- FIX APPLIED
+@cross_origin(origins=['https://cspower5.github.io']) 
 def api_difficulties():
     db = get_db()
     if db is None:
@@ -288,5 +286,6 @@ def internal_error(error):
 if __name__ == '__main__':
     connect_db()
     app.run(debug=True, use_reloader=False)
+
 
 
