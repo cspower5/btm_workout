@@ -12,7 +12,15 @@ app = Flask(__name__)
 # Apply CORS to explicitly allow requests from your live GitHub Pages domain
 # This fixes the 'Access-Control-Allow-Origin' missing error.
 #CORS(app, origins=["https://cspower5.github.io"])
-CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
+#CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
+CORS(app, resources={
+    r"/api/v1/*": {
+        "origins": "*",
+        "allow_headers": "*",
+        "expose_headers": "*",
+        "methods": ["GET", "POST", "DELETE", "OPTIONS"]
+    }
+})
 
 # ======================================================================
 # API Endpoints (Routes use /api/v1/ prefix)
