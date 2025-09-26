@@ -7,8 +7,8 @@ if (!BASE_URL) {
 }
 
 export async function generateWorkout(bodyPart, numExercises) {
-  // FIX: Prepend the BASE_URL to the API path
-  const response = await fetch(`${BASE_URL}/api/get_random_exercises`, {
+  // FINAL FIX: Changed to /api/v1/
+  const response = await fetch(`${BASE_URL}/api/v1/get_random_exercises`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -26,8 +26,8 @@ export async function generateWorkout(bodyPart, numExercises) {
 }
 
 export async function getBodyParts() {
-  // FIX: Prepend the BASE_URL to the API path
-  const response = await fetch(`${BASE_URL}/api/body_parts_list`);
+  // FINAL FIX: Changed to /api/v1/
+  const response = await fetch(`${BASE_URL}/api/v1/body_parts_list`);
   if (!response.ok) {
     throw new Error('Failed to fetch body parts');
   }
@@ -37,8 +37,8 @@ export async function getBodyParts() {
 }
 
 export async function refreshDatabase() {
-  // FIX: Prepend the BASE_URL to the API path
-  const response = await fetch(`${BASE_URL}/api/refresh_db`, {
+  // FINAL FIX: Changed to /api/v1/
+  const response = await fetch(`${BASE_URL}/api/v1/refresh_db`, {
     method: 'POST',
   });
   if (!response.ok) {
