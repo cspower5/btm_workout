@@ -1,26 +1,24 @@
-from flask import Flask, render_template, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 import os
+# Removed unused imports: render_template, send_from_directory
 from btm_workout_db_connect import connect_db, get_db
 from database_refresh import insert_exercises_if_not_exist
 from pymongo.errors import DuplicateKeyError
 
-# Define the path to the React build folder
-#react_build_folder = os.path.join(os.path.dirname(__file__), 'client/dist')
-
-# Configure Flask to serve static files from the React build
-#app = Flask(__name__, static_folder=react_build_folder, template_folder=react_build_folder)
+# Configure Flask as an API-ONLY server
 app = Flask(__name__)
 
-# Apply CORS to the entire application
-CORS(app)
+# Apply CORS to explicitly allow requests from your live GitHub Pages domain
+# This fixes the 'Access-Control-Allow-Origin' missing error.
+CORS(app, origins=["https://cspower5.github.io"]) 
 
 # ======================================================================
-# API Endpoints (All API routes MUST come before the catch-all route)
+# API Endpoints (Routes use /api/v1/ prefix)
 # ======================================================================
 
 # API endpoint to handle inserting a new exercise
-@app.route('/api/insert_exercise', methods=['POST'])
+@app.route('/api/v1/insert_exercise', methods=['POST'])
 def api_insert_exercise():
     db = get_db()
     if db is None:
@@ -30,6 +28,7 @@ def api_insert_exercise():
         data = request.json
         exercises_collection = db['exercises']
 
+        # NOTE: Assumed 'gifUrl' requirement was removed from your logic
         if not all(k in data for k in ('name', 'bodyPart', 'equipment', 'target')):
             return jsonify({"error": "Missing required fields."}), 400
         
@@ -48,7 +47,7 @@ def api_insert_exercise():
         return jsonify({"error": "Failed to insert exercise."}), 500
 
 # API endpoint to get 3 random exercises for a selected body part
-@app.route('/api/get_random_exercises', methods=['POST'])
+@app.route('/api/v1/get_random_exercises', methods=['POST'])
 def api_get_random_exercises():
     db = get_db()
     if db is None:
@@ -80,7 +79,7 @@ def api_get_random_exercises():
         return jsonify({"error": "Failed to retrieve exercises."}), 500
 
 # API endpoint to refresh the database with new exercises
-@app.route('/api/refresh_db', methods=['POST'])
+@app.route('/api/v1/refresh_db', methods=['POST'])
 def api_refresh_db():
     try:
         count = insert_exercises_if_not_exist()
@@ -90,7 +89,7 @@ def api_refresh_db():
         return jsonify({"error": "Failed to refresh database."}), 500
 
 # API endpoint to get a single exercise by its name
-@app.route('/api/exercise/<string:name>')
+@app.route('/api/v1/exercise/<string:name>')
 def api_get_exercise_details(name):
     db = get_db()
     if db is None:
@@ -110,7 +109,7 @@ def api_get_exercise_details(name):
         return jsonify({"error": "Failed to retrieve exercise details."}), 500
 
 # API endpoint to handle adding a new body part
-@app.route('/api/add_body_part', methods=['POST'])
+@app.route('/api/v1/add_body_part', methods=['POST'])
 def api_add_body_part():
     db = get_db()
     if db is None:
@@ -128,7 +127,7 @@ def api_add_body_part():
         return jsonify({"error": f"Failed to add body part: {str(e)}"}), 500
 
 # API endpoint to handle adding new equipment
-@app.route('/api/add_equipment', methods=['POST'])
+@app.route('/api/v1/add_equipment', methods=['POST'])
 def api_add_equipment():
     db = get_db()
     if db is None:
@@ -146,7 +145,7 @@ def api_add_equipment():
         return jsonify({"error": f"Failed to add equipment: {str(e)}"}), 500
 
 # API endpoint to delete an exercise by its name
-@app.route('/api/delete_exercise/<path:name>', methods=['DELETE'])
+@app.route('/api/v1/delete_exercise/<path:name>', methods=['DELETE'])
 def api_delete_exercise(name):
     db = get_db()
     if db is None:
@@ -161,7 +160,7 @@ def api_delete_exercise(name):
         return jsonify({"error": f"Failed to delete exercise: {str(e)}"}), 500
 
 # API endpoint to delete a body part by its name
-@app.route('/api/delete_body_part/<string:name>', methods=['DELETE'])
+@app.route('/api/v1/delete_body_part/<string:name>', methods=['DELETE'])
 def api_delete_body_part(name):
     db = get_db()
     if db is None:
@@ -181,7 +180,7 @@ def api_delete_body_part(name):
         return jsonify({"error": f"Failed to delete body part: {str(e)}"}), 500
 
 # API endpoint to delete equipment by its name
-@app.route('/api/delete_equipment/<string:name>', methods=['DELETE'])
+@app.route('/api/v1/delete_equipment/<string:name>', methods=['DELETE'])
 def api_delete_equipment(name):
     db = get_db()
     if db is None:
@@ -201,7 +200,7 @@ def api_delete_equipment(name):
         return jsonify({"error": f"Failed to delete equipment: {str(e)}"}), 500
 
 # API endpoint to get a list of all body parts
-@app.route('/api/body_parts_list')
+@app.route('/api/v1/body_parts_list')
 def api_body_parts_list():
     db = get_db()
     if db is None:
@@ -213,7 +212,7 @@ def api_body_parts_list():
         return jsonify({"error": f"Failed to retrieve body parts list: {str(e)}"}), 500
 
 # API endpoint to get a list of all equipment
-@app.route('/api/equipment_list')
+@app.route('/api/v1/equipment_list')
 def api_equipment_list():
     db = get_db()
     if db is None:
@@ -225,7 +224,7 @@ def api_equipment_list():
         return jsonify({"error": "Failed to retrieve equipment list: {str(e)}"}), 500
 
 # API endpoint to get a list of all exercises
-@app.route('/api/exercises_list')
+@app.route('/api/v1/exercises_list')
 def api_exercises_list():
     db = get_db()
     if db is None:
@@ -237,7 +236,7 @@ def api_exercises_list():
         return jsonify({"error": "Failed to retrieve exercises list: {str(e)}"}), 500
 
 # API endpoint to get a list of all difficulties
-@app.route('/api/difficulties')
+@app.route('/api/v1/difficulties')
 def api_difficulties():
     db = get_db()
     if db is None:
@@ -251,21 +250,7 @@ def api_difficulties():
 # ======================================================================
 # Catch-All Route (This MUST be the last route in the file)
 # ======================================================================
-#@app.route('/', defaults={'path': ''})
-#@app.route('/<path:path>')
-#def serve(path):
-    # This check ensures that if the browser is asking for an API, 
-    # the server stops and doesn't try to serve a static index.html file.
-    #if path.startswith('api/'):
-        # If the request starts with 'api/', it means the specific /api/v1/ route
-        # did not match. We force a standard 404 for debugging.
-        #return jsonify({"error": "API route not matched. Check server logs."}), 404
-
-    # The rest of the logic serves static files or the main index.html
-    #if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
-        #return send_from_directory(app.static_folder, path)
-    #else:
-        #return send_from_directory(app.static_folder, 'index.html')
+# The entire Catch-All route is removed to prevent static file conflicts.
 
 if __name__ == '__main__':
     connect_db()
