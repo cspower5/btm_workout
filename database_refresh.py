@@ -26,7 +26,9 @@ def insert_exercises_if_not_exist():
     try:
         exercises_collection = db['exercises']
         
-        api_url = "https://exercisedb.p.rapidapi.com/exercises"
+        # --- FIX: Added 'limit=0' parameter to force API to return all exercises (pagination fix) ---
+        api_url = "https://exercisedb.p.rapidapi.com/exercises?limit=0" 
+        
         headers = {
             "X-RapidAPI-Key": RAPIDAPI_KEY,
             "X-RapidAPI-Host": "exercisedb.p.rapidapi.com"
@@ -40,10 +42,10 @@ def insert_exercises_if_not_exist():
         exercises_to_insert = []
 
         for exercise in api_exercises:
-            # --- FIX: Map API field names to MongoDB field names ---
+            # --- Map API field names to MongoDB field names (final structure) ---
             mapped_exercise = {
-                "exercise_name": exercise.get("name"),    # Maps 'name' to 'exercise_name'
-                "body_part": exercise.get("bodyPart"),    # Maps 'bodyPart' to 'body_part'
+                "exercise_name": exercise.get("name"),    
+                "body_part": exercise.get("bodyPart"),    
                 "equipment": exercise.get("equipment"),
                 "target": exercise.get("target"),
                 "gifUrl": exercise.get("gifUrl"),
@@ -75,11 +77,7 @@ def insert_exercises_if_not_exist():
         return {"error": f"API Request Failed: {e}"}
     except BulkWriteError as e:
         print(f"BulkWriteError during insert: {e}")
-        # Returns the count of exercises inserted before the failure
-        return len(e.details.get('insertedIds', [])) 
+        return {"error": "Insertion failed due to duplicate keys or invalid data."} 
     except Exception as e:
         print(f"An error occurred during database refresh: {e}")
         return {"error": f"Database Insertion Error: {e}"}
-
-# Note: The if __name__ == '__main__': block is removed to prevent
-# this file from running automatically when imported by flask_server.py
