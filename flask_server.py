@@ -1,271 +1,270 @@
+import json
+import sqlite3
+import random
 from flask import Flask, jsonify, request
-from flask_cors import CORS
-# Removed unused imports: render_template, send_from_directory
-import os
-from btm_workout_db_connect import connect_db, get_db
-from database_refresh import insert_exercises_if_not_exist
-from pymongo.errors import DuplicateKeyError
+from flask_cors import CORS, cross_origin 
 
-# Configure Flask as an API-ONLY server
+# --- Initialization ---
 app = Flask(__name__)
 
-# ======================================================================
-# ULTIMATE CORS FIX (Inject Headers Manually to bypass all production conflicts)
-# ======================================================================
+# --- Configuration ---
+# NOTE: The global CORS(app) line is REMOVED to avoid deployment conflicts.
+# The @cross_origin decorator is used on each route for guaranteed functionality.
 
-# 1. This hook handles the browser's OPTIONS pre-flight request globally.
-@app.before_request
-def before_request_hook():
-    if request.method == 'OPTIONS':
-        return app.make_default_options_response()
+def get_db_connection():
+    # Use the database file in the project root
+    conn = sqlite3.connect('btm_workout.db')
+    conn.row_factory = sqlite3.Row
+    return conn
 
-# 2. This hook injects the CORS headers into every final response.
-@app.after_request
-def after_request(response):
-    # This guarantees the Access-Control-Allow-Origin: * header is sent
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-    return response
+# --- API Routes (v1) ---
 
-# ======================================================================
-# API Endpoints (Routes use /api/v1/ prefix)
-# ======================================================================
+@app.route('/api/v1/body_parts_list', methods=['GET'])
+@cross_origin(origins=['https://cspower5.github.io']) # <--- CORS Fix
+def api_body_parts_list():
+    conn = get_db_connection()
+    body_parts = conn.execute('SELECT DISTINCT body_part FROM exercises ORDER BY body_part').fetchall()
+    conn.close()
+    
+    # Convert Row objects to a list of strings
+    body_parts_list = [part['body_part'] for part in body_parts]
+    return jsonify(body_parts_list)
 
-# API endpoint to handle inserting a new exercise
-@app.route('/api/v1/insert_exercise', methods=['POST'])
-def api_insert_exercise():
-    db = get_db()
-    if db is None:
-        return jsonify({"error": "Database not connected."}), 500
-
-    try:
-        data = request.json
-        exercises_collection = db['exercises']
-
-        if not all(k in data for k in ('name', 'bodyPart', 'equipment', 'target')):
-            return jsonify({"error": "Missing required fields."}), 400
+@app.route('/api/v1/exercise_list', methods=['GET'])
+@cross_origin(origins=['https://cspower5.github.io']) # <--- CORS Fix
+def api_exercise_list():
+    body_part = request.args.get('body_part')
+    conn = get_db_connection()
+    
+    if body_part:
+        exercises = conn.execute('SELECT * FROM exercises WHERE body_part = ? ORDER BY exercise_name', (body_part,)).fetchall()
+    else:
+        exercises = conn.execute('SELECT * FROM exercises ORDER BY exercise_name').fetchall()
         
-        data.pop('category', None)
-
-        result = exercises_collection.insert_one(data)
-
-        return jsonify({"message": "Exercise inserted successfully", "id": str(result.inserted_id)})
+    conn.close()
     
-    except DuplicateKeyError as e:
-        print(f"Duplicate exercise not inserted: {e}")
-        return jsonify({"error": "An exercise with this name, body part, and equipment already exists."}), 409
-    
-    except Exception as e:
-        print(f"Error inserting exercise: {e}")
-        return jsonify({"error": "Failed to insert exercise."}), 500
+    # Convert Row objects to list of dicts for JSON
+    exercise_list = [dict(row) for row in exercises]
+    return jsonify(exercise_list)
 
-# API endpoint to get 3 random exercises for a selected body part
-@app.route('/api/v1/get_random_exercises', methods=['POST'])
+@app.route('/api/v1/random_exercises', methods=['GET'])
+@cross_origin(origins=['https://cspower5.github.io']) # <--- CORS Fix
 def api_get_random_exercises():
-    db = get_db()
-    if db is None:
-        return jsonify({"error": "Database not connected."}), 500
-
     try:
-        data = request.json
-        selected_body_part = data.get('bodyPart')
-        num_exercises = data.get('numExercises', 3)
+        body_part = request.args.get('body_part')
+        num_exercises = int(request.args.get('num_exercises', 4))
+    except ValueError:
+        return jsonify({"error": "Invalid number of exercises specified."}), 400
 
-        if not selected_body_part:
-            return jsonify({"error": "No body part provided."}), 400
-
-        exercises_collection = db['exercises']
+    conn = get_db_connection()
+    
+    if body_part == 'All':
+        all_exercises = conn.execute('SELECT * FROM exercises').fetchall()
+    else:
+        all_exercises = conn.execute('SELECT * FROM exercises WHERE body_part = ?', (body_part,)).fetchall()
         
-        pipeline = [
-            {"$match": {"bodyPart": selected_body_part}},
-            {"$sample": {"size": int(num_exercises)}}
-        ]
+    conn.close()
 
-        random_exercises = list(exercises_collection.aggregate(pipeline))
+    if not all_exercises:
+        return jsonify({"error": "No exercises found for this body part."}), 404
 
-        for exercise in random_exercises:
-            exercise.pop('_id', None)
+    # Select random exercises without replacement
+    if len(all_exercises) < num_exercises:
+        num_exercises = len(all_exercises) # Adjust if fewer exercises are available
 
-        return jsonify(random_exercises)
-    except Exception as e:
-        print(f"Error getting random exercises: {e}")
-        return jsonify({"error": "Failed to retrieve exercises."}), 500
+    random_exercises = random.sample(all_exercises, num_exercises)
+    
+    # Convert to list of dicts
+    result = [dict(row) for row in random_exercises]
+    return jsonify(result)
 
-# API endpoint to refresh the database with new exercises
-@app.route('/api/v1/refresh_db', methods=['POST'])
-def api_refresh_db():
+@app.route('/api/v1/insert_exercise', methods=['POST'])
+@cross_origin(origins=['https://cspower5.github.io']) # <--- CORS Fix
+def api_insert_exercise():
     try:
-        count = insert_exercises_if_not_exist()
-        return jsonify({"message": f"Database refresh complete. {count} new exercises added."})
-    except Exception as e:
-        return jsonify({"error": "Failed to refresh database."}), 500
-
-# API endpoint to get a single exercise by its name
-@app.route('/api/v1/exercise/<string:name>')
-def api_get_exercise_details(name):
-    db = get_db()
-    if db is None:
-        return jsonify({"error": "Database not connected."}), 500
-    try:
-        exercises_collection = db['exercises']
-        exercise = exercises_collection.find_one({"name": name})
+        data = request.get_json()
+        exercise_name = data['exercise_name']
+        body_part = data['body_part']
         
-        if exercise:
-            exercise.pop('_id', None)
-            return jsonify(exercise)
-        else:
+        if not exercise_name or not body_part:
+            return jsonify({"error": "Missing exercise_name or body_part"}), 400
+
+        conn = get_db_connection()
+        conn.execute('INSERT INTO exercises (exercise_name, body_part) VALUES (?, ?)', (exercise_name, body_part))
+        conn.commit()
+        conn.close()
+        
+        return jsonify({"message": f"Exercise '{exercise_name}' inserted successfully."}), 201
+    except sqlite3.IntegrityError:
+        return jsonify({"error": f"Exercise '{exercise_name}' already exists for {body_part}."}), 409
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/v1/update_exercise/<int:exercise_id>', methods=['PUT'])
+@cross_origin(origins=['https://cspower5.github.io']) # <--- CORS Fix
+def api_update_exercise(exercise_id):
+    try:
+        data = request.get_json()
+        new_name = data.get('exercise_name')
+        new_part = data.get('body_part')
+
+        if not new_name and not new_part:
+            return jsonify({"error": "No update fields provided"}), 400
+
+        conn = get_db_connection()
+        
+        updates = []
+        params = []
+        if new_name:
+            updates.append("exercise_name = ?")
+            params.append(new_name)
+        if new_part:
+            updates.append("body_part = ?")
+            params.append(new_part)
+
+        params.append(exercise_id)
+        
+        query = f"UPDATE exercises SET {', '.join(updates)} WHERE id = ?"
+        cursor = conn.execute(query, params)
+        conn.commit()
+        conn.close()
+        
+        if cursor.rowcount == 0:
             return jsonify({"error": "Exercise not found."}), 404
             
-    except Exception as e:
-        print(f"Error fetching single exercise: {e}")
-        return jsonify({"error": "Failed to retrieve exercise details."}), 500
+        return jsonify({"message": f"Exercise ID {exercise_id} updated successfully."}), 200
 
-# API endpoint to handle adding a new body part
-@app.route('/api/v1/add_body_part', methods=['POST'])
-def api_add_body_part():
-    db = get_db()
-    if db is None:
-        return jsonify({"error": "Database not connected."}), 500
-    try:
-        data = request.json
-        name = data.get('name')
-        if not name:
-            return jsonify({"error": "Missing 'name' field."}), 400
-        result = db.body_parts.insert_one({"name": name})
-        return jsonify({"message": "Body part added successfully", "id": str(result.inserted_id)})
-    except DuplicateKeyError:
-        return jsonify({"error": "This body part already exists."}), 409
+    except sqlite3.IntegrityError:
+        return jsonify({"error": "Update failed: Exercise name already exists for this body part."}), 409
     except Exception as e:
-        return jsonify({"error": f"Failed to add body part: {str(e)}"}), 500
+        return jsonify({"error": str(e)}), 500
 
-# API endpoint to handle adding new equipment
-@app.route('/api/v1/add_equipment', methods=['POST'])
-def api_add_equipment():
-    db = get_db()
-    if db is None:
-        return jsonify({"error": "Database not connected."}), 500
-    try:
-        data = request.json
-        name = data.get('name')
-        if not name:
-            return jsonify({"error": "Missing 'name' field."}), 400
-        result = db.equipment.insert_one({"name": name})
-        return jsonify({"message": "Equipment added successfully", "id": str(result.inserted_id)})
-    except DuplicateKeyError:
-        return jsonify({"error": "This equipment already exists."}), 409
-    except Exception as e:
-        return jsonify({"error": "Failed to add equipment: {str(e)}"}), 500
+@app.route('/api/v1/delete_exercise/<int:exercise_id>', methods=['DELETE'])
+@cross_origin(origins=['https://cspower5.github.io']) # <--- CORS Fix
+def api_delete_exercise(exercise_id):
+    conn = get_db_connection()
+    cursor = conn.execute('DELETE FROM exercises WHERE id = ?', (exercise_id,))
+    conn.commit()
+    conn.close()
 
-# API endpoint to delete an exercise by its name
-@app.route('/api/v1/delete_exercise/<path:name>', methods=['DELETE'])
-def api_delete_exercise(name):
-    db = get_db()
-    if db is None:
-        return jsonify({"error": "Database not connected."}), 500
-    try:
-        result = db.exercises.delete_one({"name": name})
-        if result.deleted_count == 1:
-            return jsonify({"message": f"Exercise '{name}' deleted successfully."})
-        else:
-            return jsonify({"error": "Exercise not found."}), 404
-    except Exception as e:
-        return jsonify({"error": f"Failed to delete exercise: {str(e)}"}), 500
-
-# API endpoint to delete a body part by its name
-@app.route('/api/v1/delete_body_part/<string:name>', methods=['DELETE'])
-def api_delete_body_part(name):
-    db = get_db()
-    if db is None:
-        return jsonify({"error": "Database not connected."}), 500
-    try:
-        result = db.body_parts.delete_one({"name": name})
+    if cursor.rowcount == 0:
+        return jsonify({"error": "Exercise not found."}), 404
         
-        exercises_deleted = db.exercises.delete_many({"bodyPart": name})
+    return jsonify({"message": f"Exercise ID {exercise_id} deleted successfully."}), 200
 
-        if result.deleted_count == 1:
-            return jsonify({
-                "message": f"Body part '{name}' and {exercises_deleted.deleted_count} associated exercises deleted successfully."
-            })
-        else:
-            return jsonify({"error": "Body part not found."}), 404
-    except Exception as e:
-        return jsonify({"error": f"Failed to delete body part: {str(e)}"}), 500
+@app.route('/api/v1/search_exercise', methods=['GET'])
+@cross_origin(origins=['https://cspower5.github.io']) # <--- CORS Fix
+def api_search_exercise():
+    query = request.args.get('query', '')
+    if not query:
+        return jsonify({"error": "Missing search query."}), 400
 
-# API endpoint to delete equipment by its name
-@app.route('/api/v1/delete_equipment/<string:name>', methods=['DELETE'])
-def api_delete_equipment(name):
-    db = get_db()
-    if db is None:
-        return jsonify({"error": "Database not connected."}), 500
+    conn = get_db_connection()
+    
+    # Use LIKE for partial matching on exercise name or body part
+    search_term = f"%{query}%"
+    exercises = conn.execute(
+        'SELECT * FROM exercises WHERE exercise_name LIKE ? OR body_part LIKE ? ORDER BY exercise_name', 
+        (search_term, search_term)
+    ).fetchall()
+        
+    conn.close()
+    
+    result = [dict(row) for row in exercises]
+    return jsonify(result)
+
+# --- Database Management (Internal Utility Routes) ---
+
+@app.route('/api/v1/db_schema', methods=['GET'])
+@cross_origin(origins=['https://cspower5.github.io']) # <--- CORS Fix
+def api_db_schema():
+    conn = get_db_connection()
+    cursor = conn.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='exercises'")
+    schema = cursor.fetchone()
+    conn.close()
+    if schema:
+        return jsonify({"schema": schema[0]}), 200
+    return jsonify({"error": "Schema not found"}), 404
+
+@app.route('/api/v1/count_exercises', methods=['GET'])
+@cross_origin(origins=['https://cspower5.github.io']) # <--- CORS Fix
+def api_count_exercises():
+    conn = get_db_connection()
+    count = conn.execute('SELECT COUNT(*) FROM exercises').fetchone()[0]
+    conn.close()
+    return jsonify({"count": count}), 200
+
+@app.route('/api/v1/delete_all_exercises', methods=['DELETE'])
+@cross_origin(origins=['https://cspower5.github.io']) # <--- CORS Fix
+def api_delete_all_exercises():
+    conn = get_db_connection()
+    cursor = conn.execute('DELETE FROM exercises')
+    conn.commit()
+    conn.close()
+    return jsonify({"message": f"{cursor.rowcount} exercises deleted."}), 200
+
+@app.route('/api/v1/reset_db', methods=['POST'])
+@cross_origin(origins=['https://cspower5.github.io']) # <--- CORS Fix
+def api_reset_db():
     try:
-        result = db.equipment.delete_one({"name": name})
+        conn = get_db_connection()
+        
+        # 1. Drop the table if it exists
+        conn.execute("DROP TABLE IF EXISTS exercises")
+        
+        # 2. Re-create the table
+        conn.execute("""
+            CREATE TABLE exercises (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                exercise_name TEXT NOT NULL,
+                body_part TEXT NOT NULL,
+                UNIQUE(exercise_name, body_part)
+            )
+        """)
+        
+        # 3. Insert initial seed data
+        seed_data = [
+            ('Squat', 'Legs'), ('Lunge', 'Legs'), ('Leg Press', 'Legs'),
+            ('Bench Press', 'Chest'), ('Push-up', 'Chest'), ('Dumbbell Fly', 'Chest'),
+            ('Deadlift', 'Back'), ('Pull-up', 'Back'), ('Row', 'Back'),
+            ('Overhead Press', 'Shoulders'), ('Lateral Raise', 'Shoulders'),
+            ('Bicep Curl', 'Arms'), ('Tricep Pushdown', 'Arms'), 
+            ('Plank', 'Core'), ('Crunches', 'Core')
+        ]
+        conn.executemany('INSERT INTO exercises (exercise_name, body_part) VALUES (?, ?)', seed_data)
 
-        exercises_deleted = db.exercises.delete_many({"equipment": name})
-
-        if result.deleted_count == 1:
-            return jsonify({
-                "message": f"Equipment '{name}' and {exercises_deleted.deleted_count} associated exercises deleted successfully."
-            })
-        else:
-            return jsonify({"error": "Equipment not found."}), 404
+        conn.commit()
+        conn.close()
+        return jsonify({"message": "Database reset and seeded successfully."}), 200
     except Exception as e:
-        return jsonify({"error": "Failed to delete equipment: {str(e)}"}), 500
+        return jsonify({"error": str(e)}), 500
 
-# API endpoint to get a list of all body parts
-@app.route('/api/v1/body_parts_list')
-def api_body_parts_list():
-    db = get_db()
-    if db is None:
-        return jsonify({"error": "Database not connected."}), 500
-    try:
-        body_parts = list(db.body_parts.find({}, {"_id": 0}))
-        return jsonify(body_parts)
-    except Exception as e:
-        return jsonify({"error": f"Failed to retrieve body parts list: {str(e)}"}), 500
+# --- Error Handling ---
 
-# API endpoint to get a list of all equipment
-@app.route('/api/v1/equipment_list')
-def api_equipment_list():
-    db = get_db()
-    if db is None:
-        return jsonify({"error": "Database not connected."}), 500
-    try:
-        equipment_list = list(db.equipment.find({}, {"_id": 0}))
-        return jsonify(equipment_list)
-    except Exception as e:
-        return jsonify({"error": "Failed to retrieve equipment list: {str(e)}"}), 500
+@app.errorhandler(404)
+@cross_origin(origins=['https://cspower5.github.io']) # <--- CORS Fix
+def not_found(error):
+    # This ensures a 404 response is still accessible by the frontend
+    return jsonify({'error': 'Not Found', 'message': 'The requested URL was not found on the server. Please check the URL for typos.'}), 404
 
-# API endpoint to get a list of all exercises
-@app.route('/api/v1/exercises_list')
-def api_exercises_list():
-    db = get_db()
-    if db is None:
-        return jsonify({"error": "Database not connected."}), 500
-    try:
-        exercises_list = list(db.exercises.find({}, {"_id": 0}))
-        return jsonify(exercises_list)
-    except Exception as e:
-        return jsonify({"error": "Failed to retrieve exercises list: {str(e)}"}), 500
+@app.errorhandler(500)
+@cross_origin(origins=['https://cspower5.github.io']) # <--- CORS Fix
+def internal_error(error):
+    # Log the error for debugging on the server
+    app.logger.error('Server Error: %s', error)
+    # This ensures a 500 response is still accessible by the frontend
+    return jsonify({'error': 'Internal Server Error', 'message': 'An unexpected error occurred on the server.'}), 500
 
-# API endpoint to get a list of all difficulties
-@app.route('/api/v1/difficulties')
-def api_difficulties():
-    db = get_db()
-    if db is None:
-        return jsonify({"error": "Database not connected."}), 500
-    try:
-        difficulties = db.exercises.distinct('difficulty')
-        return jsonify(difficulties)
-    except Exception as e:
-        return jsonify({"error": f"Failed to retrieve difficulties: {str(e)}"}), 500
+# --- Health Check ---
+@app.route('/api/v1/health', methods=['GET'])
+@cross_origin(origins=['https://cspower5.github.io']) # <--- CORS Fix
+def api_health_check():
+    # Simple endpoint to confirm the server is running
+    return jsonify({"status": "ok", "message": "API is running and healthy."}), 200
 
-# ======================================================================
-# Catch-All Route (This MUST be the last route in the file)
-# ======================================================================
-# The entire Catch-All route is removed to prevent static file conflicts.
 
+# --- Run Server (Production/Development) ---
 if __name__ == '__main__':
-    connect_db()
-    app.run(debug=True, use_reloader=False)
+    # This runs the server only in local development mode
+    app.run(debug=True, port=5000)
 
