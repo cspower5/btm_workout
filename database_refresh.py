@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 from btm_workout_db_connect import get_db
 from pymongo.errors import BulkWriteError, DuplicateKeyError
+import json # <-- Added import for clarity
 
 # 1. Load environment variables
 load_dotenv()
@@ -26,7 +27,7 @@ def insert_exercises_if_not_exist():
     try:
         exercises_collection = db['exercises']
         
-        # --- FIX: Added 'limit=0' parameter to force API to return all exercises (pagination fix) ---
+        # FIX: Added 'limit=0' parameter to force API to return all exercises (pagination fix)
         api_url = "https://exercisedb.p.rapidapi.com/exercises?limit=0" 
         
         headers = {
@@ -37,6 +38,15 @@ def insert_exercises_if_not_exist():
         response = requests.get(api_url, headers=headers)
         response.raise_for_status() # Raise an HTTPError for bad responses
         api_exercises = response.json()
+
+        # --- FINAL FIX: Validation Check ---
+        if not isinstance(api_exercises, list):
+            # If the response is not a list, it usually means the API is sending an error message 
+            # or data is nested in a JSON object.
+            # We return the response content so you can debug what the API is sending.
+            print(f"API returned non-list data: {api_exercises}")
+            return {"error": "API returned unexpected data format. Check console."}
+        # --- END FINAL FIX ---
 
         inserted_count = 0
         exercises_to_insert = []
