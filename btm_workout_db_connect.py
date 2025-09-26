@@ -38,7 +38,7 @@ def connect_db():
     try:
         # Attempt connection using the determined URI
         client = MongoClient(FINAL_MONGO_URI, serverSelectionTimeoutMS=5000)
-        client.admin.command('ping')
+        #client.admin.command('ping')
         
         # NOTE: For local connection, client.get_database(MONGO_DB) works. 
         # For Atlas, we must ensure we use the name specified in the Atlas connection string if it exists,
