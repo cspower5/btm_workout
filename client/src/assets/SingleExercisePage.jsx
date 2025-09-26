@@ -3,6 +3,9 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import './css/SingleExercisePage.css';
 
+// --- ABSOLUTE URL FIX: Hardcoded host to ensure all API calls hit the Render server ---
+const API_BASE_URL = 'https://btm-workout.onrender.com'; 
+
 function SingleExercisePage() {
     const { name } = useParams();
     const [exercise, setExercise] = useState(null);
@@ -11,11 +14,23 @@ function SingleExercisePage() {
 
     useEffect(() => {
         const fetchExercise = async () => {
+            setLoading(true);
+            setError(null);
             try {
-                const response = await axios.get(`/api/exercise/${name}`);
+                // FIX: Use the absolute URL and the correct /api/v1/ path
+                // encodeURIComponent is used to handle spaces and special characters in the exercise name
+                const url = `${API_BASE_URL}/api/v1/exercise/${encodeURIComponent(name)}`;
+                const response = await axios.get(url);
+                
+                // Note: The API should return a 404 if not found, caught below
                 setExercise(response.data);
             } catch (err) {
-                setError("Failed to load exercise details.");
+                // Handle 404 errors specifically from the server if exercise name is wrong
+                if (err.response && err.response.status === 404) {
+                     setError("Exercise not found. Please check the URL or try generating a new workout.");
+                } else {
+                     setError("Failed to load exercise details due to a network error.");
+                }
                 console.error("Error fetching exercise details:", err);
             } finally {
                 setLoading(false);
@@ -27,13 +42,13 @@ function SingleExercisePage() {
 
     if (loading) return <div className="loading-message">Loading exercise details...</div>;
     if (error) return <div className="error-message">{error}</div>;
-    if (!exercise) return <div className="not-found-message">Exercise not found.</div>;
+    if (!exercise) return <div className="not-found-message">Exercise data is unavailable.</div>;
 
     return (
         <div className="single-exercise-container">
             <div className="exercise-details">
                 <h2>{exercise.name}</h2>
-                <img src={exercise.gifUrl} alt={exercise.name} />
+                {exercise.gifUrl && <img src={exercise.gifUrl} alt={exercise.name} />}
                 <p><strong>Body Part:</strong> {exercise.bodyPart}</p>
                 <p><strong>Target Muscle:</strong> {exercise.target}</p>
                 <p><strong>Equipment:</strong> {exercise.equipment}</p>
