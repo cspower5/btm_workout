@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// Example: https://btm-workout-api-12345.onrender.com
+// Example: https://btm-workout-12345.onrender.com
 const LIVE_API_URL = "https://btm-workout.onrender.com"; 
 
 // https://vitejs.dev/config/
