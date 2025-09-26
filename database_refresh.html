@@ -1,0 +1,90 @@
+html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Refresh Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white p-8 rounded-xl shadow-2xl max-w-lg w-full">
+        <h1 class="text-3xl font-bold mb-4 text-gray-800">BTM Workout Database Refresh</h1>
+        <p class="text-sm text-gray-500 mb-6">
+            This tool sends a **POST** request to the definitive endpoint to clear all current exercises and re-insert the seed data, allowing your new functionality to be fully tested.
+            <span class="font-semibold text-red-600">Only run this once to populate your app.</span>
+        </p>
+
+        <div class="mb-4">
+            <label for="apiUrl" class="block text-sm font-medium text-gray-700 mb-1">API Endpoint (POST)</label>
+            <input 
+                id="apiUrl" 
+                type="text" 
+                value="https://btm-workout.onrender.com/api/v1/refresh_db" 
+                readonly 
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
+            >
+        </div>
+
+        <button 
+            id="refreshButton"
+            onclick="refreshDatabase()" 
+            class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200 shadow-md transform hover:scale-[1.01] disabled:opacity-50"
+        >
+            REFRESH & SEED MONGODB
+        </button>
+
+        <div id="messageBox" class="mt-6 p-4 rounded-lg font-medium hidden"></div>
+
+    </div>
+
+    <script>
+        const apiUrl = "https://btm-workout.onrender.com/api/v1/refresh_db";
+        const messageBox = document.getElementById('messageBox');
+        const refreshButton = document.getElementById('refreshButton');
+
+        function showMessage(text, isError = false) {
+            messageBox.textContent = text;
+            messageBox.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800');
+            if (isError) {
+                messageBox.classList.add('bg-red-100', 'text-red-800');
+            } else {
+                messageBox.classList.add('bg-green-100', 'text-green-800');
+            }
+        }
+
+        async function refreshDatabase() {
+            refreshButton.disabled = true;
+            showMessage("Sending refresh request... This may take a few seconds.", false);
+            
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    // Send an empty body as the endpoint doesn't require data
+                    body: JSON.stringify({})
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showMessage(`Success! ${result.message} Now refresh your workout app!`, false);
+                } else {
+                    console.error("API Error Response:", response.status, result);
+                    showMessage(`ERROR (${response.status}): ${result.message || result.error || 'Failed to communicate with API.'}`, true);
+                }
+
+            } catch (error) {
+                console.error("Fetch failed:", error);
+                showMessage(`Network Error: Could not connect to API. Is the Render service active?`, true);
+            } finally {
+                refreshButton.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
+
