@@ -3,14 +3,16 @@ import os
 from dotenv import load_dotenv
 from btm_workout_db_connect import get_db
 from pymongo.errors import BulkWriteError, DuplicateKeyError
-import json # <-- Added import for clarity
+import json 
 
 # 1. Load environment variables
 load_dotenv()
-RAPIDAPI_KEY = os.getenv("RAPIDAPI_KEY")
 
-if not RAPIDAPI_KEY:
-    print("Error: The RAPIDAPI_KEY environment variable is missing.")
+# --- FIX: TEMPORARILY HARDCODE KEY FOR FINAL DEBUGGING ---
+# REPLACE "YOUR_ACTUAL_RAPIDAPI_KEY_HERE" with the full, correct key string
+RAPIDAPI_KEY = "YOUR_ACTUAL_RAPIDAPI_KEY_HERE" # <-- PASTE YOUR KEY HERE
+# --- END TEMPORARY FIX ---
+
 
 def insert_exercises_if_not_exist():
     """
@@ -21,8 +23,8 @@ def insert_exercises_if_not_exist():
     if db is None:
         return {"error": "Database connection is not available."}
 
-    if not RAPIDAPI_KEY:
-        return {"error": "API Key is missing. Cannot fetch data."}
+    if not RAPIDAPI_KEY or RAPIDAPI_KEY == "YOUR_ACTUAL_RAPIDAPI_KEY_HERE":
+        return {"error": "API Key is missing or default. Cannot fetch data."}
 
     try:
         exercises_collection = db['exercises']
@@ -35,18 +37,25 @@ def insert_exercises_if_not_exist():
             "X-RapidAPI-Host": "exercisedb.p.rapidapi.com"
         }
 
+        print("--- Attempting API Fetch from ExerciseDB ---")
+        
         response = requests.get(api_url, headers=headers)
-        response.raise_for_status() # Raise an HTTPError for bad responses
+        response.raise_for_status() # Must be 200 OK
         api_exercises = response.json()
+        
+        # --- NEW DEBUGGING LOGGING ---
+        # Log the response content to see what the API actually sent back
+        print(f"API RESPONSE STATUS: {response.status_code}")
+        print(f"API RESPONSE ITEMS RECEIVED: {len(api_exercises) if isinstance(api_exercises, list) else 'Non-list data'}")
+        print(f"API RAW RESPONSE HEAD: {json.dumps(api_exercises)[:200]}")
+        # --- END DEBUGGING LOGGING ---
 
-        # --- FINAL FIX: Validation Check ---
+
+        # --- FINAL CHECK: Validation ---
         if not isinstance(api_exercises, list):
-            # If the response is not a list, it usually means the API is sending an error message 
-            # or data is nested in a JSON object.
-            # We return the response content so you can debug what the API is sending.
-            print(f"API returned non-list data: {api_exercises}")
-            return {"error": "API returned unexpected data format. Check console."}
-        # --- END FINAL FIX ---
+            # The API returned an unexpected payload (not the list of exercises)
+            return {"error": "API returned unexpected data format. Check server logs."}
+        # --- END FINAL CHECK ---
 
         inserted_count = 0
         exercises_to_insert = []
@@ -79,6 +88,9 @@ def insert_exercises_if_not_exist():
             # Insert all exercises in one batch for performance
             result = exercises_collection.insert_many(exercises_to_insert, ordered=False)
             inserted_count = len(result.inserted_ids)
+            print(f"Successfully inserted {inserted_count} new documents.")
+        else:
+            print("No new exercises found to insert.")
         
         return inserted_count
 
