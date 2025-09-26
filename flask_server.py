@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-import os
 # Removed unused imports: render_template, send_from_directory
+import os
 from btm_workout_db_connect import connect_db, get_db
 from database_refresh import insert_exercises_if_not_exist
 from pymongo.errors import DuplicateKeyError
@@ -9,18 +9,24 @@ from pymongo.errors import DuplicateKeyError
 # Configure Flask as an API-ONLY server
 app = Flask(__name__)
 
-# Apply CORS to explicitly allow requests from your live GitHub Pages domain
-# This fixes the 'Access-Control-Allow-Origin' missing error.
-#CORS(app, origins=["https://cspower5.github.io"])
-#CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
-CORS(app, resources={
-    r"/api/v1/*": {
-        "origins": "*",
-        "allow_headers": "*",
-        "expose_headers": "*",
-        "methods": ["GET", "POST", "DELETE", "OPTIONS"]
-    }
-})
+# ======================================================================
+# ULTIMATE CORS FIX (Inject Headers Manually to bypass all production conflicts)
+# ======================================================================
+
+# 1. This hook handles the browser's OPTIONS pre-flight request globally.
+@app.before_request
+def before_request_hook():
+    if request.method == 'OPTIONS':
+        return app.make_default_options_response()
+
+# 2. This hook injects the CORS headers into every final response.
+@app.after_request
+def after_request(response):
+    # This guarantees the Access-Control-Allow-Origin: * header is sent
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
 
 # ======================================================================
 # API Endpoints (Routes use /api/v1/ prefix)
@@ -37,7 +43,6 @@ def api_insert_exercise():
         data = request.json
         exercises_collection = db['exercises']
 
-        # NOTE: Assumed 'gifUrl' requirement was removed from your logic
         if not all(k in data for k in ('name', 'bodyPart', 'equipment', 'target')):
             return jsonify({"error": "Missing required fields."}), 400
         
@@ -94,7 +99,6 @@ def api_refresh_db():
         count = insert_exercises_if_not_exist()
         return jsonify({"message": f"Database refresh complete. {count} new exercises added."})
     except Exception as e:
-        print(f"Error refreshing database: {e}")
         return jsonify({"error": "Failed to refresh database."}), 500
 
 # API endpoint to get a single exercise by its name
@@ -151,7 +155,7 @@ def api_add_equipment():
     except DuplicateKeyError:
         return jsonify({"error": "This equipment already exists."}), 409
     except Exception as e:
-        return jsonify({"error": f"Failed to add equipment: {str(e)}"}), 500
+        return jsonify({"error": "Failed to add equipment: {str(e)}"}), 500
 
 # API endpoint to delete an exercise by its name
 @app.route('/api/v1/delete_exercise/<path:name>', methods=['DELETE'])
@@ -206,7 +210,7 @@ def api_delete_equipment(name):
         else:
             return jsonify({"error": "Equipment not found."}), 404
     except Exception as e:
-        return jsonify({"error": f"Failed to delete equipment: {str(e)}"}), 500
+        return jsonify({"error": "Failed to delete equipment: {str(e)}"}), 500
 
 # API endpoint to get a list of all body parts
 @app.route('/api/v1/body_parts_list')
