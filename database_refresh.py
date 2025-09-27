@@ -71,7 +71,8 @@ def insert_exercises_if_not_exist():
                 "secondaryMuscles": exercise.get("secondaryMuscles"),
                 "instructions": exercise.get("instructions"),
                 "description": exercise.get("description"),
-                "difficulty": exercise.get("difficulty")
+                "difficulty": exercise.get("difficulty"),
+                "category": exercise.get("category") # <--- FIX: ADDED MISSING FIELD
             }
 
             # Check if an exercise with the same mapped fields already exists
