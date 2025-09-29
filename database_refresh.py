@@ -15,7 +15,8 @@ RAPIDAPI_KEY = os.getenv("RAPIDAPI_KEY")
 
 def insert_exercises_if_not_exist():
     """
-    Fetches all exercises from the API and inserts them into the database.
+    Fetches a single exercise from the API for diagnostic purposes.
+    If successful, it inserts the single exercise into the database.
     """
     db = get_db()
     if db is None:
@@ -26,74 +27,53 @@ def insert_exercises_if_not_exist():
         return {"error": "API Key is missing. Cannot fetch data."}
 
     try:
-        # --- FIX: Changed collection name from 'exercise' to 'exercises' ---
         exercises_collection = db['exercises']
         
-        # --- FINAL FIX: Key is ONLY in headers, Host is explicit ---
-        api_url = "https://exercisedb.p.rapidapi.com/exercises" 
+        # --- FINAL DIAGNOSTIC: Fetching ONLY one exercise (Test Authentication) ---
+        api_url = "https://exercisedb.p.rapidapi.com/exercises/0001" 
         
-        # We only pass the pagination limit as a parameter
-        params = { 'limit': '0' } 
-        
-        # The key is now explicitly and ONLY in the header, as required by RapidAPI
+        # NOTE: We only send the Host header for this basic diagnostic test.
         headers = {
-            "X-RapidAPI-Key": RAPIDAPI_KEY, # Authentication Key is here
-            "X-RapidAPI-Host": "exercisedb.p.rapidapi.com" # Host Check
+            "X-RapidAPI-Host": "exercisedb.p.rapidapi.com"
         }
 
-        print("--- Attempting API Fetch from ExerciseDB (Header Auth) ---")
+        print("--- Attempting API Fetch (Diagnostic Single Item) ---")
         
-        # Execute the request with explicit headers and parameters
-        response = requests.get(api_url, headers=headers, params=params)
+        # Execute the request
+        response = requests.get(api_url, headers=headers)
         response.raise_for_status() # Raise an HTTPError for non-200 status
-        api_exercises = response.json()
+        api_exercise = response.json()
         
-        # Validation Check
-        if not isinstance(api_exercises, list):
-            print(f"API returned non-list data: {api_exercises}")
-            return {"error": "API returned unexpected data format."}
-
-        inserted_count = 0
-        exercises_to_insert = []
-
-        for exercise in api_exercises:
-            # Check for name/body_part presence before insertion logic
-            if not exercise.get("name") or not exercise.get("bodyPart"):
-                continue
-
-            # --- CRITICAL FIX: The 10-field mapping ---
-            mapped_exercise = {
-                "body_part": exercise.get("bodyPart"),        # Application key
-                "equipment": exercise.get("equipment"),
-                "id": exercise.get("id"),                     # Renamed key from 'api_id'
-                "exercise_name": exercise.get("name"),        # Application key
-                "target": exercise.get("target"),
-                "secondaryMuscles": exercise.get("secondaryMuscles"),
-                "instructions": exercise.get("instructions"),
-                "description": exercise.get("description"),
-                "difficulty": exercise.get("difficulty"),
-                "category": exercise.get("category")
-            }
-
-            # Check if an exercise with the same mapped fields already exists
-            existing_exercise = exercises_collection.find_one({
-                "exercise_name": mapped_exercise["exercise_name"],
-                "body_part": mapped_exercise["body_part"],
-                "equipment": mapped_exercise["equipment"]
-            })
-
-            if not existing_exercise:
-                exercises_to_insert.append(mapped_exercise)
-        
-        if exercises_to_insert:
-            # Insert all exercises in one batch for performance
+        # --- CRITICAL CHECK: Does the API send back a single dictionary? ---
+        if isinstance(api_exercise, dict) and 'name' in api_exercise:
+            
+            # If we succeed, insert the single exercise and return a count of 1.
+            exercises_to_insert = [{
+                "body_part": api_exercise.get("bodyPart"),        
+                "equipment": api_exercise.get("equipment"),
+                "id": api_exercise.get("id"),                     
+                "exercise_name": api_exercise.get("name"),        
+                "target": api_exercise.get("target"),
+                "secondaryMuscles": api_exercise.get("secondaryMuscles"),
+                "instructions": api_exercise.get("instructions"),
+                "description": api_exercise.get("description"),
+                "difficulty": api_exercise.get("difficulty"),
+                "category": api_exercise.get("category")
+            }]
+            
+            # Clean collection first to prevent unique index error on single insert
+            exercises_collection.delete_many({}) 
+            
             result = exercises_collection.insert_many(exercises_to_insert, ordered=False)
             inserted_count = len(result.inserted_ids)
-            print(f"Successfully inserted {inserted_count} new documents.")
+            print(f"SUCCESS: Inserted {inserted_count} single diagnostic document.")
+            
+            # Since we inserted ONE, we return 1.
+            return 1 
+
         else:
-            print("No new exercises found to insert.")
-        
-        return inserted_count
+            print(f"FAILURE: API returned unexpected data format for single item: {api_exercise}")
+            return {"error": "API is blocking single-item access or key is wrong."}
 
     except requests.exceptions.RequestException as e:
         if hasattr(e, 'response') and e.response is not None:
