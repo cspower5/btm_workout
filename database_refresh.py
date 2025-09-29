@@ -9,14 +9,13 @@ import sys
 # 1. Load environment variables
 load_dotenv()
 
-# --- FIX: Use Environment Variable Directly ---
+# --- Use Environment Variable Directly ---
 RAPIDAPI_KEY = os.getenv("RAPIDAPI_KEY") 
 
 
 def insert_exercises_if_not_exist():
     """
-    Fetches a single exercise from the API for diagnostic purposes.
-    If successful, it inserts the single exercise into the database.
+    Fetches all exercises from the API using pagination (limit=10) and inserts them into the database.
     """
     db = get_db()
     if db is None:
@@ -26,54 +25,93 @@ def insert_exercises_if_not_exist():
         print("Error: RAPIDAPI_KEY is missing from the environment.")
         return {"error": "API Key is missing. Cannot fetch data."}
 
+    # --- PAGINATION SETUP ---
+    limit = 10
+    offset = 0
+    total_inserted_count = 0
+    
+    # --- END PAGINATION SETUP ---
+
     try:
         exercises_collection = db['exercises']
+        api_base_url = "https://exercisedb.p.rapidapi.com/exercises" 
         
-        # --- FINAL DIAGNOSTIC: Fetching ONLY one exercise (Test Authentication) ---
-        api_url = "https://exercisedb.p.rapidapi.com/exercises/0001" 
-        
-        # NOTE: We only send the Host header for this basic diagnostic test.
+        # --- API Headers ---
         headers = {
-            "X-RapidAPI-Host": "exercisedb.p.rapidapi.com"
+            "X-RapidAPI-Key": RAPIDAPI_KEY, 
+            "X-RapidAPI-Host": "exercisedb.p.rapidapi.com" 
         }
 
-        print("--- Attempting API Fetch (Diagnostic Single Item) ---")
+        print("--- Starting Paginated API Fetch from ExerciseDB ---")
         
-        # Execute the request
-        response = requests.get(api_url, headers=headers)
-        response.raise_for_status() # Raise an HTTPError for non-200 status
-        api_exercise = response.json()
-        
-        # --- CRITICAL CHECK: Does the API send back a single dictionary? ---
-        if isinstance(api_exercise, dict) and 'name' in api_exercise:
+        while True:
+            # Update parameters for the current page offset
+            params = { 
+                'limit': str(limit), 
+                'offset': str(offset)
+            } 
             
-            # If we succeed, insert the single exercise and return a count of 1.
-            exercises_to_insert = [{
-                "body_part": api_exercise.get("bodyPart"),        
-                "equipment": api_exercise.get("equipment"),
-                "id": api_exercise.get("id"),                     
-                "exercise_name": api_exercise.get("name"),        
-                "target": api_exercise.get("target"),
-                "secondaryMuscles": api_exercise.get("secondaryMuscles"),
-                "instructions": api_exercise.get("instructions"),
-                "description": api_exercise.get("description"),
-                "difficulty": api_exercise.get("difficulty"),
-                "category": api_exercise.get("category")
-            }]
+            # Execute the request
+            response = requests.get(api_base_url, headers=headers, params=params)
+            response.raise_for_status() # Check for 403, 404, etc.
+            api_exercises = response.json()
             
-            # Clean collection first to prevent unique index error on single insert
-            exercises_collection.delete_many({}) 
-            
-            result = exercises_collection.insert_many(exercises_to_insert, ordered=False)
-            inserted_count = len(result.inserted_ids)
-            print(f"SUCCESS: Inserted {inserted_count} single diagnostic document.")
-            
-            # Since we inserted ONE, we return 1.
-            return 1 
+            # Validation Check
+            if not isinstance(api_exercises, list):
+                print(f"API returned non-list data: {api_exercises}")
+                return {"error": "API returned unexpected data format."}
 
-        else:
-            print(f"FAILURE: API returned unexpected data format for single item: {api_exercise}")
-            return {"error": "API is blocking single-item access or key is wrong."}
+            if not api_exercises:
+                print("Pagination complete or no data received.")
+                break # Exit loop if no exercises are returned
+
+            exercises_to_insert = []
+
+            for exercise in api_exercises:
+                # Check for required fields before mapping
+                if not exercise.get("name") or not exercise.get("bodyPart"):
+                    continue
+
+                # --- MAPPING: Ensure correct structure for MongoDB insertion ---
+                mapped_exercise = {
+                    "body_part": exercise.get("bodyPart"),        
+                    "equipment": exercise.get("equipment"),
+                    "id": exercise.get("id"),                     
+                    "exercise_name": exercise.get("name"),        
+                    "target": exercise.get("target"),
+                    "secondaryMuscles": exercise.get("secondaryMuscles"),
+                    "instructions": exercise.get("instructions"),
+                    "description": exercise.get("description"),
+                    "difficulty": exercise.get("difficulty"),
+                    "category": exercise.get("category")
+                }
+
+                # Check for duplicates before insertion
+                existing_exercise = exercises_collection.find_one({
+                    "exercise_name": mapped_exercise["exercise_name"],
+                    "body_part": mapped_exercise["body_part"],
+                    "equipment": mapped_exercise["equipment"]
+                })
+
+                if not existing_exercise:
+                    exercises_to_insert.append(mapped_exercise)
+            
+            if exercises_to_insert:
+                # Insert documents for the current batch
+                result = exercises_collection.insert_many(exercises_to_insert, ordered=False)
+                total_inserted_count += len(result.inserted_ids)
+                print(f"Batch inserted {len(result.inserted_ids)} new documents. Total: {total_inserted_count}")
+            
+            # Update offset for the next page
+            offset += limit
+            
+            # If the current batch was smaller than the limit, we've reached the end
+            if len(api_exercises) < limit:
+                break
+
+
+        print(f"--- Pagination finished. Total documents inserted: {total_inserted_count} ---")
+        return total_inserted_count
 
     except requests.exceptions.RequestException as e:
         if hasattr(e, 'response') and e.response is not None:
