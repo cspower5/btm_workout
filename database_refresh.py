@@ -109,7 +109,7 @@ def insert_exercises_if_not_exist():
         
         return inserted_count
 
-    except requests.requests.exceptions.RequestException as e:
+    except requests.exceptions.RequestException as e:
         if hasattr(e, 'response') and e.response is not None:
              print(f"API Request Failed: Status {e.response.status_code}")
              return {"error": f"API Request Failed: Status {e.response.status_code}. Check key/host."}
