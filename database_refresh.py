@@ -4,14 +4,15 @@ from dotenv import load_dotenv
 from btm_workout_db_connect import get_db
 from pymongo.errors import BulkWriteError, DuplicateKeyError
 import json 
+import sys # Include sys for exiting when key is missing
 
 # 1. Load environment variables
 load_dotenv()
 
-# --- FIX: TEMPORARILY HARDCODE KEY FOR FINAL DEBUGGING ---
-# REPLACE "YOUR_ACTUAL_RAPIDAPI_KEY_HERE" with the full, correct key string
-RAPIDAPI_KEY = "YOUR_ACTUAL_RAPIDAPI_KEY_HERE" # <-- PASTE YOUR KEY HERE
-# --- END TEMPORARY FIX ---
+# --- FINAL SETUP: Use Environment Variable ---
+# Note: We rely on the Render environment variable for the live key.
+# This ensures security and portability.
+RAPIDAPI_KEY = os.getenv("RAPIDAPI_KEY")
 
 
 def insert_exercises_if_not_exist():
@@ -23,8 +24,10 @@ def insert_exercises_if_not_exist():
     if db is None:
         return {"error": "Database connection is not available."}
 
-    if not RAPIDAPI_KEY or RAPIDAPI_KEY == "YOUR_ACTUAL_RAPIDAPI_KEY_HERE":
-        return {"error": "API Key is missing or default. Cannot fetch data."}
+    if not RAPIDAPI_KEY:
+        # Check for key immediately before making API call
+        print("Error: RAPIDAPI_KEY is missing from the environment.")
+        return {"error": "API Key is missing. Cannot fetch data."}
 
     try:
         exercises_collection = db['exercises']
@@ -40,20 +43,13 @@ def insert_exercises_if_not_exist():
         print("--- Attempting API Fetch from ExerciseDB ---")
         
         response = requests.get(api_url, headers=headers)
-        response.raise_for_status() # Must be 200 OK
+        response.raise_for_status() # Raise an HTTPError for bad responses
         api_exercises = response.json()
         
-        # --- NEW DEBUGGING LOGGING ---
-        # Log the response content to see what the API actually sent back
-        print(f"API RESPONSE STATUS: {response.status_code}")
-        print(f"API RESPONSE ITEMS RECEIVED: {len(api_exercises) if isinstance(api_exercises, list) else 'Non-list data'}")
-        print(f"API RAW RESPONSE HEAD: {json.dumps(api_exercises)[:200]}")
-        # --- END DEBUGGING LOGGING ---
-
-
         # --- FINAL CHECK: Validation ---
         if not isinstance(api_exercises, list):
-            # The API returned an unexpected payload (not the list of exercises)
+            # If the response is not a list, it usually means the API is sending an error payload
+            print(f"API returned non-list data: {api_exercises}")
             return {"error": "API returned unexpected data format. Check server logs."}
         # --- END FINAL CHECK ---
 
@@ -61,7 +57,7 @@ def insert_exercises_if_not_exist():
         exercises_to_insert = []
 
         for exercise in api_exercises:
-            # --- Map API field names to MongoDB field names (final structure) ---
+            # --- FIX: Map ALL API field names to MongoDB field names (including 'category') ---
             mapped_exercise = {
                 "exercise_name": exercise.get("name"),    
                 "body_part": exercise.get("bodyPart"),    
@@ -72,7 +68,7 @@ def insert_exercises_if_not_exist():
                 "instructions": exercise.get("instructions"),
                 "description": exercise.get("description"),
                 "difficulty": exercise.get("difficulty"),
-                "category": exercise.get("category") # <--- FIX: ADDED MISSING FIELD
+                "category": exercise.get("category") # <--- FINAL FIELD MAPPING FIX
             }
 
             # Check if an exercise with the same mapped fields already exists
