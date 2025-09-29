@@ -5,12 +5,19 @@ from btm_workout_db_connect import get_db
 from pymongo.errors import BulkWriteError, DuplicateKeyError
 import json 
 import sys 
+# Import sys for writing debug messages directly to standard error stream
+# This forces logs to appear in Gunicorn/Render logs.
 
 # 1. Load environment variables
 load_dotenv()
 
 # --- FIX: Use Environment Variable Directly ---
 RAPIDAPI_KEY = os.getenv("RAPIDAPI_KEY") 
+
+# Helper function to write logs directly to the Gunicorn log stream (sys.stderr)
+# This bypasses Gunicorn's suppression of standard print() statements.
+def log_debug(message):
+    sys.stderr.write(f"[REFRESH DEBUG] {message}\n")
 
 
 def insert_exercises_if_not_exist():
@@ -22,7 +29,7 @@ def insert_exercises_if_not_exist():
         return {"error": "Database connection is not available."}
 
     if not RAPIDAPI_KEY:
-        print("Error: RAPIDAPI_KEY is missing from the environment.")
+        log_debug("Error: RAPIDAPI_KEY is missing from the environment.")
         return {"error": "API Key is missing. Cannot fetch data."}
 
     try:
@@ -43,7 +50,7 @@ def insert_exercises_if_not_exist():
             "X-RapidAPI-Host": "exercisedb.p.rapidapi.com" # Host Check remains
         }
 
-        print("--- Attempting API Fetch from ExerciseDB ---")
+        log_debug("--- Attempting API Fetch from ExerciseDB ---")
         
         # Execute the request with explicit headers and parameters
         response = requests.get(api_url, headers=headers, params=params)
@@ -51,18 +58,18 @@ def insert_exercises_if_not_exist():
         api_exercises = response.json()
         
         # --- NEW DEBUGGING LOGGING ---
-        print(f"DEBUG: API Response Status: {response.status_code}")
+        log_debug(f"API Response Status: {response.status_code}")
         if isinstance(api_exercises, list):
-            print(f"DEBUG: Items Received: {len(api_exercises)}")
-            print(f"DEBUG: Raw Data Head: {json.dumps(api_exercises)[:500]}...")
+            log_debug(f"Items Received: {len(api_exercises)}")
+            log_debug(f"Raw Data Head: {json.dumps(api_exercises)[:500]}...")
         else:
-            print(f"DEBUG: Raw Data Head: {json.dumps(api_exercises)[:500]}")
+            log_debug(f"Raw Data Head (Non-list): {json.dumps(api_exercises)[:500]}")
         # --- END DEBUGGING LOGGING ---
         
         
         # Validation Check
         if not isinstance(api_exercises, list):
-            print(f"API returned non-list data: {api_exercises}")
+            log_debug(f"API returned non-list data: {api_exercises}")
             return {"error": "API returned unexpected data format."}
 
         inserted_count = 0
@@ -73,7 +80,7 @@ def insert_exercises_if_not_exist():
             if not exercise.get("name") or not exercise.get("bodyPart"):
                 continue
 
-            # --- CRITICAL FIX: Reordered and renamed 'api_id' to 'id' (Application keys maintained) ---
+            # --- CRITICAL FIX: The 10-field mapping ---
             mapped_exercise = {
                 "body_part": exercise.get("bodyPart"),        # Application key
                 "equipment": exercise.get("equipment"),
@@ -103,22 +110,22 @@ def insert_exercises_if_not_exist():
             # Insert all exercises in one batch for performance
             result = exercises_collection.insert_many(exercises_to_insert, ordered=False)
             inserted_count = len(result.inserted_ids)
-            print(f"Successfully inserted {inserted_count} new documents.")
+            log_debug(f"Successfully inserted {inserted_count} new documents.")
         else:
-            print("No new exercises found to insert.")
+            log_debug("No new exercises found to insert.")
         
         return inserted_count
 
     except requests.exceptions.RequestException as e:
         if hasattr(e, 'response') and e.response is not None:
-             print(f"API Request Failed: Status {e.response.status_code}")
+             log_debug(f"API Request Failed: Status {e.response.status_code}")
              return {"error": f"API Request Failed: Status {e.response.status_code}. Check key/host."}
         else:
-             print(f"Network Error: {e}")
+             log_debug(f"Network Error: {e}")
              return {"error": f"Network Error during API fetch: {e}"}
     except BulkWriteError as e:
-        print(f"BulkWriteError during insert: {e}")
+        log_debug(f"BulkWriteError during insert: {e}")
         return {"error": "Insertion failed due to duplicate keys or invalid data."} 
     except Exception as e:
-        print(f"An error occurred during database refresh: {e}")
+        log_debug(f"An error occurred during database refresh: {e}")
         return {"error": f"Database Insertion Error: {e}"}
