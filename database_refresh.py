@@ -35,17 +35,14 @@ def insert_exercises_if_not_exist():
     try:
         exercises_collection = db['exercises']
         
-        # --- CRITICAL FIX: OVERRIDE THE CONFLICTING INDEX ---
-        # 1. Drop the old conflicting index if it exists (safe check)
+        # --- CRITICAL FIX: OVERRIDE THE CONFLICTING INDEX (We rely on manual collection drop now) ---
         try:
             # We must drop the index created on the old API field names to allow insertion
             exercises_collection.drop_index("unique_exercise_index")
             print("Dropped conflicting Atlas index.")
         except:
+            # Safely ignore if the index doesn't exist
             pass
-
-        # 2. We do NOT recreate an index here, relying on default MongoDB behavior
-        #    to accept documents without external uniqueness constraints.
         # --- END CRITICAL FIX ---
 
 
@@ -83,33 +80,24 @@ def insert_exercises_if_not_exist():
 
                 # --- MAPPING: STRICTLY ONLY THE 8 REQUESTED FIELDS (plus app keys) ---
                 mapped_exercise = {
-                    # Primary Application Keys
                     "exercise_name": exercise.get("name"),
                     "body_part": exercise.get("bodyPart"),
                     "equipment": exercise.get("equipment"),
-
-                    # API Data Fields (only the requested ones)
                     "target": exercise.get("target"),
                     "secondaryMuscles": exercise.get("secondaryMuscles"),
                     "instructions": exercise.get("instructions"),
                     "description": exercise.get("description"),
-                    "difficulty": exercise.get("difficulty")
+                    "difficulty": exercise.get("difficulty"),
+                    "id": exercise.get("id")
                 }
                 # --- END MAPPING ---
 
-                # Check for duplicates using the composite key from the inserted data fields
-                # NOTE: We can rely on the find_one for uniqueness check without an explicit index
-                existing_exercise = exercises_collection.find_one({
-                    "exercise_name": mapped_exercise["exercise_name"],
-                    "body_part": mapped_exercise["body_part"],
-                    "equipment": mapped_exercise["equipment"]
-                })
-
-                if not existing_exercise:
-                    exercises_to_insert.append(mapped_exercise)
+                # CRITICAL FIX: REMOVE find_one CHECK AND RELY ON DATABASE ERROR HANDLING
+                exercises_to_insert.append(mapped_exercise)
             
             if exercises_to_insert:
                 # Insert documents for the current batch
+                # We use ordered=False to skip errors and keep inserting the rest
                 result = exercises_collection.insert_many(exercises_to_insert, ordered=False)
                 total_inserted_count += len(result.inserted_ids)
                 print(f"Batch inserted {len(result.inserted_ids)} new documents. Total: {total_inserted_count}")
@@ -135,7 +123,9 @@ def insert_exercises_if_not_exist():
     except BulkWriteError as e:
         # If a BulkWriteError occurs, we return the count of items successfully inserted
         print(f"BulkWriteError during insert: {e}")
-        return total_inserted_count 
+        # NOTE: We rely on the error details to get the count of items inserted before the crash
+        inserted_before_crash = total_inserted_count + len(e.details.get('insertedIds', []))
+        return inserted_before_crash
     except Exception as e:
         print(f"An error occurred during database refresh: {e}")
         return {"error": f"Database Insertion Error: {e}"}
