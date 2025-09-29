@@ -25,25 +25,31 @@ def insert_exercises_if_not_exist():
         print("Error: RAPIDAPI_KEY is missing from the environment.")
         return {"error": "API Key is missing. Cannot fetch data."}
 
-    # --- FIX: Initialize total_inserted_count here to prevent NameError on early crash ---
-    total_inserted_count = 0
-    # --- END FIX ---
-    
     # --- PAGINATION SETUP ---
+    total_inserted_count = 0
     limit = 10
     offset = 0
     # --- END PAGINATION SETUP ---
 
     try:
         exercises_collection = db['exercises']
+        
+        # --- CRITICAL FIX: Ensure collection exists and has a placeholder to prevent auto-indexing ---
+        # This prevents the BulkWriteError by ensuring MongoDB doesn't automatically create the index 
+        # on the first malformed document.
+        if exercises_collection.count_documents({}) == 0:
+             exercises_collection.insert_one({"initial_load": True})
+        # --- END CRITICAL FIX ---
+
+
         api_base_url = "https://exercisedb.p.rapidapi.com/exercises" 
         
-        # --- API Headers ---
+        # --- API Headers and Params ---
         headers = {
             "X-RapidAPI-Key": RAPIDAPI_KEY, 
             "X-RapidAPI-Host": "exercisedb.p.rapidapi.com" 
         }
-
+        
         print("--- Starting Paginated API Fetch from ExerciseDB ---")
         
         while True:
@@ -55,22 +61,16 @@ def insert_exercises_if_not_exist():
             
             # Execute the request
             response = requests.get(api_base_url, headers=headers, params=params)
-            response.raise_for_status() # Check for 403, 404, etc.
+            response.raise_for_status() 
             api_exercises = response.json()
             
             # Validation Check
-            if not isinstance(api_exercises, list):
-                print(f"API returned non-list data: {api_exercises}")
-                return {"error": "API returned unexpected data format."}
-
-            if not api_exercises:
-                print("Pagination complete or no data received.")
-                break # Exit loop if no exercises are returned
+            if not isinstance(api_exercises, list) or not api_exercises:
+                break 
 
             exercises_to_insert = []
 
             for exercise in api_exercises:
-                # Check for required fields before mapping
                 if not exercise.get("name") or not exercise.get("bodyPart"):
                     continue
 
@@ -88,16 +88,15 @@ def insert_exercises_if_not_exist():
                     "category": exercise.get("category")
                 }
 
-                # Check for duplicates before insertion
-                existing_exercise = exercises_collection.find_one({
-                    "id": mapped_exercise["id"]
-                })
+                # Check for duplicates using the API's 'id' field
+                existing_exercise = exercises_collection.find_one({"id": mapped_exercise["id"]})
 
                 if not existing_exercise:
                     exercises_to_insert.append(mapped_exercise)
             
             if exercises_to_insert:
                 # Insert documents for the current batch
+                # We use ordered=False to skip errors and keep inserting the rest of the batch
                 result = exercises_collection.insert_many(exercises_to_insert, ordered=False)
                 total_inserted_count += len(result.inserted_ids)
                 print(f"Batch inserted {len(result.inserted_ids)} new documents. Total: {total_inserted_count}")
@@ -111,6 +110,11 @@ def insert_exercises_if_not_exist():
 
 
         print(f"--- Pagination finished. Total documents inserted: {total_inserted_count} ---")
+        
+        # Finally, remove the placeholder document we inserted at the start
+        exercises_collection.delete_one({"initial_load": True})
+        
+        # Return the final count minus the placeholder
         return total_inserted_count
 
     except requests.exceptions.RequestException as e:
@@ -124,7 +128,7 @@ def insert_exercises_if_not_exist():
         # If a BulkWriteError occurs, the thread should not crash. We return the count 
         # of items successfully inserted up to that point.
         print(f"BulkWriteError during insert: {e}")
-        return total_inserted_count # Return the count accumulated before the write error
+        return total_inserted_count 
     except Exception as e:
         print(f"An error occurred during database refresh: {e}")
         return {"error": f"Database Insertion Error: {e}"}
