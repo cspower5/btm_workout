@@ -122,16 +122,3 @@ def insert_exercises_if_not_exist():
     except Exception as e:
         print(f"An error occurred during database refresh: {e}")
         return {"error": f"Database Insertion Error: {e}"}
-```
-
----
-
-## 🚀 Final Deployment and Diagnostic Run
-
-Now we just need to run the final push and check the Render logs immediately after clicking the tile.
-
-1.  **Commit the Code Fix** (from the project root):
-    ```bash
-    git add database_refresh.py 
-    git commit -m "debug: Added verbose logging of API response payload"
-    git push origin main
