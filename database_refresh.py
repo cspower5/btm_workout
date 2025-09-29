@@ -59,11 +59,11 @@ def insert_exercises_if_not_exist():
         for exercise in api_exercises:
             # --- FIX: Map ALL API field names to MongoDB field names (including 'category') ---
             mapped_exercise = {
+                "api_id": exercise.get("id"),
                 "exercise_name": exercise.get("name"),    
                 "body_part": exercise.get("bodyPart"),    
                 "equipment": exercise.get("equipment"),
                 "target": exercise.get("target"),
-                "gifUrl": exercise.get("gifUrl"),
                 "secondaryMuscles": exercise.get("secondaryMuscles"),
                 "instructions": exercise.get("instructions"),
                 "description": exercise.get("description"),
