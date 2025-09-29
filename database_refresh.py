@@ -35,20 +35,32 @@ def insert_exercises_if_not_exist():
     try:
         exercises_collection = db['exercises']
         
-        # --- CRITICAL FIX: OVERRIDE THE CONFLICTING INDEX (We rely on manual collection drop now) ---
+        # --- CRITICAL FIX: EXPLICIT INDEX MANAGEMENT ---
+        # 1. Drop the old conflicting index if it exists (safe check)
         try:
-            # We must drop the index created on the old API field names to allow insertion
+            # Drop the problematic index created on the old API field names ('name', 'bodyPart')
             exercises_collection.drop_index("unique_exercise_index")
             print("Dropped conflicting Atlas index.")
         except:
-            # Safely ignore if the index doesn't exist
-            pass
+            pass # Safely ignore if the index doesn't exist
+
+        # 2. Create the NEW, CORRECT Unique Index using application field names
+        try:
+            exercises_collection.create_index([
+                ("exercise_name", ASCENDING),
+                ("body_part", ASCENDING),
+                ("equipment", ASCENDING)
+            ], unique=True, name="unique_app_index")
+            print("Successfully created final unique_app_index.")
+        except Exception as e:
+            # This is expected if the index already exists from a previous successful run
+            print(f"Warning: Index creation skipped/failed, likely because it already exists: {e}")
         # --- END CRITICAL FIX ---
 
 
         api_base_url = "https://exercisedb.p.rapidapi.com/exercises" 
         
-        # --- API Headers and Params ---
+        # --- API Headers and Params (Authentication is now stable) ---
         headers = {
             "X-RapidAPI-Key": RAPIDAPI_KEY, 
             "X-RapidAPI-Host": "exercisedb.p.rapidapi.com" 
