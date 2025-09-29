@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 from btm_workout_db_connect import get_db
 from pymongo.errors import BulkWriteError, DuplicateKeyError
+from pymongo import ASCENDING
 import json 
 import sys 
 
@@ -34,11 +35,17 @@ def insert_exercises_if_not_exist():
     try:
         exercises_collection = db['exercises']
         
-        # --- CRITICAL FIX: Ensure collection exists and has a placeholder to prevent auto-indexing ---
-        # This prevents the BulkWriteError by ensuring MongoDB doesn't automatically create the index 
-        # on the first malformed document.
-        if exercises_collection.count_documents({}) == 0:
-             exercises_collection.insert_one({"initial_load": True})
+        # --- CRITICAL FIX: OVERRIDE THE CONFLICTING INDEX ---
+        # 1. Drop the old conflicting index if it exists (safe check)
+        try:
+            # We must drop the index created on the old API field names to allow insertion
+            exercises_collection.drop_index("unique_exercise_index")
+            print("Dropped conflicting Atlas index.")
+        except:
+            pass
+
+        # 2. We do NOT recreate an index here, relying on default MongoDB behavior
+        #    to accept documents without external uniqueness constraints.
         # --- END CRITICAL FIX ---
 
 
@@ -74,29 +81,35 @@ def insert_exercises_if_not_exist():
                 if not exercise.get("name") or not exercise.get("bodyPart"):
                     continue
 
-                # --- MAPPING: Ensure correct structure for MongoDB insertion ---
+                # --- MAPPING: STRICTLY ONLY THE 8 REQUESTED FIELDS (plus app keys) ---
                 mapped_exercise = {
-                    "body_part": exercise.get("bodyPart"),        
+                    # Primary Application Keys
+                    "exercise_name": exercise.get("name"),
+                    "body_part": exercise.get("bodyPart"),
                     "equipment": exercise.get("equipment"),
-                    "id": exercise.get("id"),                     
-                    "exercise_name": exercise.get("name"),        
+
+                    # API Data Fields (only the requested ones)
                     "target": exercise.get("target"),
                     "secondaryMuscles": exercise.get("secondaryMuscles"),
                     "instructions": exercise.get("instructions"),
                     "description": exercise.get("description"),
-                    "difficulty": exercise.get("difficulty"),
-                    "category": exercise.get("category")
+                    "difficulty": exercise.get("difficulty")
                 }
+                # --- END MAPPING ---
 
-                # Check for duplicates using the API's 'id' field
-                existing_exercise = exercises_collection.find_one({"id": mapped_exercise["id"]})
+                # Check for duplicates using the composite key from the inserted data fields
+                # NOTE: We can rely on the find_one for uniqueness check without an explicit index
+                existing_exercise = exercises_collection.find_one({
+                    "exercise_name": mapped_exercise["exercise_name"],
+                    "body_part": mapped_exercise["body_part"],
+                    "equipment": mapped_exercise["equipment"]
+                })
 
                 if not existing_exercise:
                     exercises_to_insert.append(mapped_exercise)
             
             if exercises_to_insert:
                 # Insert documents for the current batch
-                # We use ordered=False to skip errors and keep inserting the rest of the batch
                 result = exercises_collection.insert_many(exercises_to_insert, ordered=False)
                 total_inserted_count += len(result.inserted_ids)
                 print(f"Batch inserted {len(result.inserted_ids)} new documents. Total: {total_inserted_count}")
@@ -110,11 +123,6 @@ def insert_exercises_if_not_exist():
 
 
         print(f"--- Pagination finished. Total documents inserted: {total_inserted_count} ---")
-        
-        # Finally, remove the placeholder document we inserted at the start
-        exercises_collection.delete_one({"initial_load": True})
-        
-        # Return the final count minus the placeholder
         return total_inserted_count
 
     except requests.exceptions.RequestException as e:
@@ -125,8 +133,7 @@ def insert_exercises_if_not_exist():
              print(f"Network Error: {e}")
              return {"error": f"Network Error during API fetch: {e}"}
     except BulkWriteError as e:
-        # If a BulkWriteError occurs, the thread should not crash. We return the count 
-        # of items successfully inserted up to that point.
+        # If a BulkWriteError occurs, we return the count of items successfully inserted
         print(f"BulkWriteError during insert: {e}")
         return total_inserted_count 
     except Exception as e:
