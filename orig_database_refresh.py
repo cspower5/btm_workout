@@ -5,12 +5,19 @@ from btm_workout_db_connect import get_db
 from pymongo.errors import BulkWriteError, DuplicateKeyError
 import json 
 import sys 
+# Import sys for writing debug messages directly to standard error stream
+# This forces logs to appear in Gunicorn/Render logs.
 
 # 1. Load environment variables
 load_dotenv()
 
 # --- FIX: Use Environment Variable Directly ---
 RAPIDAPI_KEY = os.getenv("RAPIDAPI_KEY") 
+
+# Helper function to write logs directly to the Gunicorn log stream (sys.stderr)
+# This bypasses Gunicorn's suppression of standard print() statements.
+def log_debug(message):
+    sys.stderr.write(f"[REFRESH DEBUG] {message}\n")
 
 
 def insert_exercises_if_not_exist():
@@ -22,35 +29,48 @@ def insert_exercises_if_not_exist():
         return {"error": "Database connection is not available."}
 
     if not RAPIDAPI_KEY:
-        print("Error: RAPIDAPI_KEY is missing from the environment.")
+        log_debug("Error: RAPIDAPI_KEY is missing from the environment.")
         return {"error": "API Key is missing. Cannot fetch data."}
 
     try:
         # --- FIX: Changed collection name from 'exercise' to 'exercises' ---
         exercises_collection = db['exercises']
         
-        # --- FINAL FIX: Key is ONLY in headers, Host is explicit ---
+        # --- FINAL FIX: Use Python requests 'params' and 'headers' argument directly ---
+        # NOTE: RapidAPI sometimes requires the key in the params for full access.
         api_url = "https://exercisedb.p.rapidapi.com/exercises" 
         
-        # We only pass the pagination limit as a parameter
-        params = { 'limit': '0' } 
+        # We pass both the pagination limit AND the key as parameters
+        params = { 
+            'limit': '0', 
+            'x-rapidapi-key': RAPIDAPI_KEY  # <-- Passed as a URL parameter
+        } 
         
-        # The key is now explicitly and ONLY in the header, as required by RapidAPI
         headers = {
-            "X-RapidAPI-Key": RAPIDAPI_KEY, # Authentication Key is here
-            "X-RapidAPI-Host": "exercisedb.p.rapidapi.com" # Host Check
+            "X-RapidAPI-Host": "exercisedb.p.rapidapi.com" # Host Check remains
         }
 
-        print("--- Attempting API Fetch from ExerciseDB (Header Auth) ---")
+        log_debug("--- Attempting API Fetch from ExerciseDB ---")
         
         # Execute the request with explicit headers and parameters
         response = requests.get(api_url, headers=headers, params=params)
         response.raise_for_status() # Raise an HTTPError for non-200 status
         api_exercises = response.json()
+        print(api_exercises)  #remove after testing
+        
+        # --- NEW DEBUGGING LOGGING ---
+        log_debug(f"API Response Status: {response.status_code}")
+        if isinstance(api_exercises, list):
+            log_debug(f"Items Received: {len(api_exercises)}")
+            log_debug(f"Raw Data Head: {json.dumps(api_exercises)[:500]}...")
+        else:
+            log_debug(f"Raw Data Head (Non-list): {json.dumps(api_exercises)[:500]}")
+        # --- END DEBUGGING LOGGING ---
+        
         
         # Validation Check
         if not isinstance(api_exercises, list):
-            print(f"API returned non-list data: {api_exercises}")
+            log_debug(f"API returned non-list data: {api_exercises}")
             return {"error": "API returned unexpected data format."}
 
         inserted_count = 0
@@ -74,6 +94,8 @@ def insert_exercises_if_not_exist():
                 "difficulty": exercise.get("difficulty"),
                 "category": exercise.get("category")
             }
+            # --- END CRITICAL FIX ---
+
 
             # Check if an exercise with the same mapped fields already exists
             existing_exercise = exercises_collection.find_one({
@@ -89,22 +111,22 @@ def insert_exercises_if_not_exist():
             # Insert all exercises in one batch for performance
             result = exercises_collection.insert_many(exercises_to_insert, ordered=False)
             inserted_count = len(result.inserted_ids)
-            print(f"Successfully inserted {inserted_count} new documents.")
+            log_debug(f"Successfully inserted {inserted_count} new documents.")
         else:
-            print("No new exercises found to insert.")
+            log_debug("No new exercises found to insert.")
         
         return inserted_count
 
     except requests.exceptions.RequestException as e:
         if hasattr(e, 'response') and e.response is not None:
-             print(f"API Request Failed: Status {e.response.status_code}")
+             log_debug(f"API Request Failed: Status {e.response.status_code}")
              return {"error": f"API Request Failed: Status {e.response.status_code}. Check key/host."}
         else:
-             print(f"Network Error: {e}")
+             log_debug(f"Network Error: {e}")
              return {"error": f"Network Error during API fetch: {e}"}
     except BulkWriteError as e:
-        print(f"BulkWriteError during insert: {e}")
+        log_debug(f"BulkWriteError during insert: {e}")
         return {"error": "Insertion failed due to duplicate keys or invalid data."} 
     except Exception as e:
-        print(f"An error occurred during database refresh: {e}")
+        log_debug(f"An error occurred during database refresh: {e}")
         return {"error": f"Database Insertion Error: {e}"}
