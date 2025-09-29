@@ -33,10 +33,16 @@ def insert_exercises_if_not_exist():
     # --- END PAGINATION SETUP ---
 
     try:
+        # --- CRITICAL PERSISTENCE FIX ---
+        # 1. Check if collection exists; if not, explicitly create it to ensure persistence.
+        if 'exercises' not in db.list_collection_names():
+            db.create_collection('exercises')
+            print("Successfully created 'exercises' collection structure for persistence.")
+        # --- END CRITICAL PERSISTENCE FIX ---
+        
         exercises_collection = db['exercises']
         
-        # --- CRITICAL FIX: EXPLICIT INDEX MANAGEMENT ---
-        # 1. Drop the old conflicting index if it exists (safe check)
+        # We must drop the conflicting index only if it exists
         try:
             # Drop the problematic index created on the old API field names ('name', 'bodyPart')
             exercises_collection.drop_index("unique_exercise_index")
