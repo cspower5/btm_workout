@@ -5,8 +5,8 @@ function AddEquipmentPage() {
   return (
     <AddFormComponent
       title="Add New Equipment"
-      apiEndpoint="/api/add_equipment"
-      placeholder="e.g., Kettlebell"
+      apiEndpoint="/api/v1/add_equipment"
+      placeholder="e.g., dumbbell"
     />
   );
 }

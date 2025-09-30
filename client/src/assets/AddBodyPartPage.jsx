@@ -5,8 +5,8 @@ function AddBodyPartPage() {
   return (
     <AddFormComponent
       title="Add New Body Part"
-      apiEndpoint="/api/add_body_part"
-      placeholder="e.g., Forearms"
+      apiEndpoint="/api/v1/add_body_part"
+      placeholder="e.g., legs"
     />
   );
 }
