@@ -213,8 +213,17 @@ def api_body_parts_list():
     if db is None:
         return jsonify({"error": "Database not connected."}), 500
     try:
-        # FIX: Query the dedicated body_parts collection and return a list of 'name' strings
-        body_parts = db.body_parts.distinct('name')
+        # FIX: Use Aggregation to force all names to lowercase and return unique list
+        pipeline = [
+            {"$match": {"name": {"$exists": True, "$ne": None, "$ne": ""}}}, # Filter out blanks
+            {"$group": {"_id": {"$toLower": "$name"}}}, # Group by lowercase name
+            {"$sort": {"_id": 1}} # Sort unique names
+        ]
+        
+        names_cursor = db.body_parts.aggregate(pipeline)
+        
+        # The result is the unique lowercase name (stored in _id)
+        body_parts = [doc['_id'] for doc in names_cursor]
         return jsonify(body_parts)
     except Exception as e:
         return jsonify({"error": f"Failed to retrieve body parts list: {str(e)}"}), 500
@@ -227,8 +236,17 @@ def api_equipment_list():
     if db is None:
         return jsonify({"error": "Database not connected."}), 500
     try:
-        # FIX: Query the dedicated equipment collection and return a list of 'name' strings
-        equipment_list = db.equipment.distinct('name')
+        # FIX: Use Aggregation to force all names to lowercase and return unique list
+        pipeline = [
+            {"$match": {"name": {"$exists": True, "$ne": None, "$ne": ""}}}, # Filter out blanks
+            {"$group": {"_id": {"$toLower": "$name"}}}, # Group by lowercase name
+            {"$sort": {"_id": 1}} # Sort unique names
+        ]
+        
+        names_cursor = db.equipment.aggregate(pipeline)
+        
+        # The result is the unique lowercase name (stored in _id)
+        equipment_list = [doc['_id'] for doc in names_cursor]
         return jsonify(equipment_list)
     except Exception as e:
         return jsonify({"error": f"Failed to retrieve equipment list: {str(e)}"}), 500
@@ -254,9 +272,18 @@ def api_difficulties():
     if db is None:
         return jsonify({"error": "Database not connected."}), 500
     try:
-        difficulties = db.exercises.distinct('difficulty')
-        # Filter out any None or empty strings
-        difficulties = [d for d in difficulties if d]
+        # FIX: Use Aggregation to force all difficulties to lowercase and return unique list
+        pipeline = [
+            {"$match": {"difficulty": {"$exists": True, "$ne": None, "$ne": ""}}}, # Filter out blanks
+            {"$group": {"_id": {"$toLower": "$difficulty"}}}, # Group by lowercase difficulty
+            {"$sort": {"_id": 1}} # Sort unique difficulties
+        ]
+        
+        difficulties_cursor = db.exercises.aggregate(pipeline)
+        
+        # The result is the unique lowercase name (stored in _id)
+        difficulties = [doc['_id'] for doc in difficulties_cursor]
+        
         return jsonify(difficulties)
     except Exception as e:
         return jsonify({"error": f"Failed to retrieve difficulties: {str(e)}"}), 500
@@ -285,6 +312,3 @@ if __name__ == '__main__':
     # Initial connection attempt when running locally
     connect_db() 
     app.run(debug=True, port=5000)
-
-
-
