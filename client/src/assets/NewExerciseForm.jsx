@@ -6,7 +6,7 @@ import {
     getEquipmentList, 
     getDifficulties, 
     insertExercise 
-} from '../assets/api'; 
+} from '../assets/api/index.jsx'; 
 import './css/NewExerciseForm.css';
 
 function NewExerciseForm() {
