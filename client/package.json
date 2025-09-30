@@ -2,7 +2,7 @@
   "name": "client",
   "private": true,
   "version": "0.0.0",
-  "homepage": "http://cspower5.github.io/btm_workout",
+  "homepage": "https://cspower5.github.io/btm_workout",
   "type": "module",
   "scripts": {
     "dev": "vite",
