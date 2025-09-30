@@ -24,7 +24,7 @@ function NewExerciseForm() {
     const [isError, setIsError] = useState(false);
     
     const [bodyParts, setBodyParts] = useState([]);
-    const [equipmentList, setEquipmentList, ] = useState([]);
+    const [equipmentList, setEquipmentList] = useState([]);
     const [difficulties, setDifficulties] = useState([]);
 
     useEffect(() => {
@@ -37,12 +37,11 @@ function NewExerciseForm() {
                     getDifficulties()
                 ]);
                 
-                // NOTE: The API returns data as a list of strings for body parts and difficulties, 
-                // but your component expects objects {name: '...'} for bodyParts and equipmentList 
-                // (which is likely a bug from a previous version). We'll assume the API returns 
-                // objects for consistency, but if it breaks, we know this mapping is the cause.
+                // Assuming data is an array of objects for bodyParts and equipmentList:
                 setBodyParts(bodyPartsRes); 
                 setEquipmentList(equipmentRes);
+                
+                // Assuming difficulties returns a simple array of strings:
                 setDifficulties(difficultiesRes); 
 
             } catch (err) {
@@ -117,11 +116,7 @@ function NewExerciseForm() {
         }
     };
 
-    // NOTE: The map logic for dropdowns below assumes data returned is an object {name: '...'}
-    // The workaround for mapping string arrays is necessary if the API returns just strings:
-    // {bodyParts.map(part => (<option key={part} value={part}>{part}</option>))}
-    // Since we don't know the exact API return structure, we'll keep the current map logic for now.
-
+    // Note: The map logic assumes data returned is an object {name: '...'}
     return (
         <div className="form-container">
             <h2>Add New Exercise</h2>
@@ -130,7 +125,22 @@ function NewExerciseForm() {
                     <label>Name:</label>
                     <input type="text" name="name" value={formData.name} onChange={handleChange} required />
                 </div>
-                {/* ... other input fields ... */}
+                <div className="form-group">
+                    <label>Target:</label>
+                    <input type="text" name="target" value={formData.target} onChange={handleChange} required />
+                </div>
+                <div className="form-group">
+                    <label>Secondary Muscles (comma-separated):</label>
+                    <input type="text" name="secondaryMuscles" value={formData.secondaryMuscles} onChange={handleChange} />
+                </div>
+                <div className="form-group">
+                    <label>Instructions (period-separated):</label>
+                    <textarea name="instructions" value={formData.instructions} onChange={handleChange} />
+                </div>
+                <div className="form-group">
+                    <label>Description:</label>
+                    <textarea name="description" value={formData.description} onChange={handleChange} />
+                </div>
                 
                 <div className="form-group">
                     <label>Body Part:</label>
@@ -147,7 +157,30 @@ function NewExerciseForm() {
                     )}
                 </div>
                 
-                {/* ... other dropdowns and button ... */}
+                <div className="form-group">
+                    <label>Equipment:</label>
+                    {equipmentList.length > 0 ? (
+                        <select name="equipment" value={formData.equipment} onChange={handleChange} required>
+                            <option value="">--Select--</option>
+                            {equipmentList.map(eq => (
+                                <option key={eq.name} value={eq.name}>{eq.name}</option>
+                            ))}
+                        </select>
+                    ) : (
+                        <p className="error">Loading Equipment...</p>
+                    )}
+                </div>
+                
+                <div className="form-group">
+                    <label>Difficulty:</label>
+                    <select name="difficulty" value={formData.difficulty} onChange={handleChange} required>
+                        <option value="">--Select--</option>
+                        {difficulties.map(diff => (
+                            // Assuming difficulties returns a simple string array (no .name access needed)
+                            <option key={diff} value={diff}>{diff}</option>
+                        ))}
+                    </select>
+                </div>
                 
                 <button type="submit">Add Exercise</button>
             </form>
