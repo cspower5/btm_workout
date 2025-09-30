@@ -1,5 +1,5 @@
 import React from 'react';
-import AddFormComponent from './AddFormComponent';
+import AddFormComponent from './AddFormComponent.jsx';
 // FIX: Import the functional API helper (which uses the absolute URL and POST method)
 import { addEquipment } from '../assets/api/index.jsx'; 
 
