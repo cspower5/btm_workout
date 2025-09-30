@@ -203,7 +203,7 @@ def api_delete_equipment(name):
         else:
             return jsonify({"error": "Equipment not found."}), 404
     except Exception as e:
-        return jsonify({"error": "Failed to delete equipment: {str(e)}"}, 500)
+        return jsonify({"error": f"Failed to delete equipment: {str(e)}"}), 500
 
 # API endpoint to get a list of all body parts
 @app.route('/api/v1/body_parts_list', methods=['GET'])
@@ -214,8 +214,7 @@ def api_body_parts_list():
         return jsonify({"error": "Database not connected."}), 500
     try:
         # FIX: Query the dedicated body_parts collection and return a list of 'name' strings
-        body_parts_cursor = db.body_parts.distinct('name')
-        body_parts = [doc['name'] for doc in body_parts_cursor]
+        body_parts = db.body_parts.distinct('name')
         return jsonify(body_parts)
     except Exception as e:
         return jsonify({"error": f"Failed to retrieve body parts list: {str(e)}"}), 500
@@ -229,11 +228,10 @@ def api_equipment_list():
         return jsonify({"error": "Database not connected."}), 500
     try:
         # FIX: Query the dedicated equipment collection and return a list of 'name' strings
-        equipment_cursor = db.equipment.distinct('name')
-        equipment_list = [doc['name'] for doc in equipment_cursor]
+        equipment_list = db.equipment.distinct('name')
         return jsonify(equipment_list)
     except Exception as e:
-        return jsonify({"error": "Failed to retrieve equipment list: {str(e)}"}, 500)
+        return jsonify({"error": f"Failed to retrieve equipment list: {str(e)}"}), 500
 
 # API endpoint to get a list of all exercises
 @app.route('/api/v1/exercises_list', methods=['GET'])
