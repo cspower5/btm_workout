@@ -1,5 +1,6 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+// FIX: Switched from BrowserRouter to HashRouter for GitHub Pages compatibility.
+import { HashRouter as Router, Routes, Route, Link } from 'react-router-dom'; 
 import Home from './Home';
 import WorkoutPage from './WorkoutPage';
 import NewExerciseForm from './NewExerciseForm';
@@ -12,7 +13,9 @@ import logo from './../assets/images/btm_workout_logo.png';
 
 function App() {
   return (
-    <Router basename="/btm_workout">
+    // FIX: Removed the incorrect 'basename="/btm_workout"' prop, as HashRouter 
+    // manages the path differently and automatically resolves links correctly.
+    <Router>
       <div className="App">
         <header className="App-header">
           <h1>Break The Monotony Workout</h1>
