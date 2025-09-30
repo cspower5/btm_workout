@@ -214,7 +214,7 @@ def api_body_parts_list():
         return jsonify({"error": "Database not connected."}), 500
     try:
         # FIX: Query the dedicated body_parts collection and return a list of 'name' strings
-        body_parts_cursor = db.body_parts.find({}, {"name": 1, "_id": 0})
+        body_parts_cursor = db.body_parts.distinct('name')
         body_parts = [doc['name'] for doc in body_parts_cursor]
         return jsonify(body_parts)
     except Exception as e:
@@ -229,7 +229,7 @@ def api_equipment_list():
         return jsonify({"error": "Database not connected."}), 500
     try:
         # FIX: Query the dedicated equipment collection and return a list of 'name' strings
-        equipment_cursor = db.equipment.find({}, {"name": 1, "_id": 0})
+        equipment_cursor = db.equipment.distinct('name')
         equipment_list = [doc['name'] for doc in equipment_cursor]
         return jsonify(equipment_list)
     except Exception as e:
