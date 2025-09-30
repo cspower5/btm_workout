@@ -10,15 +10,14 @@ const API_BASE_URL = 'https://btm-workout.onrender.com';
 // 1. Get List of Body Parts (for dropdown)
 export const getBodyParts = async () => {
     const response = await axios.get(`${API_BASE_URL}/api/v1/body_parts_list`);
-    // FIX: Map the array of objects [{name: '...'}] to a simple string array ['...']
-    return response.data.map(item => item.name); 
+    // NOTE: This assumes your backend returns a list of strings (e.g., ["Legs", "Chest"])
+    return response.data; 
 };
 
 // 2. Get List of Equipment
 export const getEquipmentList = async () => {
     const response = await axios.get(`${API_BASE_URL}/api/v1/equipment_list`);
-    // FIX: Map the array of objects [{name: '...'}] to a simple string array ['...']
-    return response.data.map(item => item.name); 
+    return response.data; 
 };
 
 // 3. Get List of All Exercises

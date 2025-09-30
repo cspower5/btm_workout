@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { refreshDatabase } from '../assets/api/index.js'; // <-- NEW: Import the fixed refresh function
+import { refreshDatabase } from '../assets/api/index.jsx'; // <-- NEW: Import the fixed refresh function
 import './css/Home.css';
 
 function Home() {
