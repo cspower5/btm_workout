@@ -6,7 +6,7 @@ import {
     getEquipmentList, 
     getDifficulties, 
     insertExercise 
-} from './api'; 
+} from '../assets/api'; 
 import './css/NewExerciseForm.css';
 
 function NewExerciseForm() {
@@ -37,11 +37,9 @@ function NewExerciseForm() {
                     getDifficulties()
                 ]);
                 
-                // Assuming data is an array of objects for bodyParts and equipmentList:
+                // Assuming all helpers return a simple string array:
                 setBodyParts(bodyPartsRes); 
                 setEquipmentList(equipmentRes);
-                
-                // Assuming difficulties returns a simple array of strings:
                 setDifficulties(difficultiesRes); 
 
             } catch (err) {
@@ -53,15 +51,18 @@ function NewExerciseForm() {
         fetchDropdownData();
     }, []);
 
+    // FIX: Update the cleanup useEffect to use simple string comparison
     useEffect(() => {
         // This useEffect handles clearing selections if the list changes
-        if (formData.bodyPart && !bodyParts.some(bp => bp.name === formData.bodyPart)) {
+        // It now checks if the selected string is IN the list of available strings.
+        if (formData.bodyPart && !bodyParts.includes(formData.bodyPart)) {
             setFormData(prevState => ({ ...prevState, bodyPart: '' }));
         }
-        if (formData.equipment && !equipmentList.some(eq => eq.name === formData.equipment)) {
+        if (formData.equipment && !equipmentList.includes(formData.equipment)) {
             setFormData(prevState => ({ ...prevState, equipment: '' }));
         }
     }, [bodyParts, equipmentList, formData.bodyPart, formData.equipment]);
+
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -116,7 +117,7 @@ function NewExerciseForm() {
         }
     };
 
-    // Note: The map logic assumes data returned is an object {name: '...'}
+    // Note: The map logic below relies on the component receiving string arrays
     return (
         <div className="form-container">
             <h2>Add New Exercise</h2>
@@ -147,9 +148,9 @@ function NewExerciseForm() {
                     {bodyParts.length > 0 ? (
                         <select name="bodyPart" value={formData.bodyPart} onChange={handleChange} required>
                             <option value="">--Select--</option>
-                            {/* Assuming bodyParts is an array of objects like [{name: 'Arms'}] */}
-                            {bodyParts.map(part => (
-                                <option key={part.name} value={part.name}>{part.name}</option>
+                            {/* The mapping logic is now correct for string arrays */}
+                            {bodyParts.map((part, index) => (
+                                <option key={index} value={part}>{part}</option>
                             ))}
                         </select>
                     ) : (
@@ -162,8 +163,8 @@ function NewExerciseForm() {
                     {equipmentList.length > 0 ? (
                         <select name="equipment" value={formData.equipment} onChange={handleChange} required>
                             <option value="">--Select--</option>
-                            {equipmentList.map(eq => (
-                                <option key={eq.name} value={eq.name}>{eq.name}</option>
+                            {equipmentList.map((eq, index) => (
+                                <option key={index} value={eq}>{eq}</option>
                             ))}
                         </select>
                     ) : (
@@ -176,7 +177,7 @@ function NewExerciseForm() {
                     <select name="difficulty" value={formData.difficulty} onChange={handleChange} required>
                         <option value="">--Select--</option>
                         {difficulties.map(diff => (
-                            // Assuming difficulties returns a simple string array (no .name access needed)
+                            // Assuming difficulties returns a simple string array 
                             <option key={diff} value={diff}>{diff}</option>
                         ))}
                     </select>
