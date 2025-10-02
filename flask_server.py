@@ -4,15 +4,62 @@ import btm_workout_db_connect as db_connect
 from database_refresh import insert_exercises_if_not_exist
 from pymongo.errors import DuplicateKeyError
 
+import os
+
+# Production-only allowed origin
+PROD_ORIGINS = ["https://cspower5.github.io"]
+
+# Developer: set FLASK_ALLOW_DEV_ORIGINS=1 in your local env to allow local dev origins
+_allow_dev = os.getenv("FLASK_ALLOW_DEV_ORIGINS", "1").lower() in ("1", "true", "yes")
+
+# Tightened dev origins (only exact ports used for dev Vite server)
+DEV_ORIGINS = [
+    "http://localhost:5173",
+    "http://localhost:5174",
+]
+
+# Final allowed origins: production plus dev (if enabled)
+ALLOWED_ORIGINS = PROD_ORIGINS + (DEV_ORIGINS if _allow_dev else [])
+
+
+# Log CORS-origin rejections: browsers enforce CORS, but we can surface unexpected origins
+def log_cors_origin_mismatch():
+    origin = request.headers.get("Origin")
+    if origin:
+        # If origin isn't allowed, log a WARNING with request context to help debugging
+        if origin not in ALLOWED_ORIGINS:
+            # Include remote address and optionally a truncated request body when debugging
+            remote = request.remote_addr
+            body_preview = None
+            if os.getenv("FLASK_CORS_DEBUG", "0").lower() in ("1", "true", "yes"):
+                try:
+                    raw = request.get_data(as_text=True) or ""
+                    body_preview = (raw[:1000] + "...") if len(raw) > 1000 else raw
+                except Exception:
+                    body_preview = "<unavailable>"
+
+            msg = f"CORS request from origin {origin} for {request.method} {request.path} - not in ALLOWED_ORIGINS; remote={remote}"
+            if body_preview is not None:
+                msg += f"; body_preview={body_preview}"
+            app.logger.warning(msg)
+
+
 # --- Initialization ---
 app = Flask(__name__)
 # NOTE: The global CORS(app) is REMOVED. @cross_origin is used on each route for guaranteed functionality.
+
+
+# Register before_request CORS logger (helps surface CORS origin rejections in server logs)
+@app.before_request
+def _log_cors_wrapper():
+    return log_cors_origin_mismatch()
+
 
 # --- API Routes (v1) ---
 
 
 @app.route("/api/v1/insert_exercise", methods=["POST"])
-@cross_origin(origins=["https://cspower5.github.io"])  # <--- CORS FIX
+@cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
 def api_insert_exercise():
     db = db_connect.get_db()
     if db is None:
@@ -70,7 +117,7 @@ def api_insert_exercise():
 
 # API endpoint to get 3 random exercises for a selected body part
 @app.route("/api/v1/get_random_exercises", methods=["POST"])
-@cross_origin(origins=["https://cspower5.github.io"])  # <--- CORS FIX
+@cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
 def api_get_random_exercises():
     db = db_connect.get_db()
     if db is None:
@@ -175,7 +222,7 @@ def api_get_random_exercises():
 
 # API endpoint to refresh the database with new exercises
 @app.route("/api/v1/refresh_db", methods=["POST"])
-@cross_origin(origins=["https://cspower5.github.io"])  # <--- CORS FIX
+@cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
 def api_refresh_db():
     try:
         # Calls the external API logic from database_refresh.py
@@ -189,7 +236,7 @@ def api_refresh_db():
 
 # API endpoint to get a single exercise by its name
 @app.route("/api/v1/exercise/<string:name>", methods=["GET"])
-@cross_origin(origins=["https://cspower5.github.io"])  # <--- CORS FIX
+@cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
 def api_get_exercise_details(name):
     db = db_connect.get_db()
     if db is None:
@@ -207,7 +254,7 @@ def api_get_exercise_details(name):
 
 # API endpoint to handle adding a new body part
 @app.route("/api/v1/add_body_part", methods=["POST"])
-@cross_origin(origins=["https://cspower5.github.io"])  # <--- CORS FIX
+@cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
 def api_add_body_part():
     db = db_connect.get_db()
     if db is None:
@@ -229,7 +276,7 @@ def api_add_body_part():
 
 # API endpoint to handle adding new equipment
 @app.route("/api/v1/add_equipment", methods=["POST"])
-@cross_origin(origins=["https://cspower5.github.io"])  # <--- CORS FIX
+@cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
 def api_add_equipment():
     db = db_connect.get_db()
     if db is None:
@@ -251,7 +298,7 @@ def api_add_equipment():
 
 # API endpoint to delete an exercise by its name
 @app.route("/api/v1/delete_exercise/<path:name>", methods=["DELETE"])
-@cross_origin(origins=["https://cspower5.github.io"])  # <--- CORS FIX
+@cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
 def api_delete_exercise(name):
     db = db_connect.get_db()
     if db is None:
@@ -268,7 +315,7 @@ def api_delete_exercise(name):
 
 # API endpoint to delete a body part by its name
 @app.route("/api/v1/delete_body_part/<string:name>", methods=["DELETE"])
-@cross_origin(origins=["https://cspower5.github.io"])  # <--- CORS FIX
+@cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
 def api_delete_body_part(name):
     db = db_connect.get_db()
     if db is None:
@@ -293,7 +340,7 @@ def api_delete_body_part(name):
 
 # API endpoint to delete equipment by its name
 @app.route("/api/v1/delete_equipment/<string:name>", methods=["DELETE"])
-@cross_origin(origins=["https://cspower5.github.io"])  # <--- CORS FIX
+@cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
 def api_delete_equipment(name):
     db = db_connect.get_db()
     if db is None:
@@ -318,7 +365,7 @@ def api_delete_equipment(name):
 
 # API endpoint to get a list of all body parts
 @app.route("/api/v1/body_parts_list", methods=["GET"])
-@cross_origin(origins=["https://cspower5.github.io"])  # <--- CORS FIX
+@cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
 def api_body_parts_list():
     db = db_connect.get_db()
     if db is None:
@@ -346,7 +393,7 @@ def api_body_parts_list():
 
 # API endpoint to get a list of all equipment
 @app.route("/api/v1/equipment_list", methods=["GET"])
-@cross_origin(origins=["https://cspower5.github.io"])  # <--- CORS FIX
+@cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
 def api_equipment_list():
     db = db_connect.get_db()
     if db is None:
@@ -374,7 +421,7 @@ def api_equipment_list():
 
 # API endpoint to get a list of all exercises
 @app.route("/api/v1/exercises_list", methods=["GET"])
-@cross_origin(origins=["https://cspower5.github.io"])  # <--- CORS FIX
+@cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
 def api_exercises_list():
     db = db_connect.get_db()
     if db is None:
@@ -433,7 +480,7 @@ def not_found(error):
 
 
 @app.errorhandler(500)
-@cross_origin(origins=["https://cspower5.github.io"])  # <--- CORS FIX
+@cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
 def internal_error(error):
     app.logger.error("Server Error: %s", error)
     return (
@@ -449,9 +496,20 @@ def internal_error(error):
 
 # --- Health Check ---
 @app.route("/api/v1/health", methods=["GET"])
-@cross_origin(origins=["https://cspower5.github.io"])  # <--- CORS FIX
+@cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
 def api_health_check():
     return jsonify({"status": "ok", "message": "API is running and healthy."}), 200
+
+
+# Management endpoint: preview configured allowed origins
+# Protect with ADMIN_PREVIEW_TOKEN environment variable (use a strong token)
+@app.route("/api/v1/admin/allowed_origins", methods=["GET"])
+def api_admin_allowed_origins():
+    token = os.getenv("ADMIN_PREVIEW_TOKEN")
+    auth = request.headers.get("Authorization")
+    if not token or not auth or auth.strip() != f"Bearer {token}":
+        return jsonify({"error": "Unauthorized"}), 401
+    return jsonify({"allowed_origins": ALLOWED_ORIGINS}), 200
 
 
 # --- Run Server (Production/Development) ---
