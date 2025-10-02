@@ -72,7 +72,7 @@ function WorkoutPage() {
             <input 
               type="number" 
               value={exerciseCount} 
-              onChange={(e) => setExerciseCount(Math.max(1, e.target.value))} 
+              onChange={(e) => setExerciseCount(Math.max(1, parseInt(e.target.value, 10) || 1))} 
               min="1"
             />
           </label>
@@ -93,8 +93,12 @@ function WorkoutPage() {
                 <h3>{exercise.name}</h3>
                 <p><strong>Body Part:</strong> {exercise.bodyPart}</p>
                 <p><strong>Equipment:</strong> {exercise.equipment}</p>
-                <p><strong>Reps:</strong> {exercise.reps}</p>
-                <p><strong>Sets:</strong> {exercise.sets}</p>
+                {exercise.reps != null && (
+                  <p><strong>Reps:</strong> {exercise.reps}</p>
+                )}
+                {exercise.sets != null && (
+                  <p><strong>Sets:</strong> {exercise.sets}</p>
+                )}
               </div>
             </Link>
           ))
