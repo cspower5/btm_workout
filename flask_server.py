@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_cors import cross_origin  # <-- Keep CORS and Import cross_origin
-from btm_workout_db_connect import get_db, connect_db
+import btm_workout_db_connect as db_connect
 from database_refresh import insert_exercises_if_not_exist
 from pymongo.errors import DuplicateKeyError
 
@@ -14,7 +14,7 @@ app = Flask(__name__)
 @app.route("/api/v1/insert_exercise", methods=["POST"])
 @cross_origin(origins=["https://cspower5.github.io"])  # <--- CORS FIX
 def api_insert_exercise():
-    db = get_db()
+    db = db_connect.get_db()
     if db is None:
         return jsonify({"error": "Database not connected."}), 500
 
@@ -22,9 +22,18 @@ def api_insert_exercise():
         data = request.json
         exercises_collection = db["exercises"]
 
+        # Accept legacy aliases and normalize to canonical payload keys:
+        # - "name" -> "exercise_name"
+        # - "bodyPart" -> "body_part"
         # Enforce canonical payload: expect `exercise_name`, `body_part`, `equipment`, `target`
         if data is None:
             return jsonify({"error": "Invalid or missing JSON body."}), 400
+
+        # Normalize aliases into canonical names
+        if "name" in data and "exercise_name" not in data:
+            data["exercise_name"] = data.pop("name")
+        if "bodyPart" in data and "body_part" not in data:
+            data["body_part"] = data.pop("bodyPart")
 
         required = ("exercise_name", "body_part", "equipment", "target")
         if not all(k in data for k in required):
@@ -34,8 +43,10 @@ def api_insert_exercise():
             )
 
         # Insert using canonical schema
-        # Remove unrelated fields if present
+        # Remove unrelated/legacy fields if present
         data.pop("category", None)
+        data.pop("bodyPart", None)
+        data.pop("name", None)
         result = exercises_collection.insert_one(data)
 
         return jsonify(
@@ -61,25 +72,68 @@ def api_insert_exercise():
 @app.route("/api/v1/get_random_exercises", methods=["POST"])
 @cross_origin(origins=["https://cspower5.github.io"])  # <--- CORS FIX
 def api_get_random_exercises():
-    db = get_db()
+    db = db_connect.get_db()
     if db is None:
         return jsonify({"error": "Database not connected."}), 500
 
     try:
         data = request.json
-        selected_body_part = data.get("bodyPart")
-        num_exercises = data.get("numExercises", 4)
+        # Accept either `bodyPart` (frontend legacy) or `body_part` (canonical)
+        selected_body_part = None
+        if data is not None:
+            selected_body_part = data.get("body_part") or data.get("bodyPart")
+
+        # Normalize and validate number of exercises: accept numExercises (camelCase)
+        # or num_exercises (snake_case). Coerce to int and enforce safe bounds.
+        raw_num = None
+        if data:
+            raw_num = data.get("numExercises")
+            if raw_num is None:
+                raw_num = data.get("num_exercises")
+
+        try:
+            num_exercises = int(raw_num) if raw_num is not None else 4
+        except (TypeError, ValueError):
+            return (
+                jsonify({"error": "Invalid 'numExercises', must be an integer."}),
+                400,
+            )
+
+        # Enforce reasonable bounds to avoid huge sampling requests from clients
+        num_exercises = max(1, min(num_exercises, 20))
     except Exception:
         return jsonify({"error": "Invalid request format."}), 400
 
     if not selected_body_part:
         return jsonify({"error": "No body part provided."}), 400
 
-    match_stage = {"$match": {"bodyPart": selected_body_part}}
-
+    # Use case-insensitive matching against the canonical `body_part` field
     try:
+        # Match exercises where either the canonical `body_part` OR the
+        # legacy `bodyPart` (some older docs) case-insensitively equals
+        # the requested body part. This makes the endpoint resilient to
+        # mixed document schemas in the database.
         pipeline = [
-            match_stage,
+            {
+                "$match": {
+                    "$expr": {
+                        "$or": [
+                            {
+                                "$eq": [
+                                    {"$toLower": {"$ifNull": ["$body_part", ""]}},
+                                    selected_body_part.lower(),
+                                ]
+                            },
+                            {
+                                "$eq": [
+                                    {"$toLower": {"$ifNull": ["$bodyPart", ""]}},
+                                    selected_body_part.lower(),
+                                ]
+                            },
+                        ]
+                    }
+                }
+            },
             {"$sample": {"size": int(num_exercises)}},
             {"$project": {"_id": 0}},  # Exclude MongoDB's _id field
         ]
@@ -120,7 +174,7 @@ def api_refresh_db():
 @app.route("/api/v1/exercise/<string:name>", methods=["GET"])
 @cross_origin(origins=["https://cspower5.github.io"])  # <--- CORS FIX
 def api_get_exercise_details(name):
-    db = get_db()
+    db = db_connect.get_db()
     if db is None:
         return jsonify({"error": "Database not connected."}), 500
     try:
@@ -138,7 +192,7 @@ def api_get_exercise_details(name):
 @app.route("/api/v1/add_body_part", methods=["POST"])
 @cross_origin(origins=["https://cspower5.github.io"])  # <--- CORS FIX
 def api_add_body_part():
-    db = get_db()
+    db = db_connect.get_db()
     if db is None:
         return jsonify({"error": "Database not connected."}), 500
     try:
@@ -160,7 +214,7 @@ def api_add_body_part():
 @app.route("/api/v1/add_equipment", methods=["POST"])
 @cross_origin(origins=["https://cspower5.github.io"])  # <--- CORS FIX
 def api_add_equipment():
-    db = get_db()
+    db = db_connect.get_db()
     if db is None:
         return jsonify({"error": "Database not connected."}), 500
     try:
@@ -182,7 +236,7 @@ def api_add_equipment():
 @app.route("/api/v1/delete_exercise/<path:name>", methods=["DELETE"])
 @cross_origin(origins=["https://cspower5.github.io"])  # <--- CORS FIX
 def api_delete_exercise(name):
-    db = get_db()
+    db = db_connect.get_db()
     if db is None:
         return jsonify({"error": "Database not connected."}), 500
     try:
@@ -199,7 +253,7 @@ def api_delete_exercise(name):
 @app.route("/api/v1/delete_body_part/<string:name>", methods=["DELETE"])
 @cross_origin(origins=["https://cspower5.github.io"])  # <--- CORS FIX
 def api_delete_body_part(name):
-    db = get_db()
+    db = db_connect.get_db()
     if db is None:
         return jsonify({"error": "Database not connected."}), 500
     try:
@@ -224,7 +278,7 @@ def api_delete_body_part(name):
 @app.route("/api/v1/delete_equipment/<string:name>", methods=["DELETE"])
 @cross_origin(origins=["https://cspower5.github.io"])  # <--- CORS FIX
 def api_delete_equipment(name):
-    db = get_db()
+    db = db_connect.get_db()
     if db is None:
         return jsonify({"error": "Database not connected."}), 500
     try:
@@ -249,7 +303,7 @@ def api_delete_equipment(name):
 @app.route("/api/v1/body_parts_list", methods=["GET"])
 @cross_origin(origins=["https://cspower5.github.io"])  # <--- CORS FIX
 def api_body_parts_list():
-    db = get_db()
+    db = db_connect.get_db()
     if db is None:
         return jsonify({"error": "Database not connected."}), 500
     try:
@@ -277,7 +331,7 @@ def api_body_parts_list():
 @app.route("/api/v1/equipment_list", methods=["GET"])
 @cross_origin(origins=["https://cspower5.github.io"])  # <--- CORS FIX
 def api_equipment_list():
-    db = get_db()
+    db = db_connect.get_db()
     if db is None:
         return jsonify({"error": "Database not connected."}), 500
     try:
@@ -305,7 +359,7 @@ def api_equipment_list():
 @app.route("/api/v1/exercises_list", methods=["GET"])
 @cross_origin(origins=["https://cspower5.github.io"])  # <--- CORS FIX
 def api_exercises_list():
-    db = get_db()
+    db = db_connect.get_db()
     if db is None:
         return jsonify({"error": "Database not connected."}), 500
     try:
@@ -319,7 +373,7 @@ def api_exercises_list():
 @app.route("/api/v1/difficulties", methods=["GET"])
 @cross_origin(origins=["https://cspower5.github.io"])  # <--- CORS FIX
 def api_difficulties():
-    db = get_db()
+    db = db_connect.get_db()
     if db is None:
         return jsonify({"error": "Database not connected."}), 500
     try:
@@ -386,5 +440,5 @@ def api_health_check():
 # --- Run Server (Production/Development) ---
 if __name__ == "__main__":
     # Initial connection attempt when running locally
-    connect_db()
+    db_connect.connect_db()
     app.run(debug=True, port=5000)

@@ -46,7 +46,7 @@ export const getExerciseDetails = async (name) => {
 export const generateWorkout = async (bodyPart, numExercises) => {
     const response = await axios.post(`${API_BASE_URL}/api/v1/get_random_exercises`, {
         bodyPart: bodyPart,
-        numExercises: numExercises
+        num_exercises: numExercises // use snake_case consistently
     });
     return response.data;
 };
