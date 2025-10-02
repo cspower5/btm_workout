@@ -1,0 +1,22 @@
+[
+  {
+    "_id": "68dc61ebcffea5a49276bbf5",
+    "name": "back",
+    "body_part": "back"
+  },
+  {
+    "_id": "68dc61ebcffea5a49276bbf4",
+    "name": "chest",
+    "body_part": "chest"
+  },
+  {
+    "_id": "68dc61ebcffea5a49276bbf6",
+    "name": "legs",
+    "body_part": "legs"
+  },
+  {
+    "_id": "68dc61ebcffea5a49276bbf2",
+    "name": "waist",
+    "body_part": "waist"
+  }
+]

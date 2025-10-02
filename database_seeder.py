@@ -40,8 +40,8 @@ def seed_database():
     # Sample Exercises
     exercises_data = [
         {
-            "name": "Barbell Bench Press",
-            "bodyPart": "Chest",
+            "exercise_name": "Barbell Bench Press",
+            "body_part": "Chest",
             "equipment": "Barbell",
             "target": "Pectorals",
             "reps": "8-12",
@@ -54,8 +54,8 @@ def seed_database():
             "difficulty": "Intermediate",
         },
         {
-            "name": "Dumbbell Curl",
-            "bodyPart": "Arms",
+            "exercise_name": "Dumbbell Curl",
+            "body_part": "Arms",
             "equipment": "Dumbbell",
             "target": "Biceps",
             "reps": "10-15",
@@ -68,8 +68,8 @@ def seed_database():
             "difficulty": "Beginner",
         },
         {
-            "name": "Squat",
-            "bodyPart": "Legs",
+            "exercise_name": "Squat",
+            "body_part": "Legs",
             "equipment": "Body Weight",
             "target": "Quadriceps",
             "reps": "15-20",

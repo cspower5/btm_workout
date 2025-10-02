@@ -150,7 +150,24 @@ def api_get_random_exercises():
                 404,
             )
 
-        return jsonify(random_exercises)
+        # Transform canonical DB fields into the legacy frontend shape so the
+        # existing client UI (which expects `name`, `bodyPart`, `reps`, `sets`)
+        # will display values correctly. Keep original fields where present.
+        def transform(doc):
+            return {
+                # frontend expects `name`; canonical DB has `exercise_name`
+                "name": doc.get("exercise_name") or doc.get("name"),
+                # frontend expects `bodyPart`; canonical DB has `body_part`
+                "bodyPart": doc.get("body_part") or doc.get("bodyPart"),
+                # equipment is consistent
+                "equipment": doc.get("equipment"),
+                # preserve target/instructions as modern fields too
+                "target": doc.get("target"),
+                "instructions": doc.get("instructions"),
+            }
+
+        transformed = [transform(d) for d in random_exercises]
+        return jsonify(transformed)
     except Exception as e:
         print(f"Error getting random exercises: {e}")
         return jsonify({"error": "Failed to retrieve exercises."}), 500

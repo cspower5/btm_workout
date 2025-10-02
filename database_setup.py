@@ -12,18 +12,23 @@ def create_initial_collections_and_indexes():
     print("\n--- Setting up MongoDB collections and indexes ---")
 
     # 1. Exercises Collection - Unique index on the primary definition fields
+    # Create compound unique index on (exercise_name, body_part, equipment)
     db.exercises.create_index(
-        [("name", ASCENDING), ("bodyPart", ASCENDING), ("equipment", ASCENDING)],
+        [
+            ("exercise_name", ASCENDING),
+            ("body_part", ASCENDING),
+            ("equipment", ASCENDING),
+        ],
         unique=True,
-        name="unique_exercise_index",
+        name="unique_exercies_index",
     )
-    print("✅ Index created for exercises (name, bodyPart, equipment).")
+    print("✅ Index created for exercises (exercise_name, body_part, equipment).")
 
     # 2. Body Parts Collection - Unique index on name
     db.body_parts.create_index(
-        [("name", ASCENDING)], unique=True, name="unique_body_part_name"
+        [("name", ASCENDING)], unique=True, name="unique_body_parts_index"
     )
-    print("✅ Index created for body_parts (name).")
+    print("✅ Index created for body_parts (name) as unique_body_parts_index.")
 
     # 3. Equipment Collection - Unique index on name
     db.equipment.create_index(

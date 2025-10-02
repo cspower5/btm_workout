@@ -1,0 +1,17 @@
+[
+  {
+    "name": "waist"
+  },
+  {
+    "name": "chest"
+  },
+  {
+    "name": "back"
+  },
+  {
+    "name": "legs"
+  },
+  {
+    "body_part": "arms"
+  }
+]

@@ -1,0 +1,21 @@
+[
+  {
+    "name": "waist",
+    "body_part": "waist"
+  },
+  {
+    "name": "chest",
+    "body_part": "chest"
+  },
+  {
+    "name": "back",
+    "body_part": "back"
+  },
+  {
+    "name": "legs",
+    "body_part": "legs"
+  },
+  {
+    "body_part": "arms"
+  }
+]
