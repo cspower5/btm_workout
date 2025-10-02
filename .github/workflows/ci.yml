@@ -7,21 +7,83 @@ on:
     branches: [ main ]
 
 jobs:
-  test:
+  lint-and-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.12'
-      - name: Install dependencies
+
+      - name: Create venv and install dependencies
         run: |
+          python -m venv .venv
+          . .venv/bin/activate
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      - name: Lint (ruff) and format-check (black)
+          pip install pre-commit
+
+      - name: Run pre-commit (lint & format checks)
         run: |
-          python -m ruff check . || true
-          python -m black --check . || true
-      - name: Run tests
-        run: pytest -q
+          . .venv/bin/activate
+          pre-commit run --all-files
+
+      - name: Run ruff (explicit check)
+        run: |
+          . .venv/bin/activate
+          .venv/bin/ruff check .
+
+      - name: Run Black (explicit format check)
+        run: |
+          . .venv/bin/activate
+          .venv/bin/black --check .
+
+      - name: Run pytest
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          . .venv/bin/activate
+          .venv/bin/pytest -q
+
+  frontend:
+    runs-on: ubuntu-latest
+    needs: lint-and-test
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('client/package-lock.json') }}
+
+      - name: Install frontend dependencies
+        working-directory: client
+        run: |
+          npm ci
+
+      - name: Build frontend
+        working-directory: client
+        run: |
+          npm run build
+
+      - name: Upload frontend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-dist
+          path: client/dist
