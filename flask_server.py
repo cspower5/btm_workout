@@ -215,9 +215,12 @@ def api_body_parts_list():
     try:
         # FIX: Use Aggregation to force all names to lowercase and return unique list
         pipeline = [
-            {"$match": {"name": {"$exists": True, "$ne": None, "$ne": ""}}}, # Filter out blanks
-            {"$group": {"_id": {"$toLower": "$name"}}}, # Group by lowercase name
-            {"$sort": {"_id": 1}} # Sort unique names
+            # 1. Ensure the field is present and not null
+            {"$match": {"name": {"$exists": True, "$ne": None, "$ne": ""}}}, 
+            # 2. Group by lowercase name to ensure case-insensitivity
+            {"$group": {"_id": {"$toLower": "$name"}}}, 
+            # 3. Sort the unique names
+            {"$sort": {"_id": 1}} 
         ]
         
         names_cursor = db.body_parts.aggregate(pipeline)
@@ -226,6 +229,7 @@ def api_body_parts_list():
         body_parts = [doc['_id'] for doc in names_cursor]
         return jsonify(body_parts)
     except Exception as e:
+        # NOTE: This endpoint still fails on bad data, but we rely on a clean deploy now.
         return jsonify({"error": f"Failed to retrieve body parts list: {str(e)}"}), 500
 
 # API endpoint to get a list of all equipment
@@ -238,9 +242,12 @@ def api_equipment_list():
     try:
         # FIX: Use Aggregation to force all names to lowercase and return unique list
         pipeline = [
-            {"$match": {"name": {"$exists": True, "$ne": None, "$ne": ""}}}, # Filter out blanks
-            {"$group": {"_id": {"$toLower": "$name"}}}, # Group by lowercase name
-            {"$sort": {"_id": 1}} # Sort unique names
+            # 1. Ensure the field is present and not null
+            {"$match": {"name": {"$exists": True, "$ne": None, "$ne": ""}}}, 
+            # 2. Group by lowercase name to ensure case-insensitivity
+            {"$group": {"_id": {"$toLower": "$name"}}}, 
+            # 3. Sort the unique names
+            {"$sort": {"_id": 1}} 
         ]
         
         names_cursor = db.equipment.aggregate(pipeline)
@@ -249,6 +256,7 @@ def api_equipment_list():
         equipment_list = [doc['_id'] for doc in names_cursor]
         return jsonify(equipment_list)
     except Exception as e:
+        # THIS IS THE FAILING ENDPOINT
         return jsonify({"error": f"Failed to retrieve equipment list: {str(e)}"}), 500
 
 # API endpoint to get a list of all exercises
