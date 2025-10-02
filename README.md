@@ -62,3 +62,35 @@ CI
 This repo includes a GitHub Actions workflow (`.github/workflows/ci.yml`) that runs lint/tests on pushes and pull requests.
 
 If anything is unclear or you want me to expand the migration (e.g., add backups, transactional behavior for MongoDB clusters), tell me which direction you prefer.
+
+Environment variables
+---------------------
+
+The server reads configuration from environment variables. Create a local `.env` file (copy `.env.example`) for development and configure your deployment (Render, Heroku, etc.) with the same vars.
+
+Important variables used by the app:
+
+- `MONGO_URI` OR `MONGO_USER`, `MONGO_PASS`, `MONGO_HOST` - MongoDB connection. Either provide a full `MONGO_URI` or the user/pass/host triple.
+- `RAPIDAPI_KEY` - required for `database_refresh.py` when fetching exercises from the external API.
+- `FLASK_ALLOW_DEV_ORIGINS` - set to `1` (default) to allow `http://localhost:5173` and `http://localhost:5174` as CORS origins for local development. Set to `0` in CI/production to enforce production-only origins.
+- `FLASK_CORS_DEBUG` - set to `1` to include a truncated request body preview in CORS-warning logs (useful for debugging unexpected client payloads).
+- `ADMIN_PREVIEW_TOKEN` - a strong opaque token used to protect the management endpoint `/api/v1/admin/allowed_origins` which returns the currently configured allowed origins. Example usage:
+
+	- To call the endpoint:
+
+		Authorization: Bearer <ADMIN_PREVIEW_TOKEN>
+
+	- This endpoint is intentionally readonly and only reveals the `ALLOWED_ORIGINS` list; do not store a weak token in production.
+
+Security note: this token grants visibility into the server configuration only; keep it secret (treat it like a password) and rotate if it leaks.
+
+Local development
+-----------------
+
+1. Copy `.env.example` to `.env` and fill in values.
+2. Ensure `FLASK_ALLOW_DEV_ORIGINS=1` while running the frontend dev server (Vite) so the browser can call the local backend.
+
+Deployments
+-----------
+
+When deploying to Render (or another host) set `FLASK_ALLOW_DEV_ORIGINS=0` in the environment to restrict allowed origins to the production static site. Also add `ADMIN_PREVIEW_TOKEN` to the service environment to enable the protected preview endpoint.
