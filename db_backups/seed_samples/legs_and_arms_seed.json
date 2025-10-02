@@ -1,0 +1,55 @@
+[
+  {
+    "exercise_name": "Bodyweight Lunge",
+    "body_part": "legs",
+    "equipment": "Body Weight",
+    "target": "Quadriceps",
+    "difficulty": "beginner",
+    "instructions": [
+      "Stand upright, step one leg forward and lower your hips until both knees are bent at about 90 degrees.",
+      "Push back to the starting position and repeat on the other side."
+    ]
+  },
+  {
+    "exercise_name": "Dumbbell Romanian Deadlift",
+    "body_part": "legs",
+    "equipment": "Dumbbell",
+    "target": "Hamstrings",
+    "difficulty": "intermediate",
+    "instructions": [
+      "Stand holding dumbbells with a slight bend in the knees.",
+      "Hinge at the hips and lower the weights while keeping a neutral spine, then return upright."
+    ]
+  },
+  {
+    "exercise_name": "Standing Calf Raise",
+    "body_part": "legs",
+    "equipment": "Body Weight",
+    "target": "Calves",
+    "difficulty": "beginner",
+    "instructions": [
+      "Stand tall and raise your heels off the floor, then slowly lower them back down." 
+    ]
+  },
+  {
+    "exercise_name": "Banded Bicep Curl",
+    "body_part": "arms",
+    "equipment": "Resistance Band",
+    "target": "Biceps",
+    "difficulty": "beginner",
+    "instructions": [
+      "Stand on the middle of a resistance band and curl the handles upward, keeping elbows at your sides.",
+      "Lower with control back to the starting position."
+    ]
+  },
+  {
+    "exercise_name": "Triceps Overhead Extension",
+    "body_part": "arms",
+    "equipment": "Dumbbell",
+    "target": "Triceps",
+    "difficulty": "intermediate",
+    "instructions": [
+      "Hold a dumbbell overhead with both hands, lower it behind your head by bending your elbows, then extend back up."
+    ]
+  }
+]

@@ -1,0 +1,41 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        body_part: [ chest, back, shoulders ]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install client dependencies
+        working-directory: ./client
+        run: npm ci --silent
+
+      - name: Install project Puppeteer deps
+        run: npm install puppeteer axios --no-audit --no-fund --silent
+
+      - name: Build client
+        working-directory: ./client
+        run: npm run build --silent
+
+      - name: Serve built site
+        run: npx http-server ./client/dist -p 8080 -c-1 & sleep 2
+
+      - name: Run E2E check
+        env:
+          TEST_BASE: http://localhost:8080/btm_workout
+          TEST_API: https://btm-workout.onrender.com
+          BODY_PART: ${{ matrix.body_part }}
+          NUM_EX: 3
+        run: node scripts/e2e_check.js
