@@ -7,3 +7,7 @@
 # Python
 /venv
 __pycache__
+# Virtual environments
+.venv/
+my_jupyter_env/
+

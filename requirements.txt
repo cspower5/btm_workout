@@ -4,3 +4,7 @@ pymongo
 gunicorn
 python-dotenv
 requests
+pytest
+mongomock
+ruff
+black
