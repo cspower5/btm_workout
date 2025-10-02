@@ -36,6 +36,7 @@ jobs:
         env:
           TEST_BASE: http://localhost:8080/btm_workout
           TEST_API: https://btm-workout.onrender.com
+          FLASK_ALLOW_DEV_ORIGINS: '0'
           BODY_PART: ${{ matrix.body_part }}
           NUM_EX: 3
         run: node scripts/e2e_check.js
