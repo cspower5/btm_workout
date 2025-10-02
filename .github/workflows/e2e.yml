@@ -3,6 +3,10 @@ name: E2E Tests
 on:
   push:
     branches: [ main ]
+  workflow_dispatch: {}
+  # Optional: run on deployment events if your host can emit them
+  deployment:
+    types: [created]
 
 jobs:
   e2e:
