@@ -47,24 +47,30 @@ jobs:
         working-directory: ./client
         run: npm ci --silent
 
-      - name: Setup Playwright browsers (system deps + Chromium)
-        uses: microsoft/playwright-github-action@v1
-        with:
-          install-deps: true
-          browsers: chromium
-
       - name: Install project Puppeteer deps
-        # Keep Puppeteer for the existing e2e_check.js script; Playwright step
-        # ensures system libs and a Chromium binary are available which speeds
-        # browser startup and reduces failures on CI images.
-        run: npm install puppeteer axios --no-audit --no-fund --silent
+        working-directory: ./client
+        run: |
+          # Install project deps (Puppeteer is kept for the existing e2e_check.js)
+          npm install puppeteer axios --no-audit --no-fund --silent
+
+      - name: Install Playwright system deps & Chromium (safer on ubuntu-24.04)
+        working-directory: ./client
+        run: |
+          # Use npx to install system dependencies and the Chromium browser for Playwright.
+          # This is recommended over the deprecated action and works on ubuntu-24.04.
+          npx playwright install-deps || true
+          npx playwright install chromium --with-deps || true
 
       - name: Build client
         working-directory: ./client
         run: npm run build --silent
 
       - name: Serve built site
-        run: npx http-server ./client/dist -p 8080 -c-1 & sleep 2
+        run: |
+          # Serve the built client and wait briefly for the server to be ready.
+          npx http-server ./client/dist -p 8080 -c-1 &
+          # give the server a bit more time on CI images
+          sleep 5
 
       - name: Run E2E check
         env:
