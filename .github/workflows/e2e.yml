@@ -73,12 +73,13 @@ jobs:
 
       - name: Check dependency imports (fast-fail)
         # Run from both root and client to diagnose resolution issues quickly.
+        # Prefer puppeteer-core if available, otherwise fall back to puppeteer.
         run: |
           echo 'Checking dynamic import resolution at repo root...'
-          node -e "(async ()=>{ try{ await import('puppeteer'); console.log('root: puppeteer ok'); }catch(e){ console.error('root: puppeteer import failed:', e.message); process.exit(3);} })()"
+          node -e "(async ()=>{ try{ try{ await import('puppeteer-core'); console.log('root: puppeteer-core ok'); }catch(_){ await import('puppeteer'); console.log('root: puppeteer ok'); } }catch(e){ console.error('root: puppeteer import failed:', e.message); process.exit(3);} })()"
           node -e "(async ()=>{ try{ await import('axios'); console.log('root: axios ok'); }catch(e){ console.error('root: axios import failed:', e.message); process.exit(3);} })()"
           echo 'Checking dynamic import resolution from client working dir...'
-          (cd client && node -e "(async ()=>{ try{ await import('puppeteer'); console.log('client: puppeteer ok'); }catch(e){ console.error('client: puppeteer import failed:', e.message); process.exit(4);} })()")
+          (cd client && node -e "(async ()=>{ try{ try{ await import('puppeteer-core'); console.log('client: puppeteer-core ok'); }catch(_){ await import('puppeteer'); console.log('client: puppeteer ok'); } }catch(e){ console.error('client: puppeteer import failed:', e.message); process.exit(4);} })()")
           (cd client && node -e "(async ()=>{ try{ await import('axios'); console.log('client: axios ok'); }catch(e){ console.error('client: axios import failed:', e.message); process.exit(4);} })()")
 
       - name: Serve built site
