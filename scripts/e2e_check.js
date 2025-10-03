@@ -165,14 +165,27 @@ const SHOULD_REWRITE_BTM_PREFIX = !BASE.includes('/btm_workout');
     const htmlSnapshot = await page.content();
     try {
       const fs = await loadModule('fs');
-      fs.writeFileSync('/tmp/e2e_page_snapshot.html', htmlSnapshot, 'utf8');
-      console.log('Saved HTML snapshot to /tmp/e2e_page_snapshot.html');
+      const path = await loadModule('path');
+      // Write artifacts into a folder inside the client working directory so
+      // CI's actions/upload-artifact can reliably find them. When the script
+      // is executed with working-directory=./client this resolves to
+      // ./client/e2e-artifacts.
+      const artifactsDir = path.resolve(process.cwd(), 'e2e-artifacts');
+      if (!fs.existsSync(artifactsDir)) fs.mkdirSync(artifactsDir, { recursive: true });
+      const htmlPath = path.join(artifactsDir, 'e2e_page_snapshot.html');
+      fs.writeFileSync(htmlPath, htmlSnapshot, 'utf8');
+      console.log('Saved HTML snapshot to', htmlPath);
     } catch (writeErr) {
       console.log('Failed to write HTML snapshot:', writeErr && writeErr.message ? writeErr.message : writeErr);
     }
     try {
-      await page.screenshot({ path: '/tmp/e2e_page_snapshot.png', fullPage: true });
-      console.log('Saved page snapshot and screenshot to /tmp');
+      const fs = await loadModule('fs');
+      const path = await loadModule('path');
+      const artifactsDir = path.resolve(process.cwd(), 'e2e-artifacts');
+      if (!fs.existsSync(artifactsDir)) fs.mkdirSync(artifactsDir, { recursive: true });
+      const pngPath = path.join(artifactsDir, 'e2e_page_snapshot.png');
+      await page.screenshot({ path: pngPath, fullPage: true });
+      console.log('Saved page snapshot and screenshot to', pngPath);
     } catch (screenshotErr) {
       console.log('Screenshot failed:', screenshotErr && screenshotErr.message ? screenshotErr.message : screenshotErr);
     }

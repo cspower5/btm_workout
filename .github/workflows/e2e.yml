@@ -104,11 +104,15 @@ jobs:
         run: |
           # Run the small wrapper which validates modules and launches the e2e script
           node ../scripts/run_e2e_with_fallbacks.mjs
+      - name: Debug: show artifacts directory
+        run: |
+          echo 'cwd='$(pwd)
+          echo 'ls client/e2e-artifacts:'
+          ls -la client/e2e-artifacts || true
       - name: Upload E2E artifacts on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: e2e-artifacts
           path: |
-            /tmp/e2e_page_snapshot.png
-            /tmp/e2e_page_snapshot.html
+            client/e2e-artifacts/**
