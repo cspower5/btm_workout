@@ -90,6 +90,34 @@ Local development
 1. Copy `.env.example` to `.env` and fill in values.
 2. Ensure `FLASK_ALLOW_DEV_ORIGINS=1` while running the frontend dev server (Vite) so the browser can call the local backend. For production deploys (Render), use `FLASK_ALLOW_DEV_ORIGINS=0`.
 
+Run the local proxy and E2E smoke test
+-------------------------------------
+
+If you build the frontend and want to run the Puppeteer smoke test locally, use the repo-tracked WSGI proxy which serves the built `client/dist` at `/btm_workout` and proxies `/api/*` to the remote API (adds permissive CORS headers).
+
+1. Build the frontend:
+
+```bash
+cd client
+npm ci
+npm run build
+cd ..
+```
+
+2. Start the proxy (defaults to 127.0.0.1:5174):
+
+```bash
+python3 scripts/proxy_btm_server.py --host 127.0.0.1 --port 5174
+```
+
+3. Run the E2E smoke test (from repo root):
+
+```bash
+node scripts/e2e_check.js --base http://127.0.0.1:5174/btm_workout --headless --save-artifacts --timeout 30000
+```
+
+Artifacts (screenshot and HTML snapshot) will be saved to `/tmp/e2e_page_snapshot.png` and `/tmp/e2e_page_snapshot.html` by the script.
+
 Deployments
 -----------
 

@@ -33,14 +33,17 @@ const NUM_EX = parseInt(process.env.NUM_EXERCISES || process.env.NUM_EX || '3', 
 // at runtime and provide robust fallbacks.
 (async () => {
   try {
-      // Prefer puppeteer-core to avoid bringing Chromium; fall back to puppeteer.
+      // Prefer full puppeteer (bundled Chromium) so an executable is available;
+      // fall back to puppeteer-core only if full puppeteer isn't installed.
       let puppeteer = null;
-      if (await (async ()=>{ try{ await import('puppeteer-core'); return true; }catch(e){ return false; } })()) {
+      if (await (async ()=>{ try{ await import('puppeteer'); return true; }catch(e){ return false; } })()) {
+        puppeteer = await loadModule('puppeteer');
+        console.log('Using full puppeteer');
+      } else if (await (async ()=>{ try{ await import('puppeteer-core'); return true; }catch(e){ return false; } })()) {
         puppeteer = await loadModule('puppeteer-core');
         console.log('Using puppeteer-core');
       } else {
-        puppeteer = await loadModule('puppeteer');
-        console.log('Using full puppeteer');
+        throw new Error('Neither puppeteer nor puppeteer-core is installed');
       }
       const axios = await loadModule('axios');
 
@@ -144,8 +147,21 @@ const NUM_EX = parseInt(process.env.NUM_EXERCISES || process.env.NUM_EX || '3', 
       // and proceed (assets may 404 in that case).
       console.log('Request interception not available:', interceptErr && interceptErr.message ? interceptErr.message : interceptErr);
     }
-    // Navigate directly to the workout route (HashRouter uses #/workout)
-    await page.goto(BASE + '/#/workout', { waitUntil: 'networkidle0' });
+    // Navigate to the base page and then click the internal hash link for
+    // the workout route. Some HTTP servers/proxies may mis-handle URLs that
+    // include fragments when sent by certain tooling, so drive the app via
+    // user-like interactions instead of navigating with a URL fragment.
+    await page.goto(BASE, { waitUntil: 'networkidle0' });
+    // Click the 'Generate Workout' nav link which uses '#/workout'
+    try {
+      await page.waitForSelector('a[href="#/workout"]', { timeout: 10000 });
+      await page.click('a[href="#/workout"]');
+    } catch (navErr) {
+      // If nav link isn't present, set the hash directly as a fallback
+      await page.evaluate(() => { location.hash = '#/workout'; });
+    }
+  // Allow SPA to render
+  await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // Attach console and error listeners to capture client-side errors for debugging
     page.on('console', msg => console.log('PAGE LOG:', msg.text()));
