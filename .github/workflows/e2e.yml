@@ -82,11 +82,12 @@ jobs:
           (cd client && node -e "(async ()=>{ try{ try{ await import('puppeteer-core'); console.log('client: puppeteer-core ok'); }catch(_){ await import('puppeteer'); console.log('client: puppeteer ok'); } }catch(e){ console.error('client: puppeteer import failed:', e.message); process.exit(4);} })()")
           (cd client && node -e "(async ()=>{ try{ await import('axios'); console.log('client: axios ok'); }catch(e){ console.error('client: axios import failed:', e.message); process.exit(4);} })()")
 
-      - name: Serve built site
+      - name: Serve built site (mounted at /btm_workout)
         run: |
-          # Serve the built client and wait briefly for the server to be ready.
-          npx http-server ./client/dist -p 8080 -c-1 &
-          # give the server a bit more time on CI images
+          # Use the repository script to serve client/dist mounted at /btm_workout
+          # so absolute asset URLs generated for GitHub Pages resolve correctly.
+          node ./scripts/serve_with_prefix.mjs &
+          # Give the server some time on CI images to start up
           sleep 5
 
       - name: Run E2E check
