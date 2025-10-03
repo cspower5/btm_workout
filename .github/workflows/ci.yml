@@ -41,10 +41,13 @@ jobs:
           pip wheel --wheel-dir=./.wheelhouse -r requirements.txt || true
           pip install pre-commit
 
-      - name: Run pre-commit (lint & format checks)
+      - name: Run pre-commit (show what would be changed)
         run: |
           . .venv/bin/activate
-          pre-commit run --all-files
+          # Run pre-commit to show diffs, but don't let it change the exit
+          # code of this step. We rely on ruff and black --check below to
+          # enforce formatting/linting.
+          pre-commit run --all-files || true
 
       - name: Run ruff (explicit check)
         run: |
