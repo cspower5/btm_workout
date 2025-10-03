@@ -61,6 +61,29 @@ CI
 
 This repo includes a GitHub Actions workflow (`.github/workflows/ci.yml`) that runs lint/tests on pushes and pull requests.
 
+Local E2E smoke test
+--------------------
+
+There are small helper scripts to run a local headless smoke test that mirrors CI's checks.
+
+- Start a local server that mounts the built site at `/btm_workout`:
+
+```bash
+# from repo root
+node scripts/serve_btm_workout.js &
+```
+
+- Build the client and run the E2E wrapper:
+
+```bash
+cd client
+npm ci
+TEST_BASE='http://localhost:5174/btm_workout' TEST_API='https://btm-workout.onrender.com' node ../scripts/run_e2e_with_fallbacks.mjs
+```
+
+Artifacts are written to `/tmp/e2e_page_snapshot.png` and `/tmp/e2e_page_snapshot.html`.
+
+
 If anything is unclear or you want me to expand the migration (e.g., add backups, transactional behavior for MongoDB clusters), tell me which direction you prefer.
 
 Environment variables

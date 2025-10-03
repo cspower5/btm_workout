@@ -51,8 +51,31 @@ async function main(){
   const script = path.resolve(process.cwd(), '..', 'scripts', 'e2e_check.js');
   console.log('Spawning e2e script:', script);
   const child = spawn(process.execPath, [script], { stdio: 'inherit' });
-  child.on('exit', code => process.exit(code ?? 0));
-  child.on('error', err => { console.error('failed to spawn e2e script', err); process.exit(5); });
+  const fs = require('fs');
+  const path = require('path');
+
+  function ensureArtifacts(exitCode) {
+    try {
+      const wd = process.cwd();
+      // artifacts go under client/e2e-artifacts (when run with cwd=client)
+      const artifactsDir = path.resolve(wd, 'e2e-artifacts');
+      if (!fs.existsSync(artifactsDir)) fs.mkdirSync(artifactsDir, { recursive: true });
+      const tmpHtml = '/tmp/e2e_page_snapshot.html';
+      const tmpPng = '/tmp/e2e_page_snapshot.png';
+      if (fs.existsSync(tmpHtml)) fs.copyFileSync(tmpHtml, path.join(artifactsDir, 'e2e_page_snapshot.html'));
+      if (fs.existsSync(tmpPng)) fs.copyFileSync(tmpPng, path.join(artifactsDir, 'e2e_page_snapshot.png'));
+      // write an exit marker so CI can tell the script failed
+      fs.writeFileSync(path.join(artifactsDir, 'e2e_exit_code.txt'), String(exitCode), 'utf8');
+    } catch (e) {
+      console.error('artifact preservation failed:', e && e.message ? e.message : e);
+    }
+  }
+
+  child.on('exit', code => {
+    ensureArtifacts(code ?? 0);
+    process.exit(code ?? 0);
+  });
+  child.on('error', err => { console.error('failed to spawn e2e script', err); ensureArtifacts(5); process.exit(5); });
 }
 
 main().catch(err => { console.error(err); process.exit(2); });

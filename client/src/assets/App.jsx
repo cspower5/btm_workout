@@ -9,7 +9,7 @@ import AddBodyPartPage from './AddBodyPartPage';
 import AddEquipmentPage from './AddEquipmentPage';
 import ManageItemsPage from './ManageItemsPage';
 import './css/App.css';
-import logo from './../assets/images/btm_workout_logo.png';
+import logo from './../assets/images/btm_workout_logo.svg';
 
 function App() {
   return (

@@ -84,22 +84,37 @@ jobs:
 
       - name: Serve built site
         run: |
-          # Serve the built client and wait briefly for the server to be ready.
-          npx http-server ./client/dist -p 8080 -c-1 &
-          # give the server a bit more time on CI images
+          # Use the repo's small express server which mounts the built site at /btm_workout
+          # Install root dependencies so `node scripts/serve_btm_workout.js` can run.
+          npm ci --silent --no-audit --no-fund || npm install --silent --no-audit --no-fund
+          node scripts/serve_btm_workout.js &
           sleep 5
 
       - name: Run E2E check
         env:
-          # Serve root URL (http://localhost:8080). The built index.html uses
-          # absolute paths like /btm_workout/assets/...; serving at root makes
-          # those asset URLs resolve correctly under http-server.
-          TEST_BASE: http://localhost:8080
+          # Serve base URL matching the express server started above (port 5174)
+          TEST_BASE: http://localhost:5174/btm_workout
           TEST_API: https://btm-workout.onrender.com
           FLASK_ALLOW_DEV_ORIGINS: '0'
           BODY_PART: ${{ matrix.body_part }}
           NUM_EX: 3
         working-directory: ./client
         run: |
+          # Ensure artifact directory exists and create a placeholder so the
+          # upload step has something to pick up even if the test fails early.
+          mkdir -p e2e-artifacts
+          echo 'placeholder' > e2e-artifacts/placeholder.txt
           # Run the small wrapper which validates modules and launches the e2e script
           node ../scripts/run_e2e_with_fallbacks.mjs
+      - name: "Debug: show artifacts directory"
+        run: |
+          echo 'cwd='$(pwd)
+          echo 'ls client/e2e-artifacts:'
+          ls -la client/e2e-artifacts || true
+      - name: Upload E2E artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-artifacts
+          path: |
+            client/e2e-artifacts/**
