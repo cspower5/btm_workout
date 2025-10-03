@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // --- ABSOLUTE URL FIX: This guarantees requests hit Render and bypasses GitHub Pages ---
-const API_BASE_URL = 'https://btm-workout.onrender.com';
+export const API_BASE_URL = 'https://btm-workout.onrender.com';
 
 // ===================================
 // GETTERS (Data Retrieval)

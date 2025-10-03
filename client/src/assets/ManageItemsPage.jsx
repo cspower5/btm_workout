@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from './api/index.jsx';
 import './css/ManageItemsPage.css';
 
 function ManageItemsPage({ title, fetchUrl, deleteUrl }) {
@@ -9,7 +10,12 @@ function ManageItemsPage({ title, fetchUrl, deleteUrl }) {
 
     const fetchItems = async () => {
         try {
-            const response = await axios.get(fetchUrl);
+            // If the provided fetchUrl is a relative path (starts with '/'),
+            // prefix it with the absolute API base so requests go to the
+            // configured backend (Render) instead of the origin the app
+            // is served from.
+            const fullFetchUrl = fetchUrl.startsWith('/') ? `${API_BASE_URL}${fetchUrl}` : fetchUrl;
+            const response = await axios.get(fullFetchUrl);
             setItems(response.data);
             setMessage('');
             setIsError(false);
@@ -24,7 +30,8 @@ function ManageItemsPage({ title, fetchUrl, deleteUrl }) {
         setIsError(false);
         if (window.confirm(`Are you sure you want to delete '${name}'?`)) {
             const encodedName = encodeURIComponent(name);
-            const fullDeleteUrl = `${deleteUrl}/${encodedName}`;
+            const urlToDelete = deleteUrl.startsWith('/') ? `${API_BASE_URL}${deleteUrl}` : deleteUrl;
+            const fullDeleteUrl = `${urlToDelete}/${encodedName}`;
             
             // This line will show the URL being sent to the backend
             console.log("Attempting to delete with URL:", fullDeleteUrl);

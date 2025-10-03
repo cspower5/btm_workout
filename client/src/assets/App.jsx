@@ -58,9 +58,9 @@ function App() {
             <Route path="/add-body-part" element={<AddBodyPartPage />} />
             <Route path="/add-equipment" element={<AddEquipmentPage />} />
             <Route path="/exercise/:name" element={<SingleExercisePage />} />
-            <Route path="/manage-body-parts" element={<ManageItemsPage title="Body Parts" fetchUrl="/api/body_parts_list" deleteUrl="/api/delete_body_part" />} />
-            <Route path="/manage-equipment" element={<ManageItemsPage title="Equipment" fetchUrl="/api/equipment_list" deleteUrl="/api/delete_equipment" />} />
-            <Route path="/manage-exercises" element={<ManageItemsPage title="Exercises" fetchUrl="/api/exercises_list" deleteUrl="/api/delete_exercise" />} />
+            <Route path="/manage-body-parts" element={<ManageItemsPage title="Body Parts" fetchUrl="/api/v1/body_parts_list" deleteUrl="/api/v1/delete_body_part" />} />
+            <Route path="/manage-equipment" element={<ManageItemsPage title="Equipment" fetchUrl="/api/v1/equipment_list" deleteUrl="/api/v1/delete_equipment" />} />
+            <Route path="/manage-exercises" element={<ManageItemsPage title="Exercises" fetchUrl="/api/v1/exercises_list" deleteUrl="/api/v1/delete_exercise" />} />
           </Routes>
         </main>
         <footer className="footer-nav">

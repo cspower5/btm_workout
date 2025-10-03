@@ -1,11 +1,12 @@
 import React from 'react';
 import AddFormComponent from './AddFormComponent';
+import { addBodyPart } from '../assets/api/index.jsx';
 
 function AddBodyPartPage() {
   return (
     <AddFormComponent
       title="Add New Body Part"
-      apiEndpoint="/api/v1/add_body_part"
+      apiFunction={addBodyPart}
       placeholder="e.g., legs"
     />
   );

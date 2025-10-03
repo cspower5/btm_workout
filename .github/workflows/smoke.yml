@@ -1,0 +1,28 @@
+name: Smoke tests
+
+on:
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run smoke test against preview URL
+        env:
+          PREVIEW_URL: ${{ secrets.PREVIEW_URL }}
+        run: |
+          if [ -z "$PREVIEW_URL" ]; then
+            echo "PREVIEW_URL secret not set - skipping smoke test";
+            exit 0;
+          fi
+          python3 scripts/smoke_test_api.py --base-url "$PREVIEW_URL"
