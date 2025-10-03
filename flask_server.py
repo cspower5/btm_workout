@@ -372,12 +372,14 @@ def api_body_parts_list():
         return jsonify({"error": "Database not connected."}), 500
     try:
         # FIX: Use Aggregation to force all names to lowercase and return unique list
+        # Only include documents where 'name' exists and is a string so $toLower is safe
         pipeline = [
-            # 1. Ensure the field is present and not null (not None and not empty string)
-            {"$match": {"name": {"$exists": True, "$nin": [None, ""]}}},
-            # 2. Group by lowercase name to ensure case-insensitivity
+            {
+                "$match": {
+                    "name": {"$exists": True, "$type": "string", "$nin": ["", None]}
+                }
+            },
             {"$group": {"_id": {"$toLower": "$name"}}},
-            # 3. Sort the unique names
             {"$sort": {"_id": 1}},
         ]
 
@@ -400,12 +402,14 @@ def api_equipment_list():
         return jsonify({"error": "Database not connected."}), 500
     try:
         # FIX: Use Aggregation to force all names to lowercase and return unique list
+        # Only include documents where 'name' exists and is a string so $toLower is safe
         pipeline = [
-            # 1. Ensure the field is present and not null (not None and not empty string)
-            {"$match": {"name": {"$exists": True, "$nin": [None, ""]}}},
-            # 2. Group by lowercase name to ensure case-insensitivity
+            {
+                "$match": {
+                    "name": {"$exists": True, "$type": "string", "$nin": ["", None]}
+                }
+            },
             {"$group": {"_id": {"$toLower": "$name"}}},
-            # 3. Sort the unique names
             {"$sort": {"_id": 1}},
         ]
 
@@ -442,14 +446,19 @@ def api_difficulties():
         return jsonify({"error": "Database not connected."}), 500
     try:
         # FIX: Use Aggregation to force all difficulties to lowercase and return unique list
+        # Only include documents where 'difficulty' is present and a string to avoid $toLower on other types
         pipeline = [
             {
-                "$match": {"difficulty": {"$exists": True, "$nin": [None, ""]}}
-            },  # Filter out blanks
-            {
-                "$group": {"_id": {"$toLower": "$difficulty"}}
-            },  # Group by lowercase difficulty
-            {"$sort": {"_id": 1}},  # Sort unique difficulties
+                "$match": {
+                    "difficulty": {
+                        "$exists": True,
+                        "$type": "string",
+                        "$nin": [None, ""],
+                    }
+                }
+            },
+            {"$group": {"_id": {"$toLower": "$difficulty"}}},
+            {"$sort": {"_id": 1}},
         ]
 
         difficulties_cursor = db.exercises.aggregate(pipeline)
