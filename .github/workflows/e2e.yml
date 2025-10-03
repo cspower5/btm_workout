@@ -10,7 +10,15 @@ on:
 
 jobs:
   e2e:
+    # Give the job a bit more headroom and avoid accidental cancellation.
+    timeout-minutes: 30
     runs-on: ubuntu-latest
+    # Use a concurrency group that isolates manual dispatch runs so they don't
+    # cancel each other. For push events we keep the ref-based group to avoid
+    # overlapping branch runs.
+    concurrency:
+      group: e2e-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.ref }}
+      cancel-in-progress: false
     strategy:
       matrix:
         body_part: [ chest, back, shoulders ]
@@ -20,7 +28,9 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          # Vite expects newer Node versions; use Node 20 for CI to match
+          # modern toolchains and avoid warnings / subtle runtime diffs.
+          node-version: '20'
 
       - name: Install client dependencies
         working-directory: ./client
