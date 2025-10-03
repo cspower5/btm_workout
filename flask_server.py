@@ -419,8 +419,30 @@ def api_equipment_list():
         equipment_list = [doc["_id"] for doc in names_cursor]
         return jsonify(equipment_list)
     except Exception as e:
-        # THIS IS THE FAILING ENDPOINT
-        return jsonify({"error": f"Failed to retrieve equipment list: {str(e)}"}), 500
+        # Defensive fallback: aggregation may fail on corrupt/mixed-type data.
+        app.logger.warning(
+            "Aggregation failed for equipment_list, falling back to safe scan: %s", e
+        )
+        try:
+            names = set()
+            for doc in db.equipment.find({}, {"name": 1}):
+                name = doc.get("name")
+                if name is None:
+                    continue
+                if not isinstance(name, str):
+                    try:
+                        name = str(name)
+                    except Exception:
+                        continue
+                names.add(name.lower())
+            equipment_list = sorted(names)
+            return jsonify(equipment_list)
+        except Exception:
+            app.logger.exception("Fallback scan also failed for equipment_list")
+            return (
+                jsonify({"error": f"Failed to retrieve equipment list: {str(e)}"}),
+                500,
+            )
 
 
 # API endpoint to get a list of all exercises
