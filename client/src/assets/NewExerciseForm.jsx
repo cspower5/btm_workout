@@ -38,13 +38,14 @@ function NewExerciseForm() {
                 ]);
                 
                 // Assuming all helpers return a simple string array:
-                setBodyParts(bodyPartsRes); 
-                setEquipmentList(equipmentRes);
-                setDifficulties(difficultiesRes); 
+                setBodyParts(Array.isArray(bodyPartsRes) ? bodyPartsRes : []);
+                setEquipmentList(Array.isArray(equipmentRes) ? equipmentRes : []);
+                setDifficulties(Array.isArray(difficultiesRes) ? difficultiesRes : []);
 
             } catch (err) {
                 console.error("Failed to fetch dropdown data:", err);
-                setMessage("Failed to load form options. Please check the server.");
+                // Show a friendly message in the UI and keep selects disabled
+                setMessage("Failed to load form options from the API. Please try again later.");
                 setIsError(true);
             }
         };

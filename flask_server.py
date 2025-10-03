@@ -94,6 +94,38 @@ def api_insert_exercise():
         data.pop("category", None)
         data.pop("bodyPart", None)
         data.pop("name", None)
+        # Ensure backward compatibility: include legacy `name` field so
+        # the existing unique index on (name, body_part, equipment) will
+        # be effective. Also check for duplicates using either the
+        # canonical `exercise_name` or the legacy `name` field.
+        data["name"] = data.get("exercise_name")
+
+        existing = exercises_collection.find_one(
+            {
+                "$or": [
+                    {
+                        "exercise_name": data["exercise_name"],
+                        "body_part": data["body_part"],
+                        "equipment": data["equipment"],
+                    },
+                    {
+                        "name": data["name"],
+                        "body_part": data["body_part"],
+                        "equipment": data["equipment"],
+                    },
+                ]
+            }
+        )
+        if existing:
+            return (
+                jsonify(
+                    {
+                        "error": "An exercise with this name, body part, and equipment already exists."
+                    }
+                ),
+                409,
+            )
+
         result = exercises_collection.insert_one(data)
 
         return jsonify(

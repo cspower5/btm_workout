@@ -20,7 +20,7 @@ def create_initial_collections_and_indexes():
             ("equipment", ASCENDING),
         ],
         unique=True,
-        name="unique_exercies_index",
+        name="unique_exercise_index",
     )
     print("✅ Index created for exercises (exercise_name, body_part, equipment).")
 
