@@ -80,6 +80,29 @@ const NUM_EX = parseInt(process.env.NUM_EXERCISES || process.env.NUM_EX || '3', 
     const browser = await puppeteer.launch(launchOpts);
     const page = await browser.newPage();
     page.setDefaultTimeout(30000);
+    // Rewrite requests that start with /btm_workout to remove the base prefix so
+    // the built assets (which are referenced with an absolute '/btm_workout/...'
+    // path) resolve when we serve the dist folder at the server root.
+    try {
+      await page.setRequestInterception(true);
+      page.on('request', req => {
+        try {
+          const reqUrl = new URL(req.url());
+          if (reqUrl.pathname.startsWith('/btm_workout/')) {
+            const newPath = reqUrl.pathname.replace('/btm_workout', '');
+            const newUrl = `${reqUrl.protocol}//${reqUrl.host}${newPath}${reqUrl.search}`;
+            return req.continue({ url: newUrl });
+          }
+        } catch (e) {
+          // If URL parsing fails, just continue the request unchanged
+        }
+        return req.continue();
+      });
+    } catch (interceptErr) {
+      // Some browser/platform combinations may not support interception; ignore
+      // and proceed (assets may 404 in that case).
+      console.log('Request interception not available:', interceptErr && interceptErr.message ? interceptErr.message : interceptErr);
+    }
     // Navigate directly to the workout route (HashRouter uses #/workout)
     await page.goto(BASE + '/#/workout', { waitUntil: 'networkidle0' });
 
