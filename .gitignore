@@ -4,6 +4,9 @@
 /client/dist
 .env
 
+# Root node_modules
+/node_modules
+
 # Python
 /venv
 __pycache__

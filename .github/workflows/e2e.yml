@@ -53,6 +53,12 @@ jobs:
           # Install project deps (Puppeteer is kept for the existing e2e_check.js)
           npm install puppeteer axios --no-audit --no-fund --silent
 
+      - name: Install root dependencies for E2E script
+        run: |
+          # The E2E script lives at scripts/e2e_check.js and imports puppeteer from
+          # the repository root. Use npm ci for reproducible, faster installs in CI.
+          npm ci --silent --no-audit --no-fund || npm install --silent --no-audit --no-fund
+
       - name: Install Playwright system deps & Chromium (safer on ubuntu-24.04)
         working-directory: ./client
         run: |
@@ -64,6 +70,16 @@ jobs:
       - name: Build client
         working-directory: ./client
         run: npm run build --silent
+
+      - name: Check dependency imports (fast-fail)
+        # Run from both root and client to diagnose resolution issues quickly.
+        run: |
+          echo 'Checking dynamic import resolution at repo root...'
+          node -e "(async ()=>{ try{ await import('puppeteer'); console.log('root: puppeteer ok'); }catch(e){ console.error('root: puppeteer import failed:', e.message); process.exit(3);} })()"
+          node -e "(async ()=>{ try{ await import('axios'); console.log('root: axios ok'); }catch(e){ console.error('root: axios import failed:', e.message); process.exit(3);} })()"
+          echo 'Checking dynamic import resolution from client working dir...'
+          (cd client && node -e "(async ()=>{ try{ await import('puppeteer'); console.log('client: puppeteer ok'); }catch(e){ console.error('client: puppeteer import failed:', e.message); process.exit(4);} })()")
+          (cd client && node -e "(async ()=>{ try{ await import('axios'); console.log('client: axios ok'); }catch(e){ console.error('client: axios import failed:', e.message); process.exit(4);} })()")
 
       - name: Serve built site
         run: |
@@ -79,4 +95,7 @@ jobs:
           FLASK_ALLOW_DEV_ORIGINS: '0'
           BODY_PART: ${{ matrix.body_part }}
           NUM_EX: 3
-        run: node scripts/e2e_check.js
+        working-directory: ./client
+        run: |
+          # Run the small wrapper which validates modules and launches the e2e script
+          node ../scripts/run_e2e_with_fallbacks.mjs

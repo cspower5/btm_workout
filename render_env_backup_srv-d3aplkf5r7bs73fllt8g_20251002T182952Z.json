@@ -1,0 +1,23 @@
+[
+  {
+    "envVar": {
+      "key": "ADMIN_PREVIEW_TOKEN",
+      "value": "ed1ddc674568228bc050eb163c623d880a79e592e5a64e950cf478122881131d"
+    },
+    "cursor": "kzlDA1SfDnAxc2ppcG5iYzczZGl1czMw"
+  },
+  {
+    "envVar": {
+      "key": "RAPIDAPI_KEY",
+      "value": "c807b11f83msheed3dcd050d619bp17f6c3jsnb69f101e8dfe"
+    },
+    "cursor": "5ineckFdRUh2MmJpcG5iYzczZmJtMzEw"
+  },
+  {
+    "envVar": {
+      "key": "MONGO_URI",
+      "value": "mongodb+srv://cspower:Susan1016@myatlasclusteredu.9pejmn7.mongodb.net/?retryWrites=true&w=majority&appName=myAtlasClusterEDU"
+    },
+    "cursor": "5ineckFdRUhsa2Y1cjdiczczZmxsdGQw"
+  }
+]
