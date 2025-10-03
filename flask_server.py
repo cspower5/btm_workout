@@ -94,22 +94,48 @@ def api_insert_exercise():
         data.pop("category", None)
         data.pop("bodyPart", None)
         data.pop("name", None)
+
         # Ensure backward compatibility: include legacy `name` field so
         # the existing unique index on (name, body_part, equipment) will
-        # be effective. Also check for duplicates using either the
-        # canonical `exercise_name` or the legacy `name` field.
-        data["name"] = data.get("exercise_name")
+        # be effective. Normalize canonical fields to lowercase to avoid
+        # duplicates caused by case differences (e.g., 'Squat' vs 'squat').
+        def _safe_strip(val):
+            try:
+                return val.strip() if isinstance(val, str) else val
+            except Exception:
+                return val
 
+        # Preserve the original exercise_name for display, but maintain
+        # lowercased fields used for uniqueness/indexing so case-variants
+        # don't create duplicate entries.
+        original_ex_name = _safe_strip(data.get("exercise_name"))
+        bp = _safe_strip(data.get("body_part"))
+        eq = _safe_strip(data.get("equipment"))
+
+        # Normalized values (lowercased) used by the unique index
+        norm_name = (
+            original_ex_name.lower()
+            if isinstance(original_ex_name, str)
+            else original_ex_name
+        )
+        norm_bp = bp.lower() if isinstance(bp, str) else bp
+        norm_eq = eq.lower() if isinstance(eq, str) else eq
+
+        # Store both display and normalized/index fields
+        data["exercise_name"] = original_ex_name
+        data["name"] = norm_name
+        data["body_part"] = norm_bp
+        data["equipment"] = norm_eq
         existing = exercises_collection.find_one(
             {
                 "$or": [
                     {
-                        "exercise_name": data["exercise_name"],
+                        "name": data["name"],
                         "body_part": data["body_part"],
                         "equipment": data["equipment"],
                     },
                     {
-                        "name": data["name"],
+                        "exercise_name": original_ex_name,
                         "body_part": data["body_part"],
                         "equipment": data["equipment"],
                     },
@@ -275,9 +301,21 @@ def api_get_exercise_details(name):
         return jsonify({"error": "Database not connected."}), 500
     try:
         exercises_collection = db["exercises"]
-        exercise = exercises_collection.find_one({"exercise_name": name}, {"_id": 0})
+        # Accept queries by display name or normalized name. Normalize the
+        # incoming parameter to lowercase and attempt both lookups so existing
+        # clients that pass the original cased name continue to work.
+        try:
+            norm_query = name.strip().lower()
+        except Exception:
+            norm_query = name
+
+        exercise = exercises_collection.find_one(
+            {"$or": [{"exercise_name": name}, {"name": norm_query}]}, {"_id": 0}
+        )
+
         if exercise:
             return jsonify(exercise)
+
         return jsonify({"error": "Exercise not found."}), 404
 
     except Exception:

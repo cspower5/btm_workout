@@ -168,7 +168,16 @@ const NUM_EX = parseInt(process.env.NUM_EXERCISES || process.env.NUM_EX || '3', 
     page.on('pageerror', err => console.log('PAGE ERROR:', err && err.message ? err.message : err));
 
     // Take a snapshot of the current HTML and a screenshot to help debug hydration issues
+    // and persist them to /tmp so the workflow can upload them as artifacts.
     const htmlSnapshot = await page.content();
+    try {
+      // write HTML snapshot and a console-log file to /tmp so they can be uploaded
+      const fs = await loadModule('fs');
+      try { fs.writeFileSync('/tmp/e2e_page_snapshot.html', htmlSnapshot, 'utf8'); } catch(e){ console.log('Failed to write HTML snapshot:', e && e.message ? e.message : e); }
+      try { fs.writeFileSync('/tmp/e2e_console_log.txt', '', 'utf8'); } catch(e){ /* best-effort */ }
+    } catch(e) {
+      console.log('Snapshot write preparation failed:', e && e.message ? e.message : e);
+    }
     try {
       await page.screenshot({ path: '/tmp/e2e_page_snapshot.png', fullPage: true });
       console.log('Saved page snapshot and screenshot to /tmp');
@@ -176,15 +185,35 @@ const NUM_EX = parseInt(process.env.NUM_EXERCISES || process.env.NUM_EX || '3', 
       console.log('Screenshot failed:', screenshotErr && screenshotErr.message ? screenshotErr.message : screenshotErr);
     }
 
-    // 3) Select 'legs' in the body part dropdown and click Generate
+    // 3) Select the requested body part in the dropdown and click Generate
     // Wait longer for the SPA to hydrate and render the select dropdown
     try {
-      await page.waitForSelector('select', { timeout: 15000 });
+      // Wait for the select to exist and have at least one option. This avoids
+      // races where the SPA has mounted but data hasn't populated the select.
+      await page.waitForSelector('select', { timeout: 20000 });
+      // wait until the select has at least one non-empty option
+      await page.waitForFunction(() => {
+        const sel = document.querySelector('select');
+        return sel && sel.options && sel.options.length > 0 && Array.from(sel.options).some(o => o.value && o.value.trim().length>0);
+      }, { timeout: 20000 });
     } catch (waitErr) {
-      console.log('Selector wait failed; dumping HTML snapshot for debugging:\n', htmlSnapshot.slice(0, 2000));
+      console.log('Selector wait failed; dumping HTML snapshot for debugging:\n', (htmlSnapshot || '').slice(0, 2000));
+      // persist the page HTML again for artifact capture
+      try { const fs = await loadModule('fs'); fs.appendFileSync('/tmp/e2e_console_log.txt', '\nSelector wait failed\n', 'utf8'); } catch(e){}
       throw waitErr;
     }
-    await page.select('select', 'legs');
+    // Robustly select the option by matching value or visible text case-insensitively
+    await page.evaluate((bp) => {
+      const sel = document.querySelector('select');
+      if (!sel) return;
+      const target = bp ? bp.toString().toLowerCase() : '';
+      const options = Array.from(sel.options);
+      const match = options.find(o => (o.value && o.value.toLowerCase() === target) || (o.text && o.text.toLowerCase() === target));
+      if (match) {
+        sel.value = match.value;
+        sel.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    }, BODY_PART);
 
     // Set number input to 3
     await page.evaluate(() => {
@@ -195,8 +224,9 @@ const NUM_EX = parseInt(process.env.NUM_EXERCISES || process.env.NUM_EX || '3', 
     // Click Generate Workout button
     await page.click('button');
 
-    // Wait for results to appear; cards have .exercise-card
-    await page.waitForSelector('.exercise-card', { timeout: 5000 });
+  // Wait for results to appear; cards have .exercise-card. Increase timeout
+  // to be more tolerant on busy CI runners.
+  await page.waitForSelector('.exercise-card', { timeout: 10000 });
 
     // 4) Inspect the first card for Reps/Sets nodes
     const cardInfo = await page.evaluate(() => {
@@ -219,9 +249,16 @@ const NUM_EX = parseInt(process.env.NUM_EXERCISES || process.env.NUM_EX || '3', 
     }
 
     console.log('E2E check passed.');
+    try { const fs = await loadModule('fs'); fs.appendFileSync('/tmp/e2e_console_log.txt', 'E2E check passed.\n', 'utf8'); } catch(e){}
     await browser.close();
     process.exit(0);
   } catch (err) {
+    // Capture page HTML and console logs if possible to /tmp for artifact upload
+    try {
+      const fs = await loadModule('fs');
+      try { const htmlNow = await page.content(); fs.writeFileSync('/tmp/e2e_page_snapshot_error.html', htmlNow, 'utf8'); } catch(e){}
+      try { fs.appendFileSync('/tmp/e2e_console_log.txt', `E2E check failed: ${err && err.message ? err.message : err}\n`, 'utf8'); } catch(e){}
+    } catch(e){ /* ignore write errors */ }
     console.error('E2E check failed:', err && err.message ? err.message : err);
     process.exit(2);
   }

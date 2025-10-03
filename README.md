@@ -122,3 +122,18 @@ Deployments
 -----------
 
 When deploying to Render (or another host) set `FLASK_ALLOW_DEV_ORIGINS=0` in the environment to restrict allowed origins to the production static site. Also add `ADMIN_PREVIEW_TOKEN` to the service environment to enable the protected preview endpoint.
+
+Exercise normalization and unique index
+--------------------------------------
+
+To avoid case-variant duplicates (for example, `Push Up` vs `push up`), the backend uses both a display field and a normalized field for exercise names:
+
+- `exercise_name`: preserves the original name as provided by the client (display/casing preserved).
+- `name`: a lowercased canonical form used for deduplication and for the unique index.
+
+Additionally, `body_part` and `equipment` stored on new inserts are lowercased so the unique compound index on `(name, body_part, equipment)` enforces uniqueness consistently.
+
+If you run migrations or refresh the DB, ensure you have a backup. A backup used during the index rename/creation is available under `db_backups/exercises_index_replace_20251002T201525Z`.
+
+Compatibility: the server's GET endpoint `/api/v1/exercise/<name>` accepts either the original `exercise_name` value or the normalized `name` (lowercased) so existing clients continue to work without changes.
+

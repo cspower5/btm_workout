@@ -20,10 +20,9 @@ function AddFormComponent({ title, apiFunction, placeholder }) {
         }
 
         try {
-            // FIX: Instead of axios.post(apiEndpoint, ...), we directly execute the 
-            // helper function (addBodyPart or addEquipment) which already handles the 
-            // fixed, absolute URL and the POST method.
-            const response = await apiFunction({ name }); 
+            // Call the provided helper with the raw name string. Helpers expect a
+            // single `name` argument (e.g. addBodyPart(name)).
+            const response = await apiFunction(name);
             
             setMessage(response.message);
             setIsError(false);

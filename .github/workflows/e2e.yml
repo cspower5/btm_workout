@@ -82,11 +82,12 @@ jobs:
           (cd client && node -e "(async ()=>{ try{ try{ await import('puppeteer-core'); console.log('client: puppeteer-core ok'); }catch(_){ await import('puppeteer'); console.log('client: puppeteer ok'); } }catch(e){ console.error('client: puppeteer import failed:', e.message); process.exit(4);} })()")
           (cd client && node -e "(async ()=>{ try{ await import('axios'); console.log('client: axios ok'); }catch(e){ console.error('client: axios import failed:', e.message); process.exit(4);} })()")
 
-      - name: Serve built site
+      - name: Serve built site (mounted at /btm_workout)
         run: |
-          # Serve the built client and wait briefly for the server to be ready.
-          npx http-server ./client/dist -p 8080 -c-1 &
-          # give the server a bit more time on CI images
+          # Use the repository script to serve client/dist mounted at /btm_workout
+          # so absolute asset URLs generated for GitHub Pages resolve correctly.
+          node ./scripts/serve_with_prefix.mjs &
+          # Give the server some time on CI images to start up
           sleep 5
 
       - name: Run E2E check
@@ -100,6 +101,37 @@ jobs:
           BODY_PART: ${{ matrix.body_part }}
           NUM_EX: 3
         working-directory: ./client
+        continue-on-error: true
         run: |
-          # Run the small wrapper which validates modules and launches the e2e script
+          # Run the small wrapper which validates modules and launches the e2e script.
+          # Capture the exit code to /tmp/e2e_exit_code so later steps (upload) can run
+          # and we can re-fail the job explicitly afterwards.
+          set +e
           node ../scripts/run_e2e_with_fallbacks.mjs
+          rc=$?
+          set -e
+          echo $rc > /tmp/e2e_exit_code
+          echo "E2E exit code recorded: $rc"
+
+      - name: Upload E2E snapshots (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-snapshots-${{ matrix.body_part }}
+          path: |
+            /tmp/e2e_page_snapshot.png
+            /tmp/e2e_page_snapshot.html
+            /tmp/e2e_console_log.txt
+
+      - name: Fail if E2E failed
+        if: always()
+        run: |
+          # Re-fail the job if the E2E step previously failed. This step runs after
+          # artifacts have been uploaded so we still capture logs/snapshots.
+          rc=0
+          if [ -f /tmp/e2e_exit_code ]; then rc=$(cat /tmp/e2e_exit_code); fi
+          echo "Recorded E2E exit code: $rc"
+          if [ "$rc" -ne 0 ]; then
+            echo "E2E failed with exit code $rc; failing job to preserve gating."
+            exit $rc
+          fi
