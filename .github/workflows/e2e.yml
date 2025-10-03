@@ -102,6 +102,10 @@ jobs:
           NUM_EX: 3
         working-directory: ./client
         run: |
+          # Ensure artifact directory exists and create a placeholder so the
+          # upload step has something to pick up even if the test fails early.
+          mkdir -p e2e-artifacts
+          echo 'placeholder' > e2e-artifacts/placeholder.txt
           # Run the small wrapper which validates modules and launches the e2e script
           node ../scripts/run_e2e_with_fallbacks.mjs
       - name: Debug: show artifacts directory
