@@ -92,10 +92,8 @@ jobs:
 
       - name: Run E2E check
         env:
-          # Serve root URL (http://localhost:8080). The built index.html uses
-          # absolute paths like /btm_workout/assets/...; serving at root makes
-          # those asset URLs resolve correctly under http-server.
-          TEST_BASE: http://localhost:8080
+          # Serve base URL matching the express server started above (port 5174)
+          TEST_BASE: http://localhost:5174/btm_workout
           TEST_API: https://btm-workout.onrender.com
           FLASK_ALLOW_DEV_ORIGINS: '0'
           BODY_PART: ${{ matrix.body_part }}
@@ -108,7 +106,7 @@ jobs:
           echo 'placeholder' > e2e-artifacts/placeholder.txt
           # Run the small wrapper which validates modules and launches the e2e script
           node ../scripts/run_e2e_with_fallbacks.mjs
-      - name: Debug: show artifacts directory
+      - name: "Debug: show artifacts directory"
         run: |
           echo 'cwd='$(pwd)
           echo 'ls client/e2e-artifacts:'
