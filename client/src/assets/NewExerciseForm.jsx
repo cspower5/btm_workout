@@ -37,10 +37,19 @@ function NewExerciseForm() {
                     getDifficulties()
                 ]);
                 
-                // Assuming all helpers return a simple string array:
-                setBodyParts(bodyPartsRes); 
-                setEquipmentList(equipmentRes);
-                setDifficulties(difficultiesRes); 
+                // Helpers may return arrays or objects. Normalize to arrays of strings.
+                const normalize = (val) => {
+                    if (!val) return [];
+                    if (Array.isArray(val)) return val.map(x => (typeof x === 'string' ? x : x.name || x));
+                    if (val && Array.isArray(val.body_parts)) return val.body_parts;
+                    if (val && Array.isArray(val.equipment_list)) return val.equipment_list;
+                    if (val && Array.isArray(val.difficulties)) return val.difficulties;
+                    return [];
+                };
+
+                setBodyParts(normalize(bodyPartsRes));
+                setEquipmentList(normalize(equipmentRes));
+                setDifficulties(normalize(difficultiesRes));
 
             } catch (err) {
                 console.error("Failed to fetch dropdown data:", err);

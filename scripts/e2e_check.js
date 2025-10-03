@@ -28,19 +28,28 @@ const BASE = process.env.TEST_BASE || 'http://localhost:5174/btm_workout';
 const API = process.env.TEST_API || 'https://btm-workout.onrender.com';
 const BODY_PART = process.env.BODY_PART || process.env.TARGET_BODY_PART || 'legs';
 const NUM_EX = parseInt(process.env.NUM_EXERCISES || process.env.NUM_EX || '3', 10) || 3;
+// If the BASE already includes the /btm_workout mount, we should not rewrite
+// incoming requests that include that prefix. Rewriting is only needed when
+// the server is serving the dist at the site root (no mount path).
+const SHOULD_REWRITE_BTM_PREFIX = !BASE.includes('/btm_workout');
 
 // Convert the original top-level logic to a function so we can load modules
 // at runtime and provide robust fallbacks.
 (async () => {
   try {
-      // Prefer puppeteer-core to avoid bringing Chromium; fall back to puppeteer.
+      // Prefer full puppeteer when available (it will manage its Chromium
+      // download or locate an executable). Fall back to puppeteer-core which
+      // requires an explicit executablePath or Playwright chromium to be present.
       let puppeteer = null;
-      if (await (async ()=>{ try{ await import('puppeteer-core'); return true; }catch(e){ return false; } })()) {
+      const hasPuppeteer = await (async () => { try { await import('puppeteer'); return true; } catch (e) { return false; } })();
+      if (hasPuppeteer) {
+        puppeteer = await loadModule('puppeteer');
+        console.log('Using full puppeteer');
+      } else if (await (async () => { try { await import('puppeteer-core'); return true; } catch (e) { return false; } })()) {
         puppeteer = await loadModule('puppeteer-core');
         console.log('Using puppeteer-core');
       } else {
-        puppeteer = await loadModule('puppeteer');
-        console.log('Using full puppeteer');
+        throw new Error('neither puppeteer nor puppeteer-core are available');
       }
       const axios = await loadModule('axios');
 
@@ -127,8 +136,9 @@ const NUM_EX = parseInt(process.env.NUM_EXERCISES || process.env.NUM_EX || '3', 
 
           // Rewrite asset requests that include the /btm_workout prefix so the
           // server (which is serving the dist folder at root) can still serve
-          // the absolute asset URLs emitted by the build.
-          if (reqUrl.pathname.startsWith('/btm_workout/')) {
+          // the absolute asset URLs emitted by the build. Only do this when
+          // the test BASE does not already include the /btm_workout mount.
+          if (SHOULD_REWRITE_BTM_PREFIX && reqUrl.pathname.startsWith('/btm_workout/')) {
             const newPath = reqUrl.pathname.replace('/btm_workout', '');
             const newUrl = `${reqUrl.protocol}//${reqUrl.host}${newPath}${reqUrl.search}`;
             return req.continue({ url: newUrl });
@@ -153,6 +163,13 @@ const NUM_EX = parseInt(process.env.NUM_EXERCISES || process.env.NUM_EX || '3', 
 
     // Take a snapshot of the current HTML and a screenshot to help debug hydration issues
     const htmlSnapshot = await page.content();
+    try {
+      const fs = await loadModule('fs');
+      fs.writeFileSync('/tmp/e2e_page_snapshot.html', htmlSnapshot, 'utf8');
+      console.log('Saved HTML snapshot to /tmp/e2e_page_snapshot.html');
+    } catch (writeErr) {
+      console.log('Failed to write HTML snapshot:', writeErr && writeErr.message ? writeErr.message : writeErr);
+    }
     try {
       await page.screenshot({ path: '/tmp/e2e_page_snapshot.png', fullPage: true });
       console.log('Saved page snapshot and screenshot to /tmp');

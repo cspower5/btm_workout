@@ -435,7 +435,7 @@ def api_exercises_list():
 
 # API endpoint to get a list of all difficulties
 @app.route("/api/v1/difficulties", methods=["GET"])
-@cross_origin(origins=["https://cspower5.github.io"])  # <--- CORS FIX
+@cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX (allow dev origins too)
 def api_difficulties():
     db = db_connect.get_db()
     if db is None:

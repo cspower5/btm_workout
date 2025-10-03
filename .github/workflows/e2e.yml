@@ -84,9 +84,10 @@ jobs:
 
       - name: Serve built site
         run: |
-          # Serve the built client and wait briefly for the server to be ready.
-          npx http-server ./client/dist -p 8080 -c-1 &
-          # give the server a bit more time on CI images
+          # Use the repo's small express server which mounts the built site at /btm_workout
+          # Install root dependencies so `node scripts/serve_btm_workout.js` can run.
+          npm ci --silent --no-audit --no-fund || npm install --silent --no-audit --no-fund
+          node scripts/serve_btm_workout.js &
           sleep 5
 
       - name: Run E2E check
@@ -103,3 +104,11 @@ jobs:
         run: |
           # Run the small wrapper which validates modules and launches the e2e script
           node ../scripts/run_e2e_with_fallbacks.mjs
+      - name: Upload E2E artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-artifacts
+          path: |
+            /tmp/e2e_page_snapshot.png
+            /tmp/e2e_page_snapshot.html
