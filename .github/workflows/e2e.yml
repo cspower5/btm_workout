@@ -100,9 +100,17 @@ jobs:
           BODY_PART: ${{ matrix.body_part }}
           NUM_EX: 3
         working-directory: ./client
+        continue-on-error: true
         run: |
-          # Run the small wrapper which validates modules and launches the e2e script
+          # Run the small wrapper which validates modules and launches the e2e script.
+          # Capture the exit code to /tmp/e2e_exit_code so later steps (upload) can run
+          # and we can re-fail the job explicitly afterwards.
+          set +e
           node ../scripts/run_e2e_with_fallbacks.mjs
+          rc=$?
+          set -e
+          echo $rc > /tmp/e2e_exit_code
+          echo "E2E exit code recorded: $rc"
 
       - name: Upload E2E snapshots (always)
         if: always()
@@ -113,3 +121,16 @@ jobs:
             /tmp/e2e_page_snapshot.png
             /tmp/e2e_page_snapshot.html
             /tmp/e2e_console_log.txt
+
+      - name: Fail if E2E failed
+        if: always()
+        run: |
+          # Re-fail the job if the E2E step previously failed. This step runs after
+          # artifacts have been uploaded so we still capture logs/snapshots.
+          rc=0
+          if [ -f /tmp/e2e_exit_code ]; then rc=$(cat /tmp/e2e_exit_code); fi
+          echo "Recorded E2E exit code: $rc"
+          if [ "$rc" -ne 0 ]; then
+            echo "E2E failed with exit code $rc; failing job to preserve gating."
+            exit $rc
+          fi
