@@ -98,12 +98,26 @@ const NUM_EX = parseInt(process.env.NUM_EXERCISES || process.env.NUM_EX || '3', 
               const method = req.method();
               const headers = req.headers();
               const postData = req.postData();
+              // Handle CORS preflight directly
+              if (method === 'OPTIONS') {
+                const preHeaders = {
+                  'access-control-allow-origin': '*',
+                  'access-control-allow-methods': 'GET,POST,PUT,DELETE,OPTIONS',
+                  'access-control-allow-headers': headers && headers['access-control-request-headers'] ? headers['access-control-request-headers'] : '*',
+                };
+                return req.respond({ status: 204, headers: preHeaders, body: '' });
+              }
+
               const axiosOpts = { method, url: req.url(), headers: headers || {}, data: postData || undefined, timeout: 10000 };
               const proxied = await axios(axiosOpts);
               const body = typeof proxied.data === 'string' ? proxied.data : JSON.stringify(proxied.data);
               const respHeaders = Object.assign({}, proxied.headers || {});
               // Ensure content-type is JSON when appropriate
               if (!respHeaders['content-type']) respHeaders['content-type'] = 'application/json';
+              // Add permissive CORS headers so the page can read the response in CI
+              respHeaders['access-control-allow-origin'] = '*';
+              respHeaders['access-control-expose-headers'] = '*';
+              respHeaders['access-control-allow-credentials'] = 'true';
               return req.respond({ status: proxied.status || 200, headers: respHeaders, body });
             } catch (proxyErr) {
               console.log('API proxy error for', req.url(), proxyErr && proxyErr.message ? proxyErr.message : proxyErr);
