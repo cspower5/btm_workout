@@ -85,16 +85,43 @@ const NUM_EX = parseInt(process.env.NUM_EXERCISES || process.env.NUM_EX || '3', 
     // path) resolve when we serve the dist folder at the server root.
     try {
       await page.setRequestInterception(true);
-      page.on('request', req => {
+      page.on('request', async req => {
         try {
           const reqUrl = new URL(req.url());
+
+          // If the page requests the remote API, proxy it via axios so the browser
+          // doesn't run into CORS issues. This allows the E2E runner to call the
+          // real backend from the CI runner and return the response to the page.
+          const apiOrigin = (new URL(API)).origin;
+          if (reqUrl.origin === apiOrigin && reqUrl.pathname.startsWith('/api/')) {
+            try {
+              const method = req.method();
+              const headers = req.headers();
+              const postData = req.postData();
+              const axiosOpts = { method, url: req.url(), headers: headers || {}, data: postData || undefined, timeout: 10000 };
+              const proxied = await axios(axiosOpts);
+              const body = typeof proxied.data === 'string' ? proxied.data : JSON.stringify(proxied.data);
+              const respHeaders = Object.assign({}, proxied.headers || {});
+              // Ensure content-type is JSON when appropriate
+              if (!respHeaders['content-type']) respHeaders['content-type'] = 'application/json';
+              return req.respond({ status: proxied.status || 200, headers: respHeaders, body });
+            } catch (proxyErr) {
+              console.log('API proxy error for', req.url(), proxyErr && proxyErr.message ? proxyErr.message : proxyErr);
+              return req.abort();
+            }
+          }
+
+          // Rewrite asset requests that include the /btm_workout prefix so the
+          // server (which is serving the dist folder at root) can still serve
+          // the absolute asset URLs emitted by the build.
           if (reqUrl.pathname.startsWith('/btm_workout/')) {
             const newPath = reqUrl.pathname.replace('/btm_workout', '');
             const newUrl = `${reqUrl.protocol}//${reqUrl.host}${newPath}${reqUrl.search}`;
             return req.continue({ url: newUrl });
           }
         } catch (e) {
-          // If URL parsing fails, just continue the request unchanged
+          // If URL parsing or other handling fails, continue the request unchanged
+          console.log('request interception error:', e && e.message ? e.message : e);
         }
         return req.continue();
       });
