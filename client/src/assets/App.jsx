@@ -9,7 +9,7 @@ import AddBodyPartPage from './AddBodyPartPage';
 import AddEquipmentPage from './AddEquipmentPage';
 import ManageItemsPage from './ManageItemsPage';
 import './css/App.css';
-import logo from './../assets/images/btm_workout_logo.png';
+import logo from './../assets/images/btm_workout_logo.svg';
 
 function App() {
   return (
@@ -18,7 +18,7 @@ function App() {
     <Router>
       <div className="App">
         <header className="App-header">
-          <h1>Break The Monotony Workout</h1>
+          <h1>BREAK THE MONOTONY</h1>
           <div className="header-nav">
             <nav>
               <ul>
@@ -64,7 +64,7 @@ function App() {
           </Routes>
         </main>
         <footer className="footer-nav">
-          <img src={logo} alt="Break The Monotony Workout Logo" className="footer-logo" />
+          <img src={logo} alt="BREAK THE MONOTONY Logo" className="footer-logo" />
           <nav>
             <ul>
               <li>

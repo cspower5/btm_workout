@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="120" viewBox="0 0 600 120" role="img" aria-labelledby="title">
+  <title id="title">BREAK THE MONOTONY</title>
+  <rect width="100%" height="100%" fill="transparent" />
+  <g fill="#1f2937" font-family="Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial" font-weight="700">
+    <text x="50%" y="50%" font-size="28" text-anchor="middle" dominant-baseline="central">BREAK THE</text>
+    <text x="50%" y="74%" font-size="32" text-anchor="middle" dominant-baseline="central">MONOTONY</text>
+  </g>
+</svg>

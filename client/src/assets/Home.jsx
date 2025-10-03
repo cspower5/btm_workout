@@ -36,7 +36,7 @@ function Home() {
 
   return (
     <div className="home-container">
-      <h2>Welcome to Break The Monotony Workout!</h2>
+  <h2>WELCOME TO BREAK THE MONOTONY</h2>
       <p>Explore the features below to create, manage, and find your next workout.</p>
       
       <div className="features-grid">
