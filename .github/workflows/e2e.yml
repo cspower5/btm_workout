@@ -91,7 +91,10 @@ jobs:
 
       - name: Run E2E check
         env:
-          TEST_BASE: http://localhost:8080/btm_workout
+          # Serve root URL (http://localhost:8080). The built index.html uses
+          # absolute paths like /btm_workout/assets/...; serving at root makes
+          # those asset URLs resolve correctly under http-server.
+          TEST_BASE: http://localhost:8080
           TEST_API: https://btm-workout.onrender.com
           FLASK_ALLOW_DEV_ORIGINS: '0'
           BODY_PART: ${{ matrix.body_part }}
