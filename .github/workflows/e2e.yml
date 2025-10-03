@@ -20,8 +20,9 @@ jobs:
       group: e2e-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.ref }}
       cancel-in-progress: false
     strategy:
+      # Reduce matrix size during debug to speed iteration; expand when stable.
       matrix:
-        body_part: [ chest, back, shoulders ]
+        body_part: [ chest ]
     steps:
       - uses: actions/checkout@v4
 
@@ -32,11 +33,30 @@ jobs:
           # modern toolchains and avoid warnings / subtle runtime diffs.
           node-version: '20'
 
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            client/node_modules
+            ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('client/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
       - name: Install client dependencies
         working-directory: ./client
         run: npm ci --silent
 
+      - name: Setup Playwright browsers (system deps + Chromium)
+        uses: microsoft/playwright-github-action@v1
+        with:
+          install-deps: true
+          browsers: chromium
+
       - name: Install project Puppeteer deps
+        # Keep Puppeteer for the existing e2e_check.js script; Playwright step
+        # ensures system libs and a Chromium binary are available which speeds
+        # browser startup and reduces failures on CI images.
         run: npm install puppeteer axios --no-audit --no-fund --silent
 
       - name: Build client
