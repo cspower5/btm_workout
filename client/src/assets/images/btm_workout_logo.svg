@@ -1,9 +1,23 @@
+
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="600" height="120" viewBox="0 0 600 120" role="img" aria-labelledby="title">
   <title id="title">BREAK THE MONOTONY</title>
   <rect width="100%" height="100%" fill="transparent" />
-  <g fill="#1f2937" font-family="Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial" font-weight="700">
-    <text x="50%" y="50%" font-size="28" text-anchor="middle" dominant-baseline="central">BREAK THE</text>
-    <text x="50%" y="74%" font-size="32" text-anchor="middle" dominant-baseline="central">MONOTONY</text>
+  <!-- Dumbbell icon on the left -->
+  <g transform="translate(24,20) scale(0.9)">
+    <rect x="0" y="36" width="72" height="48" rx="6" fill="#111827" opacity="0.95" />
+    <rect x="6" y="24" width="60" height="72" rx="4" fill="#f3f4f6" opacity="0.06" />
+    <rect x="-14" y="40" width="16" height="32" rx="2" fill="#111827" />
+    <rect x="70" y="40" width="16" height="32" rx="2" fill="#111827" />
+    <rect x="-26" y="32" width="12" height="48" rx="2" fill="#374151" />
+    <rect x="86" y="32" width="12" height="48" rx="2" fill="#374151" />
+    <rect x="-34" y="28" width="8" height="56" rx="2" fill="#6b7280" />
+    <rect x="94" y="28" width="8" height="56" rx="2" fill="#6b7280" />
+  </g>
+
+  <!-- Text to the right of the icon -->
+  <g transform="translate(120,30)" fill="#0f172a" font-family="Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial" font-weight="800">
+    <text x="0" y="30" font-size="22">BREAK THE</text>
+    <text x="0" y="64" font-size="30">MONOTONY</text>
   </g>
 </svg>

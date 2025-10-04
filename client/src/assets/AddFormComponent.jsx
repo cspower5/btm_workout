@@ -20,10 +20,11 @@ function AddFormComponent({ title, apiFunction, placeholder }) {
         }
 
         try {
-            // Call the provided helper with the raw name string. Helpers expect a
-            // single `name` argument (e.g. addBodyPart(name)).
-            const response = await apiFunction(name);
-            
+            // Client-side normalization for UX: send lowercased/trimmed value so
+            // users see what will be stored. Server still enforces normalization.
+            const payloadName = name.trim().toLowerCase();
+            const response = await apiFunction(payloadName);
+
             setMessage(response.message);
             setIsError(false);
             setName(''); // Clear the input field on success
@@ -48,6 +49,9 @@ function AddFormComponent({ title, apiFunction, placeholder }) {
                         placeholder={placeholder}
                         required
                     />
+                    {name && (
+                        <small className="normalized-preview">Will be stored as: '{name.trim().toLowerCase()}'</small>
+                    )}
                 </div>
                 <button type="submit">Add</button>
             </form>

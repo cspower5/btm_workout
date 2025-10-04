@@ -16,6 +16,9 @@ _allow_dev = os.getenv("FLASK_ALLOW_DEV_ORIGINS", "1").lower() in ("1", "true", 
 DEV_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:5174",
+    # Playwright/CI often serves the built site at port 8080 during tests
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
 ]
 
 # Final allowed origins: production plus dev (if enabled)
@@ -334,7 +337,16 @@ def api_add_body_part():
         name = data.get("name")
         if not name:
             return jsonify({"error": "Missing 'name' field."}), 400
-        result = db.body_parts.insert_one({"name": name})
+        # Normalize: strip and lowercase to avoid case-variant duplicates
+        norm_name = name.strip().lower()
+        # Ensure unique index on name exists for body_parts (idempotent)
+        try:
+            db.body_parts.create_index(
+                [("name", 1)], unique=True, name="unique_body_parts_name"
+            )
+        except Exception:
+            pass
+        result = db.body_parts.insert_one({"name": norm_name})
         return jsonify(
             {"message": "Body part added successfully", "id": str(result.inserted_id)}
         )
@@ -356,7 +368,16 @@ def api_add_equipment():
         name = data.get("name")
         if not name:
             return jsonify({"error": "Missing 'name' field."}), 400
-        result = db.equipment.insert_one({"name": name})
+        # Normalize: strip and lowercase to avoid case-variant duplicates
+        norm_name = name.strip().lower()
+        # Ensure unique index on name exists for equipment (idempotent)
+        try:
+            db.equipment.create_index(
+                [("name", 1)], unique=True, name="unique_equipment_name"
+            )
+        except Exception:
+            pass
+        result = db.equipment.insert_one({"name": norm_name})
         return jsonify(
             {"message": "Equipment added successfully", "id": str(result.inserted_id)}
         )

@@ -26,7 +26,8 @@ def insert_exercises_if_not_exist():
 
     # --- PAGINATION SETUP ---
     total_inserted_count = 0
-    limit = 10
+    # If limit == 0, treat as 'fetch all in one request' (no pagination)
+    limit = 0
     offset = 0
     # --- END PAGINATION SETUP ---
 
@@ -81,8 +82,11 @@ def insert_exercises_if_not_exist():
         print("--- Starting Paginated API Fetch from ExerciseDB ---")
 
         while True:
-            # Update parameters for the current page offset
-            params = {"limit": str(limit), "offset": str(offset)}
+            # If limit == 0, request all rows in a single call (no offset)
+            if limit == 0:
+                params = {"limit": "0"}
+            else:
+                params = {"limit": str(limit), "offset": str(offset)}
 
             # Execute the request
             response = requests.get(api_base_url, headers=headers, params=params)
@@ -100,10 +104,17 @@ def insert_exercises_if_not_exist():
                     continue
 
                 # --- MAPPING: STRICTLY ONLY THE 8 REQUESTED FIELDS (plus app keys) ---
+                # Preserve original display name, but also add normalized fields
+                orig_name = exercise.get("name") or ""
+                orig_body = exercise.get("bodyPart") or ""
+                orig_equip = exercise.get("equipment") or ""
+
                 mapped_exercise = {
-                    "exercise_name": exercise.get("name"),
-                    "body_part": exercise.get("bodyPart"),
-                    "equipment": exercise.get("equipment"),
+                    "exercise_name": orig_name,
+                    # Normalized canonical fields used for uniqueness/indexing
+                    "name": orig_name.strip().lower(),
+                    "body_part": orig_body.strip().lower(),
+                    "equipment": orig_equip.strip().lower(),
                     "target": exercise.get("target"),
                     "secondaryMuscles": exercise.get("secondaryMuscles"),
                     "instructions": exercise.get("instructions"),
@@ -113,19 +124,18 @@ def insert_exercises_if_not_exist():
                 }
                 # --- END MAPPING ---
 
-                # CRITICAL FIX: REMOVE find_one CHECK AND RELY ON DATABASE ERROR HANDLING
                 exercises_to_insert.append(mapped_exercise)
 
+            # Insert documents for the current batch (once per page or single fetch)
             if exercises_to_insert:
-                # Insert documents for the current batch
-                # We use ordered=False to skip errors and keep inserting the rest
                 result = exercises_collection.insert_many(
                     exercises_to_insert, ordered=False
                 )
                 total_inserted_count += len(result.inserted_ids)
-                print(
-                    f"Batch inserted {len(result.inserted_ids)} new documents. Total: {total_inserted_count}"
-                )
+
+            # If limit == 0 we fetched everything in one call; break
+            if limit == 0:
+                break
 
             # Update offset for the next page
             offset += limit
@@ -133,11 +143,6 @@ def insert_exercises_if_not_exist():
             # If the current batch was smaller than the limit, we've reached the end
             if len(api_exercises) < limit:
                 break
-
-        print(
-            f"--- Pagination finished. Total documents inserted: {total_inserted_count} ---"
-        )
-        return total_inserted_count
 
     except requests.exceptions.RequestException as e:
         if hasattr(e, "response") and e.response is not None:
@@ -159,3 +164,36 @@ def insert_exercises_if_not_exist():
     except Exception as e:
         print(f"An error occurred during database refresh: {e}")
         return {"error": f"Database Insertion Error: {e}"}
+
+    finally:
+        # Always attempt to sync management collections even if refresh had errors
+        try:
+            if db is not None:
+                print(
+                    "Post-refresh: syncing distinct body_part and equipment to management collections..."
+                )
+                db.body_parts.create_index(
+                    [("name", ASCENDING)], unique=True, name="unique_body_parts_name"
+                )
+                db.equipment.create_index(
+                    [("name", ASCENDING)], unique=True, name="unique_equipment_name"
+                )
+
+                body_parts = [bp for bp in db.exercises.distinct("body_part") if bp]
+                equipment_vals = [eq for eq in db.exercises.distinct("equipment") if eq]
+
+                for bp in body_parts:
+                    db.body_parts.update_one(
+                        {"name": bp}, {"$setOnInsert": {"name": bp}}, upsert=True
+                    )
+
+                for eq in equipment_vals:
+                    db.equipment.update_one(
+                        {"name": eq}, {"$setOnInsert": {"name": eq}}, upsert=True
+                    )
+
+                print(
+                    f"Synced {len(body_parts)} body_parts and {len(equipment_vals)} equipment entries."
+                )
+        except Exception as e:
+            print(f"Warning: Failed to sync management collections in finally: {e}")
