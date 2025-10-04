@@ -97,7 +97,10 @@ jobs:
           # those asset URLs resolve correctly under http-server.
           TEST_BASE: http://localhost:8080
           TEST_API: https://btm-workout.onrender.com
-          FLASK_ALLOW_DEV_ORIGINS: '0'
+          # Allow dev origins during CI so the Flask server accepts requests
+          # from the ephemeral CI frontend (http://localhost:8080).
+          # Previously this was '0' which produced CORS warnings in the logs.
+          FLASK_ALLOW_DEV_ORIGINS: '1'
           BODY_PART: ${{ matrix.body_part }}
           NUM_EX: 3
         working-directory: ./client
