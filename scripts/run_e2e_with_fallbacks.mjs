@@ -67,8 +67,14 @@ async function main(){
   }
   console.log('Spawning e2e runner for script:', script);
   // Spawn a small CommonJS runner that imports the ESM script via a file URL.
-  const runner = path.resolve(process.cwd(), 'scripts', 'e2e_runner.cjs');
-  const child = spawn(process.execPath, [runner], { stdio: 'inherit' });
+  // Resolve the runner path relative to the repository root (one level up from client
+  // when this wrapper is executed from ./client in CI). This avoids MODULE_NOT_FOUND
+  // when the CWD is client/ and scripts are at repo root.
+  const repoRoot = path.resolve(process.cwd(), '..');
+  const runner = path.resolve(repoRoot, 'scripts', 'e2e_runner.cjs');
+  // Pass the discovered script path as an argument to the runner so it can import
+  // the correct ESM file regardless of working directory.
+  const child = spawn(process.execPath, [runner, script], { stdio: 'inherit' });
   child.on('exit', code => process.exit(code ?? 0));
   child.on('error', err => { console.error('failed to spawn e2e script', err); process.exit(5); });
 }

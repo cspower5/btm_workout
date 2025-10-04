@@ -2,7 +2,10 @@ const path = require('path');
 const url = require('url');
 (async () => {
   try {
-    const scriptPath = path.resolve(__dirname, 'e2e_check.js');
+    // Accept a script path as an argument (passed from run_e2e_with_fallbacks.mjs)
+    // so the runner can import the correct ESM file regardless of CWD.
+    const argPath = process.argv[2];
+    const scriptPath = argPath ? path.resolve(argPath) : path.resolve(__dirname, 'e2e_check.js');
     const scriptUrl = url.pathToFileURL(scriptPath).href;
     await import(scriptUrl);
   } catch (e) {
