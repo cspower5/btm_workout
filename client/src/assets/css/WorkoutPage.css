@@ -62,6 +62,24 @@
 
 }
 
+/* Mobile adjustments so more tiles fit on a phone screen */
+@media (max-width: 600px) {
+  .workout-list {
+    /* scale-preserving: keep same columns but reduce min size so tiles shrink uniformly */
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    padding: 0 0.5rem;
+  }
+
+  .exercise-card {
+    padding: 0.6rem;
+    aspect-ratio: 1 / 1; /* preserve square tiles but smaller */
+    min-height: 0; /* allow aspect to control height */
+  }
+  .exercise-card h3 { font-size: 0.95rem; }
+  .exercise-card p { font-size: 0.85rem; }
+}
+
 .exercise-card-link {
   text-decoration: none;
   color: inherit;

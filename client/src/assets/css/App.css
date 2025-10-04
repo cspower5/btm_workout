@@ -57,14 +57,37 @@ body {
   }
 
   .header-nav nav ul {
-    flex-direction: column; /* stack nav items vertically */
-    gap: 0.25rem;
-    align-items: center;
+   /* Keep nav items horizontal and force a single row; each item stretches
+     so links fill the top bar. On very small screens we scale sizes down
+     rather than stacking to preserve the desktop layout visually. */
+   flex-direction: row;
+   gap: 0.25rem;
+   align-items: center;
+   width: 100%;
+   flex-wrap: nowrap;
   }
 
   .header-nav nav li {
-    margin: 0.25rem 0;
+    margin: 0;
+    flex: 1 1 0; /* allow items to grow and take equal space */
+    text-align: center;
   }
+
+/* Scale-preserving small-screen adjustments */
+@media (max-width: 420px) {
+  .App-header {
+    min-height: 90px; /* smaller but keeps same visual proportions */
+    padding: 0.5rem 0.5rem;
+  }
+  .App-header h1 {
+    font-size: 1.05rem; /* scale desktop heading down */
+  }
+  .header-nav a {
+    font-size: 0.9rem; /* slightly smaller links */
+    padding: 0.35rem 0.25rem;
+    display: block;
+  }
+}
 
   .footer-nav {
     padding: 1rem;
