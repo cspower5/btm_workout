@@ -111,10 +111,28 @@ const NUM_EX = parseInt(process.env.NUM_EXERCISES || process.env.NUM_EX || '3', 
                 return req.respond({ status: 204, headers: preHeaders, body: '' });
               }
 
-              const axiosOpts = { method, url: req.url(), headers: headers || {}, data: postData || undefined, timeout: 10000 };
-              const proxied = await axios(axiosOpts);
-              const body = typeof proxied.data === 'string' ? proxied.data : JSON.stringify(proxied.data);
-              const respHeaders = Object.assign({}, proxied.headers || {});
+                const axiosOpts = { method, url: req.url(), headers: headers || {}, data: postData || undefined, timeout: 10000 };
+                const proxied = await axios(axiosOpts);
+                const body = typeof proxied.data === 'string' ? proxied.data : JSON.stringify(proxied.data);
+                const respHeaders = Object.assign({}, proxied.headers || {});
+                // Write a compact proxy log entry to /tmp/e2e_console_log.txt for CI artifact debugging
+                try {
+                  const fs = require('fs');
+                  const entry = {
+                    time: new Date().toISOString(),
+                    type: 'api-proxy',
+                    method,
+                    url: req.url(),
+                    requestHeaders: headers || {},
+                    requestBody: postData || null,
+                    responseStatus: proxied.status || 200,
+                    responseHeaders: proxied.headers || {},
+                    responseBody: proxied.data || null
+                  };
+                  try { fs.appendFileSync('/tmp/e2e_console_log.txt', JSON.stringify(entry) + '\n'); } catch(e){ /* best-effort logging */ }
+                } catch(e) {
+                  // ignore logging errors
+                }
               // Ensure content-type is JSON when appropriate
               if (!respHeaders['content-type']) respHeaders['content-type'] = 'application/json';
               // Add permissive CORS headers so the page can read the response in CI

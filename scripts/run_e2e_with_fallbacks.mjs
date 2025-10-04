@@ -47,10 +47,28 @@ async function main(){
     process.exit(4);
   }
 
-  // Execute the main E2E script
-  const script = path.resolve(process.cwd(), '..', 'scripts', 'e2e_check.js');
-  console.log('Spawning e2e script:', script);
-  const child = spawn(process.execPath, [script], { stdio: 'inherit' });
+  // Execute the main E2E script. The repository may be invoked with different
+  // working directories (repo root, client/, CI runners). Try several likely
+  // candidate locations and pick the first that exists.
+  const fs = require('fs');
+  const candidates = [
+    path.resolve(process.cwd(), 'scripts', 'e2e_check.js'),
+    path.resolve(process.cwd(), '..', 'scripts', 'e2e_check.js'),
+    path.resolve(process.cwd(), 'client', 'scripts', 'e2e_check.js'),
+    path.resolve(process.cwd(), '..', 'client', 'scripts', 'e2e_check.js')
+  ];
+  let script = null;
+  for (const c of candidates) {
+    if (fs.existsSync(c)) { script = c; break; }
+  }
+  if (!script) {
+    // fallback: the original expected location relative to client
+    script = path.resolve(process.cwd(), '..', 'scripts', 'e2e_check.js');
+  }
+  console.log('Spawning e2e runner for script:', script);
+  // Spawn a small CommonJS runner that imports the ESM script via a file URL.
+  const runner = path.resolve(process.cwd(), 'scripts', 'e2e_runner.cjs');
+  const child = spawn(process.execPath, [runner], { stdio: 'inherit' });
   child.on('exit', code => process.exit(code ?? 0));
   child.on('error', err => { console.error('failed to spawn e2e script', err); process.exit(5); });
 }
