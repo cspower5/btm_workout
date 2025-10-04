@@ -82,7 +82,115 @@ const NUM_EX = parseInt(process.env.NUM_EXERCISES || process.env.NUM_EX || '3', 
 
     const browser = await puppeteer.launch(launchOpts);
     const page = await browser.newPage();
+    // Ensure any early in-page requests (fetch/XHR) that target the production
+    // API host are rewritten to point at the configured TEST API. Some apps
+    // issue requests as soon as the JS bundle is parsed; rewriting at
+    // evaluateOnNewDocument guarantees those early requests go to the mock
+    // (or TEST_API) and avoids CORS failures.
+    try {
+      // Injected before any page script runs. Log so we can detect the injection
+      // in client console logs produced during CI runs.
+      await page.evaluateOnNewDocument((testApi) => {
+        try {
+          console.log('E2E injection active (rewriting early fetch/XHR to test API):', testApi);
+        } catch (e) { /* ignore logging errors */ }
+
+        try {
+          // Rewrite window.fetch (handle string, Request, and RequestInfo forms)
+          const _origFetch = window.fetch;
+          window.fetch = function(resource, init) {
+            try {
+              let urlStr;
+              if (typeof resource === 'string') urlStr = resource;
+              else if (resource && typeof resource === 'object' && resource.url) urlStr = resource.url;
+              else urlStr = String(resource);
+              if (!urlStr) return _origFetch.call(this, resource, init);
+              const u = new URL(urlStr, location.href);
+              if (u.hostname === 'btm-workout.onrender.com') {
+                const newUrl = testApi + u.pathname + u.search;
+                if (typeof resource === 'string') resource = newUrl;
+                else if (resource && resource.url) resource = new Request(newUrl, resource);
+                else resource = newUrl;
+              }
+            } catch (e) { /* best-effort: fall back to original */ }
+            return _origFetch.call(this, resource, init);
+          };
+
+          // Override XMLHttpRequest.open at the prototype level so early XHRs are rewritten
+          try {
+            const origOpen = XMLHttpRequest.prototype.open;
+            XMLHttpRequest.prototype.open = function(method, url) {
+              try {
+                const u = new URL(url, location.href);
+                if (u.hostname === 'btm-workout.onrender.com') {
+                  url = testApi + u.pathname + u.search;
+                }
+              } catch (e) { /* ignore */ }
+              return origOpen.apply(this, arguments);
+            };
+          } catch (xhrErr) {
+            /* ignore */
+          }
+        } catch (e) { /* ignore injection errors */ }
+      }, API);
+    } catch (e) {
+      console.log('evaluateOnNewDocument injection failed:', e && e.message ? e.message : e);
+    }
     page.setDefaultTimeout(30000);
+    // Attach console/response/requestfailed handlers immediately so we capture
+    // any runtime errors during the initial page load (module execution), not
+    // just after navigation.
+    try {
+      const _fs = require('fs');
+      page.on('console', msg => {
+        try {
+          const text = typeof msg === 'string' ? msg : (msg && typeof msg.text === 'function' ? msg.text() : String(msg));
+          const entry = { time: new Date().toISOString(), type: 'page-console', text };
+          try { _fs.appendFileSync('/tmp/e2e_console_log.txt', JSON.stringify(entry) + '\n'); } catch (e) {}
+          console.log('PAGE LOG:', text);
+        } catch (e) { console.log('PAGE LOG handler error:', e && e.message ? e.message : e); }
+      });
+      page.on('pageerror', err => {
+        try {
+          const msg = err && err.message ? err.message : String(err);
+          const entry = { time: new Date().toISOString(), type: 'page-error', message: msg, stack: err && err.stack ? err.stack : null };
+          try { _fs.appendFileSync('/tmp/e2e_console_log.txt', JSON.stringify(entry) + '\n'); } catch (e) {}
+          console.log('PAGE ERROR:', msg);
+        } catch (e) { console.log('PAGE ERROR handler error:', e && e.message ? e.message : e); }
+      });
+      page.on('requestfailed', req => {
+        try {
+          const failure = req.failure();
+          const entry = { time: new Date().toISOString(), type: 'request-failed', url: req.url(), method: req.method(), failure: failure ? failure.errorText || failure : null };
+          try { _fs.appendFileSync('/tmp/e2e_console_log.txt', JSON.stringify(entry) + '\n'); } catch (e) {}
+          console.log('REQUEST FAILED:', req.url(), failure && failure.errorText ? failure.errorText : failure);
+        } catch (e) { console.log('requestfailed handler error:', e && e.message ? e.message : e); }
+      });
+      page.on('response', async resp => {
+        try {
+          const url = resp.url();
+          const req = resp.request();
+          const rtype = req.resourceType();
+          if (url.includes('/assets/') || rtype === 'script' || url.includes('/api/')) {
+            const status = resp.status();
+            const headers = resp.headers ? resp.headers : {};
+            let bodySnippet = null;
+            try {
+              const ct = headers['content-type'] || headers['Content-Type'] || '';
+              if (ct.includes('application/json') || ct.includes('application/javascript') || ct.includes('text/') || ct.includes('css')) {
+                const text = await resp.text();
+                bodySnippet = text && text.length > 2000 ? text.slice(0, 2000) : text;
+              }
+            } catch (e) {}
+            const entry = { time: new Date().toISOString(), type: 'response', url, resourceType: rtype, status, headers, bodySnippet };
+            try { _fs.appendFileSync('/tmp/e2e_console_log.txt', JSON.stringify(entry) + '\n'); } catch (e) {}
+            console.log('RESPONSE:', status, url, rtype);
+          }
+        } catch (e) { console.log('response handler error:', e && e.message ? e.message : e); }
+      });
+    } catch (logErr) {
+      console.log('Failed to attach early page log handlers:', logErr && logErr.message ? logErr.message : logErr);
+    }
     // Rewrite requests that start with /btm_workout to remove the base prefix so
     // the built assets (which are referenced with an absolute '/btm_workout/...'
     // path) resolve when we serve the dist folder at the server root.
@@ -92,11 +200,12 @@ const NUM_EX = parseInt(process.env.NUM_EXERCISES || process.env.NUM_EX || '3', 
         try {
           const reqUrl = new URL(req.url());
 
-          // If the page requests the remote API, proxy it via axios so the browser
-          // doesn't run into CORS issues. This allows the E2E runner to call the
-          // real backend from the CI runner and return the response to the page.
-          const apiOrigin = (new URL(API)).origin;
-          if (reqUrl.origin === apiOrigin && reqUrl.pathname.startsWith('/api/')) {
+          // If the page requests any /api/* path, proxy it via axios so the browser
+          // doesn't run into CORS issues. The built frontend may call an external
+          // host (for example https://btm-workout.onrender.com); proxying here
+          // allows the E2E runner to forward that request to the configured
+          // TEST_API (often a local mock) and return the response to the page.
+          if (reqUrl.pathname.startsWith('/api/')) {
             try {
               const method = req.method();
               const headers = req.headers();
@@ -110,25 +219,69 @@ const NUM_EX = parseInt(process.env.NUM_EXERCISES || process.env.NUM_EX || '3', 
                 };
                 return req.respond({ status: 204, headers: preHeaders, body: '' });
               }
+                // Build the proxied URL against the configured API base so any
+                // original host in the frontend code is ignored and the mock/local
+                // API is always used in CI/local runs.
+                const proxiedUrl = `${API}${reqUrl.pathname}${reqUrl.search}`;
+                const axiosOpts = { method, url: proxiedUrl, headers: headers || {}, data: postData || undefined, timeout: 10000 };
+                // Write an immediate, synchronous log entry so we always record the
+                // proxied target even if axios throws or async logging fails.
+                try {
+                  const fs = require('fs');
+                  const preEntry = { time: new Date().toISOString(), type: 'api-proxy-pre', method, requestedUrl: req.url(), proxiedUrl, requestHeaders: headers || {}, requestBody: postData || null };
+                  try { fs.appendFileSync('/tmp/e2e_console_log.txt', JSON.stringify(preEntry) + '\n'); } catch(e){}
+                } catch(e) { /* ignore */ }
 
-                const axiosOpts = { method, url: req.url(), headers: headers || {}, data: postData || undefined, timeout: 10000 };
-                const proxied = await axios(axiosOpts);
+                let proxied;
+                try {
+                  proxied = await axios(axiosOpts);
+                } catch (axiosErr) {
+                  // log detailed error synchronously for CI artifact capture
+                  try {
+                    const fs = require('fs');
+                    const errEntry = { time: new Date().toISOString(), type: 'api-proxy-error', method, requestedUrl: req.url(), proxiedUrl, message: axiosErr && axiosErr.message ? axiosErr.message : String(axiosErr), status: axiosErr && axiosErr.response ? axiosErr.response.status : null, data: axiosErr && axiosErr.response ? axiosErr.response.data : null };
+                    try { fs.appendFileSync('/tmp/e2e_console_log.txt', JSON.stringify(errEntry) + '\n'); } catch(e){}
+                  } catch(e){}
+                  console.log('API proxy error for', req.url(), axiosErr && axiosErr.message ? axiosErr.message : axiosErr);
+                  // If the upstream returned a response (like 404), forward that
+                  // status/body back to the browser with permissive CORS headers so
+                  // the SPA can handle the error (and avoid opaque network failures).
+                  try {
+                    const resp = axiosErr && axiosErr.response ? axiosErr.response : null;
+                    const fs = require('fs');
+                    const status = resp && resp.status ? resp.status : 502;
+                    const data = resp && resp.data ? resp.data : { error: axiosErr && axiosErr.message ? axiosErr.message : 'Upstream error' };
+                    const body = typeof data === 'string' ? data : JSON.stringify(data);
+                    const respHeaders = Object.assign({}, resp && resp.headers ? resp.headers : {});
+                    if (!respHeaders['content-type']) respHeaders['content-type'] = 'application/json';
+                    respHeaders['access-control-allow-origin'] = '*';
+                    respHeaders['access-control-expose-headers'] = '*';
+                    respHeaders['access-control-allow-credentials'] = 'true';
+                    return req.respond({ status, headers: respHeaders, body });
+                  } catch (respErr) {
+                    // if responding fails, abort to avoid hanging
+                    return req.abort();
+                  }
+                }
+
                 const body = typeof proxied.data === 'string' ? proxied.data : JSON.stringify(proxied.data);
                 const respHeaders = Object.assign({}, proxied.headers || {});
                 // Write a compact proxy log entry to /tmp/e2e_console_log.txt for CI artifact debugging
                 try {
                   const fs = require('fs');
                   const entry = {
-                    time: new Date().toISOString(),
-                    type: 'api-proxy',
-                    method,
-                    url: req.url(),
-                    requestHeaders: headers || {},
-                    requestBody: postData || null,
-                    responseStatus: proxied.status || 200,
-                    responseHeaders: proxied.headers || {},
-                    responseBody: proxied.data || null
-                  };
+                      time: new Date().toISOString(),
+                      type: 'api-proxy',
+                      method,
+                      // log the original requested URL and the proxied target
+                      requestedUrl: req.url(),
+                      proxiedUrl,
+                      requestHeaders: headers || {},
+                      requestBody: postData || null,
+                      responseStatus: proxied.status || 200,
+                      responseHeaders: proxied.headers || {},
+                      responseBody: proxied.data || null
+                    };
                   try { fs.appendFileSync('/tmp/e2e_console_log.txt', JSON.stringify(entry) + '\n'); } catch(e){ /* best-effort logging */ }
                 } catch(e) {
                   // ignore logging errors
@@ -182,17 +335,92 @@ const NUM_EX = parseInt(process.env.NUM_EXERCISES || process.env.NUM_EX || '3', 
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // Attach console and error listeners to capture client-side errors for debugging
-    page.on('console', msg => console.log('PAGE LOG:', msg.text()));
-    page.on('pageerror', err => console.log('PAGE ERROR:', err && err.message ? err.message : err));
+    // These handlers write compact JSON-line entries to /tmp/e2e_console_log.txt
+    // so CI artifact uploads include useful runtime diagnostics.
+    try {
+      const _fs = require('fs');
+      page.on('console', msg => {
+        try {
+          const text = typeof msg === 'string' ? msg : (msg && typeof msg.text === 'function' ? msg.text() : String(msg));
+          const entry = { time: new Date().toISOString(), type: 'page-console', text };
+          try { _fs.appendFileSync('/tmp/e2e_console_log.txt', JSON.stringify(entry) + '\n'); } catch (e) {}
+          console.log('PAGE LOG:', text);
+        } catch (e) {
+          console.log('PAGE LOG handler error:', e && e.message ? e.message : e);
+        }
+      });
+      page.on('pageerror', err => {
+        try {
+          const msg = err && err.message ? err.message : String(err);
+          const entry = { time: new Date().toISOString(), type: 'page-error', message: msg, stack: err && err.stack ? err.stack : null };
+          try { _fs.appendFileSync('/tmp/e2e_console_log.txt', JSON.stringify(entry) + '\n'); } catch (e) {}
+          console.log('PAGE ERROR:', msg);
+        } catch (e) {
+          console.log('PAGE ERROR handler error:', e && e.message ? e.message : e);
+        }
+      });
+
+      // Capture failed network requests (failed to load scripts/assets or network errors)
+      page.on('requestfailed', req => {
+        try {
+          const failure = req.failure();
+          const entry = { time: new Date().toISOString(), type: 'request-failed', url: req.url(), method: req.method(), failure: failure ? failure.errorText || failure : null };
+          try { _fs.appendFileSync('/tmp/e2e_console_log.txt', JSON.stringify(entry) + '\n'); } catch (e) {}
+          console.log('REQUEST FAILED:', req.url(), failure && failure.errorText ? failure.errorText : failure);
+        } catch (e) {
+          console.log('requestfailed handler error:', e && e.message ? e.message : e);
+        }
+      });
+
+      // Log responses for assets, scripts, and API endpoints so we can see status codes
+      page.on('response', async resp => {
+        try {
+          const url = resp.url();
+          const req = resp.request();
+          const rtype = req.resourceType();
+          if (url.includes('/assets/') || rtype === 'script' || url.includes('/api/')) {
+            const status = resp.status();
+            const headers = resp.headers ? resp.headers : {};
+            let bodySnippet = null;
+            try {
+              // only attempt text for JSON or JS/CSS small files
+              const ct = headers['content-type'] || headers['Content-Type'] || '';
+              if (ct.includes('application/json') || ct.includes('application/javascript') || ct.includes('text/') || ct.includes('css')) {
+                const text = await resp.text();
+                bodySnippet = text && text.length > 2000 ? text.slice(0, 2000) : text;
+              }
+            } catch (e) {
+              // ignore body read errors
+            }
+            const entry = { time: new Date().toISOString(), type: 'response', url, resourceType: rtype, status, headers, bodySnippet };
+            try { _fs.appendFileSync('/tmp/e2e_console_log.txt', JSON.stringify(entry) + '\n'); } catch (e) {}
+            console.log('RESPONSE:', status, url, rtype);
+          }
+        } catch (e) {
+          console.log('response handler error:', e && e.message ? e.message : e);
+        }
+      });
+    } catch (logErr) {
+      // If require('fs') fails for some reason, still attach minimal handlers
+      page.on('console', msg => console.log('PAGE LOG:', typeof msg === 'string' ? msg : (msg && msg.text ? msg.text() : msg)));
+      page.on('pageerror', err => console.log('PAGE ERROR:', err && err.message ? err.message : err));
+      page.on('requestfailed', req => console.log('REQUEST FAILED:', req.url(), req.failure && req.failure() && req.failure().errorText));
+    }
 
     // Take a snapshot of the current HTML and a screenshot to help debug hydration issues
     // and persist them to /tmp so the workflow can upload them as artifacts.
     const htmlSnapshot = await page.content();
     try {
-      // write HTML snapshot and a console-log file to /tmp so they can be uploaded
+      // write HTML snapshot and prepare a console-log file to /tmp so they can be uploaded
       const fs = await loadModule('fs');
       try { fs.writeFileSync('/tmp/e2e_page_snapshot.html', htmlSnapshot, 'utf8'); } catch(e){ console.log('Failed to write HTML snapshot:', e && e.message ? e.message : e); }
-      try { fs.writeFileSync('/tmp/e2e_console_log.txt', '', 'utf8'); } catch(e){ /* best-effort */ }
+      try {
+        // Only create an empty console log file if it doesn't already exist so
+        // earlier proxy logs (written during page load) are preserved.
+        if (!fs.existsSync('/tmp/e2e_console_log.txt')) {
+          fs.writeFileSync('/tmp/e2e_console_log.txt', '', 'utf8');
+        }
+      } catch(e){ /* best-effort */ }
     } catch(e) {
       console.log('Snapshot write preparation failed:', e && e.message ? e.message : e);
     }
