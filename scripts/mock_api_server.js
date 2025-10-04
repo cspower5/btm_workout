@@ -17,9 +17,16 @@ const sampleExercises = [
   { name: 'Squat', bodyPart: 'legs', equipment: 'barbell', target: 'quadriceps' }
 ];
 
+// Lightweight lists derived from the sampleExercises for other endpoints
+// Return simple string arrays (frontend expects strings, not objects)
+const sampleBodyParts = Array.from(new Set(sampleExercises.map(e => e.bodyPart))).map(bp => bp);
+const sampleEquipment = Array.from(new Set(sampleExercises.map(e => e.equipment))).map(eq => eq);
+
 const server = http.createServer((req, res) => {
   try {
     const parsed = url.parse(req.url, true);
+    // Log each incoming request path/method to make CI debugging clearer
+    console.log(`[mock] ${req.method} ${parsed.pathname} from ${req.socket.remoteAddress}`);
     if (req.method === 'POST' && parsed.pathname === '/api/v1/get_random_exercises') {
       let body = '';
       req.on('data', chunk => body += chunk);
@@ -40,6 +47,16 @@ const server = http.createServer((req, res) => {
         }
       });
       return;
+    }
+
+    // Provide a body parts list used by the frontend to populate selects
+    if (req.method === 'GET' && parsed.pathname === '/api/v1/body_parts_list') {
+      return sendJSON(res, 200, sampleBodyParts);
+    }
+
+    // Provide an equipment list used by the frontend
+    if (req.method === 'GET' && parsed.pathname === '/api/v1/equipment_list') {
+      return sendJSON(res, 200, sampleEquipment);
     }
 
     // Health endpoint for CI readiness
