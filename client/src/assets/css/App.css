@@ -57,25 +57,26 @@ body {
   }
 
   .header-nav nav ul {
-   /* Keep nav items horizontal and force a single row; each item stretches
-     so links fill the top bar. On very small screens we scale sizes down
-     rather than stacking to preserve the desktop layout visually. */
-   /* On narrow screens stack the nav vertically so items wrap and stay touch friendly */
-   flex-direction: column;
-   gap: 0.35rem;
-   align-items: stretch;
-   width: 100%;
-   flex-wrap: nowrap;
+    /* Keep nav items horizontal and force a single row; each item stretches
+       so links fill the top bar. On very small screens we scale sizes down
+       rather than stacking to preserve the desktop layout visually. */
+    flex-direction: column;
+    gap: 0.35rem;
+    align-items: stretch;
+    width: 100%;
+    flex-wrap: nowrap;
   }
 
   .header-nav nav li {
-  /* Keep nav horizontal on small screens and stretch items across the width */
-  flex-direction: row;
-  gap: 0.25rem;
-  align-items: center;
-  width: 100%;
-  justify-content: space-between;
-  flex-wrap: nowrap;
+    /* Keep nav horizontal on small screens and stretch items across the width */
+    flex-direction: row;
+    gap: 0.25rem;
+    align-items: center;
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+  }
+
   .footer-nav {
     padding: 1rem;
     min-height: auto; /* let footer size to content */
@@ -96,42 +97,42 @@ body {
     margin: 0;
     text-align: center;
   }
+}
 
-  /* Extra-small devices: tighten spacing and font sizes further */
-  @media (max-width: 420px) {
-    .App-header {
-      min-height: 84px;
-      padding: 0.5rem 0.5rem;
-    }
-    .App-header h1 {
-      font-size: 1.0rem;
-    }
-    .header-nav a {
-      font-size: 0.95rem;
-      padding: 0.4rem 0.25rem;
-      display: block;
-    }
-    .controls .form-fields {
-      flex-direction: column;
-      gap: 0.75rem;
-      align-items: stretch;
-    }
-    .controls label {
-      display: flex;
-      justify-content: space-between;
-      gap: 0.5rem;
-      align-items: center;
-    }
+/* Extra-small devices: tighten spacing and font sizes further */
+@media (max-width: 420px) {
+  .App-header {
+    min-height: 84px;
+    padding: 0.5rem 0.5rem;
   }
+  .App-header h1 {
+    font-size: 1.0rem;
+  }
+  .header-nav a {
+    font-size: 0.95rem;
+    padding: 0.4rem 0.25rem;
+    display: block;
+  }
+  .controls .form-fields {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: stretch;
+  }
+  .controls label {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    align-items: center;
+  }
+}
 
-  .footer-logo {
-    max-width: 140px; /* shrink logo for small screens */
-    margin-bottom: 1rem;
-  }
+.footer-logo {
+  max-width: 140px; /* shrink logo for small screens */
+  margin-bottom: 1rem;
+}
 
-  main {
-    padding: 0.5rem;
-  }
+main {
+  padding: 0.5rem;
 }
 
 .header-nav {
@@ -227,4 +228,49 @@ footer {
   padding: 1rem;
   background-color: var(--secondary-color);
   color: white;
+}
+
+/* Strong mobile overrides: ensure horizontal header/footer nav and compact tiles
+   appended at end so it wins during minification and avoids accidental nesting issues */
+@media (max-width: 600px) {
+  .App-header {
+    padding: 0.4rem 0.6rem !important;
+    min-height: 72px !important;
+  }
+
+  /* Force header/footer nav to a single horizontal row and stretch links */
+  .header-nav nav ul,
+  .footer-nav nav ul {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
+    gap: 0.25rem !important;
+  }
+
+  .header-nav nav li,
+  .footer-nav nav li {
+    flex: 1 1 auto !important;
+    margin: 0 !important;
+    text-align: center !important;
+    padding: 0.15rem 0 !important;
+  }
+
+  /* Make the grid very compact so content fits without vertical scroll */
+  .workout-list {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)) !important;
+    gap: 0.35rem !important;
+    padding: 0 0.25rem !important;
+  }
+
+  .exercise-card {
+    padding: 0.2rem !important;
+    font-size: 0.85rem !important;
+  }
+
+  .footer-nav {
+    padding: 0.6rem !important;
+    min-height: auto !important;
+  }
 }
