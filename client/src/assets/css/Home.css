@@ -164,22 +164,22 @@
 @media (min-width: 900px) and (orientation: landscape) {
   .features-grid {
     /* tighten gaps for wide / landscape layouts */
-    row-gap: 1rem !important;
-    column-gap: 0.5rem !important;
+    row-gap: 0.8rem !important;
+    column-gap: 0.4rem !important;
     max-width: 1400px;
   }
 
   .feature-card {
     /* slightly reduce padding and bottom margin so cards appear closer */
-    padding: 0.9rem !important;
-    margin-bottom: 0.4rem !important;
-    gap: 0.3rem !important;
+    padding: 0.75rem !important;
+    margin-bottom: 0.25rem !important;
+    gap: 0.25rem !important;
   }
 
   .feature-card-link {
     /* nudge the calc sizing so 3 items sit neatly with reduced gaps */
-    flex: 0 0 calc(33.333% - 10px) !important;
-    max-width: calc(33.333% - 10px) !important;
+    flex: 0 0 calc(33.333% - 14px) !important;
+    max-width: calc(33.333% - 14px) !important;
   }
 }
 
