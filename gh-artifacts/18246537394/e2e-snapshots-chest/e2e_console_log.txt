@@ -1,3 +1,0 @@
-
-Selector wait failed
-E2E check failed: Waiting failed: 20000ms exceeded
