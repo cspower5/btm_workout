@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 // FIX: Switched from BrowserRouter to HashRouter for GitHub Pages compatibility.
 import { HashRouter as Router, Routes, Route, Link } from 'react-router-dom'; 
 import Home from './Home';
@@ -12,6 +12,24 @@ import './css/App.css';
 import logo from './../assets/images/btm_workout_logo.png';
 
 function App() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const toggleMobileMenu = () => setMobileMenuOpen((s) => !s);
+  const closeMobileMenu = () => setMobileMenuOpen(false);
+
+  const Hamburger = ({ open, onToggle }) => (
+    <button
+      className={`hamburger ${open ? 'open' : ''}`}
+      onClick={onToggle}
+      aria-label="Toggle navigation"
+      aria-expanded={open}
+    >
+      <span className="hamburger-box">
+        <span className="hamburger-inner" />
+      </span>
+    </button>
+  );
+
   return (
     // FIX: Removed the incorrect 'basename="/btm_workout"' prop, as HashRouter 
     // manages the path differently and automatically resolves links correctly.
@@ -19,9 +37,11 @@ function App() {
       <div className="App">
         <header className="App-header">
           <h1>BREAK THE MONOTONY</h1>
-          <div className="header-nav">
+          {/* Mobile hamburger toggle - visible on small screens */}
+          <Hamburger open={mobileMenuOpen} onToggle={toggleMobileMenu} />
+          <div className={`header-nav ${mobileMenuOpen ? 'open' : ''}`}>
             <nav>
-              <ul>
+              <ul onClick={() => closeMobileMenu()}>
                 <li>
                   <Link to="/">Home</Link>
                 </li>

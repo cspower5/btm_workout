@@ -92,8 +92,8 @@ jobs:
 
       - name: Start mock API server (for deterministic E2E)
         run: |
-          # Start the in-repo mock API so E2E tests don't depend on external services.
-          node ./scripts/mock_api_server.js &
+          # Start the in-repo mock API (CommonJS) so E2E tests don't depend on external services.
+          node ./scripts/mock_api_server.cjs &
           # Wait for the mock to become healthy before proceeding.
           for i in $(seq 1 15); do
             if curl --silent --fail http://127.0.0.1:4000/health >/dev/null 2>&1; then

@@ -29,7 +29,8 @@ body {
 .App-header {
   background-color: var(--primary-color);
   color: white;
-  min-height: 200px;
+  /* reduced default header height to improve vertical space on small devices */
+  min-height: 140px;
   padding: 1rem 2rem;
   box-shadow: var(--box-shadow);
   display: flex;
@@ -41,8 +42,39 @@ body {
 
 .App-header h1 {
   margin: 0;
-  font-size: 2.5rem;
+  /* reduced default header title size for better mobile/desktop balance */
+  font-size: 1.8rem;
 }
+
+/* Hamburger button (hidden on larger screens) */
+.hamburger {
+  display: none; /* shown via media query */
+  background: transparent;
+  border: none;
+  padding: 0.25rem;
+  margin-left: 0.5rem;
+  cursor: pointer;
+  color: white;
+}
+
+.hamburger-box { display: inline-block; width: 28px; height: 18px; position: relative; }
+.hamburger-inner,
+.hamburger-inner::before,
+.hamburger-inner::after {
+  width: 28px;
+  height: 2px;
+  background-color: white;
+  display: block;
+  position: absolute;
+  left: 0;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+.hamburger-inner { top: 50%; transform: translateY(-50%); }
+.hamburger-inner::before { content: ''; top: -8px; }
+.hamburger-inner::after { content: ''; top: 8px; }
+.hamburger.open .hamburger-inner { background-color: transparent; }
+.hamburger.open .hamburger-inner::before { transform: translateY(8px) rotate(45deg); }
+.hamburger.open .hamburger-inner::after { transform: translateY(-8px) rotate(-45deg); }
 
 /* Responsive tweaks for small screens */
 @media (max-width: 600px) {
@@ -51,9 +83,27 @@ body {
     padding: 0.75rem 1rem;
   }
 
+  /* show hamburger and hide nav by default on small screens */
+  .hamburger { display: inline-flex; align-items: center; justify-content: center; }
+  .header-nav { display: none; width: 100%; }
+  .header-nav.open { display: block; }
+
+  /* when open, show the nav as a vertical overlay list for easier tapping */
+  .header-nav.open nav ul {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.5rem 0.25rem;
+    background: linear-gradient(180deg, rgba(0,0,0,0.05), rgba(0,0,0,0.0));
+    border-radius: 6px;
+  }
+
+  .header-nav.open nav li { margin: 0; }
+  .header-nav.open nav a { display: block; padding: 0.5rem 0.6rem; font-size: 0.95rem; }
+
   .App-header h1 {
-    font-size: 1.4rem; /* smaller heading on mobile */
-    line-height: 1.1;
+    font-size: 1.2rem; /* smaller heading on mobile */
+    line-height: 1.05;
   }
 
   .header-nav nav ul {
@@ -99,6 +149,40 @@ body {
   }
 }
 
+/* Ensure header nav matches footer nav in narrow landscape viewports
+   (centered, compressed, no-wrap). These rules are high-specificity and
+   appended here so they override other mobile rules. */
+@media (orientation: landscape) and (max-width: 900px) {
+  /* Make header area slightly tighter to free horizontal space */
+  .App-header { padding-left: 8px !important; padding-right: 8px !important; }
+
+  /* Force header nav to center and match footer sizing */
+  header.App-header nav.header-nav,
+  .header-nav,
+  .header-nav nav ul { display: flex !important; justify-content: center !important; align-items: center !important; gap: 6px !important; flex-wrap: nowrap !important; }
+
+  header.App-header nav.header-nav li,
+  .header-nav nav li { flex: 0 0 auto !important; margin: 0 !important; padding: 0 !important; }
+
+  header.App-header nav.header-nav a,
+  .header-nav a { font-size: 0.5rem !important; padding: 3px 6px !important; white-space: nowrap !important; display: inline-block !important; }
+
+  /* Reduce title slightly in landscape to give links more room */
+  .App-header h1 { font-size: 1.4rem !important; }
+
+  /* Ensure footer remains centered and uses same sizing */
+  .footer-nav nav ul { justify-content: center !important; gap: 6px !important; flex-wrap: nowrap !important; }
+  .footer-nav a { font-size: 0.5rem !important; padding: 3px 6px !important; }
+}
+
+/* Source-level final landscape override (highest specificity) */
+@media (orientation: landscape) and (max-width: 900px) {
+  header.App-header .header-nav nav ul, .App-header .header-nav nav ul, header.App-header nav.header-nav ul { justify-content:center !important; gap:4px !important; flex-wrap:nowrap !important }
+  header.App-header .header-nav nav li, .App-header .header-nav nav li, header.App-header nav.header-nav li { flex:0 0 auto !important; margin:0 !important; padding:0 !important }
+  header.App-header .header-nav nav a, .App-header .header-nav a, header.App-header nav.header-nav a { font-size:0.46rem !important; padding:2px 6px !important; white-space:nowrap !important; display:inline-block !important }
+  .App-header h1 { font-size:1.1rem !important; }
+}
+
 /* Extra-small devices: tighten spacing and font sizes further */
 @media (max-width: 420px) {
   .App-header {
@@ -127,8 +211,8 @@ body {
 }
 
 .footer-logo {
-  max-width: 140px; /* shrink logo for small screens */
-  margin-bottom: 1rem;
+  max-width: 120px; /* shrink logo for small screens */
+  margin-bottom: 0.75rem;
 }
 
 main {
@@ -142,19 +226,20 @@ main {
 .footer-nav {
   background-color: var(--primary-color);
   box-shadow: var(--box-shadow);
-  margin-top: 2rem;
-  min-height: 600px;
-  display: flex; 
+  margin-top: 1.25rem;
+  /* do not force a large min-height; let content size naturally */
+  min-height: auto;
+  display: flex;
   flex-direction: column;
-  justify-content: space-between; /* Adjusted to place the logo at the top, links at bottom */
-  align-items: center; /* New: Centers all items horizontally */
-  padding: 2rem;
+  justify-content: space-between; /* place the logo near top and links toward bottom when space allows */
+  align-items: center;
+  padding: 1rem;
 }
 
-.footer-logo {
-  max-width: 300px; /* Adjust size as needed */
+  .footer-logo {
+  max-width: 200px; /* Adjust size as needed */
   height: auto;
-  margin-bottom: 2rem; /* Adds space between the logo and the links */
+  margin-bottom: 1rem; /* Adds space between the logo and the links */
 }
 
 .footer-nav nav ul,
@@ -162,13 +247,16 @@ main {
   list-style: none;
   padding: 0;
   display: flex;
-  justify-content: space-around;
+  /* prefer space-between so items stretch across the bar; allow wrapping on smaller screens */
+  justify-content: space-between;
+  flex-wrap: wrap;
   margin: 0;
 }
 
 .footer-nav nav li,
 .header-nav nav li {
-  margin: 0 1rem;
+  margin: 0 0.5rem;
+  flex: 0 1 auto;
 }
 
 .footer-nav a,
@@ -176,6 +264,8 @@ main {
   color: white;
   text-decoration: none;
   font-weight: bold;
+  display: inline-block;
+  padding: 0.35rem 0.5rem;
 }
 
 .footer-nav a:hover,
@@ -234,8 +324,10 @@ footer {
    appended at end so it wins during minification and avoids accidental nesting issues */
 @media (max-width: 600px) {
   .App-header {
-    padding: 0.4rem 0.6rem !important;
-    min-height: 72px !important;
+    padding: 0.45rem 0.6rem !important;
+    min-height: 76px !important;
+    position: fixed !important;
+    top: 0; left: 0; right: 0; z-index: 1000;
   }
 
   /* Force header/footer nav to a single horizontal row and stretch links */
@@ -243,34 +335,66 @@ footer {
   .footer-nav nav ul {
     display: flex !important;
     flex-direction: row !important;
-    justify-content: space-between !important;
+    justify-content: flex-start !important;
     align-items: center !important;
     width: 100% !important;
-    gap: 0.25rem !important;
+    gap: 0.12rem !important;
+    flex-wrap: nowrap !important; /* prevent wrapping */
   }
 
   .header-nav nav li,
   .footer-nav nav li {
-    flex: 1 1 auto !important;
-    margin: 0 !important;
+    flex: 0 0 auto !important; /* don't grow; allow items to size to content */
+    margin: 0 0.12rem !important;
     text-align: center !important;
-    padding: 0.15rem 0 !important;
+    padding: 0 !important;
   }
+
+  /* Make nav anchors compact and prevent wrapping */
+  .header-nav a, .footer-nav a {
+    display: inline-block !important;
+    padding: 0.08rem 0.12rem !important;
+    font-size: 0.36rem !important; /* even smaller */
+    white-space: nowrap !important; /* keep label on one line */
+  }
+
+  /* Make list items and anchors stretch evenly across the bar */
+  .header-nav nav ul, .footer-nav nav ul { display:flex !important; }
+  .header-nav nav li, .footer-nav nav li { flex: 1 1 0 !important; }
+  .header-nav nav a, .footer-nav nav a { display:block !important; width:100% !important; }
+
+  /* Portrait: keep footer small and pinned but compact */
+  .footer-nav {
+    position: fixed !important;
+    left: 0; right: 0; bottom: 0; z-index: 1000;
+    padding: 0.06rem 0.22rem !important;
+    min-height: 26px !important; /* make bottom bar shorter */
+  }
+
+  /* Add padding to main so content isn't hidden behind fixed header/footer */
+  main { padding-top: 56px !important; padding-bottom: 56px !important; }
 
   /* Make the grid very compact so content fits without vertical scroll */
   .workout-list {
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)) !important;
-    gap: 0.35rem !important;
-    padding: 0 0.25rem !important;
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)) !important;
+    gap: 0.25rem !important;
+    padding: 0 0.15rem !important;
   }
 
   .exercise-card {
-    padding: 0.2rem !important;
-    font-size: 0.85rem !important;
+    padding: 0.12rem !important;
+    font-size: 0.7rem !important;
+    min-height: 0 !important; /* allow aspect-ratio to control size */
   }
 
   .footer-nav {
-    padding: 0.6rem !important;
-    min-height: auto !important;
+    padding: 0.18rem 0.25rem !important;
+    min-height: 30px !important;
+  }
+
+  /* Landscape phones: make footer non-fixed so it pushes content (avoid overlay and extra scroll) */
+  @media (orientation: landscape) {
+    .footer-nav { position: relative !important; left: auto !important; right: auto !important; bottom: auto !important; padding: 0.2rem 0.3rem !important; }
+    main { padding-bottom: 20px !important; }
   }
 }

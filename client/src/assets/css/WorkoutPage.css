@@ -65,20 +65,28 @@
 /* Mobile adjustments so more tiles fit on a phone screen */
 @media (max-width: 600px) {
   .workout-list {
-    /* scale-preserving: keep same columns but reduce min size so tiles shrink uniformly */
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 0.5rem;
-    padding: 0 0.5rem;
+    /* allow many small tiles to flow; use smaller min width so more fit on a single viewport width */
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+    gap: 0.35rem;
+    padding: 0 0.4rem;
+    max-width: 100%;
   }
 
+  /* Remove rigid square aspect on mobile so cards can be slightly taller and fit content
+     while still being compact horizontally. Force full-width within the grid column. */
   .exercise-card {
-    padding: 0.35rem;
-    aspect-ratio: 1 / 1; /* preserve square tiles but smaller */
-    min-height: 0; /* allow aspect to control height */
-    font-size: 0.9rem;
+    padding: 0.45rem;
+    aspect-ratio: auto;
+    min-height: 44px;
+    font-size: 0.88rem;
+    align-items: stretch; /* make headings/paragraphs fill width */
   }
-  .exercise-card h3 { font-size: 0.95rem; }
-  .exercise-card p { font-size: 0.85rem; }
+
+  .exercise-card h3 { font-size: 0.95rem; margin: 0.25rem 0; }
+  .exercise-card p { font-size: 0.82rem; margin: 0.15rem 0; }
+
+  /* Ensure the anchor fills the grid cell so touch targets are large */
+  .exercise-card-link { display: block; width: 100%; }
 }
 
 .exercise-card-link {

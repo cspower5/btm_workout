@@ -16,6 +16,7 @@ _allow_dev = os.getenv("FLASK_ALLOW_DEV_ORIGINS", "1").lower() in ("1", "true", 
 DEV_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:5174",
+    "http://127.0.0.1:5174",
     # Playwright/CI often serves the built site at port 8080 during tests
     "http://localhost:8080",
     "http://127.0.0.1:8080",
@@ -414,8 +415,17 @@ def api_delete_body_part(name):
     try:
         result = db.body_parts.delete_one({"name": name})
 
-        # Also delete associated exercises
-        exercises_deleted = db.exercises.delete_many({"bodyPart": name})
+        # Also delete associated exercises. Exercise documents may store the
+        # body part in either the modern `body_part` field or legacy `bodyPart`.
+        # Perform a case-insensitive deletion across both fields.
+        exercises_deleted = db.exercises.delete_many(
+            {
+                "$or": [
+                    {"body_part": {"$regex": f"^{name}$", "$options": "i"}},
+                    {"bodyPart": {"$regex": f"^{name}$", "$options": "i"}},
+                ]
+            }
+        )
 
         if result.deleted_count == 1:
             return jsonify(
@@ -439,8 +449,11 @@ def api_delete_equipment(name):
     try:
         result = db.equipment.delete_one({"name": name})
 
-        # Also delete associated exercises
-        exercises_deleted = db.exercises.delete_many({"equipment": name})
+        # Also delete associated exercises. Equipment may be stored under `equipment`
+        # but perform a case-insensitive match to ensure deletion regardless of case.
+        exercises_deleted = db.exercises.delete_many(
+            {"equipment": {"$regex": f"^{name}$", "$options": "i"}}
+        )
 
         if result.deleted_count == 1:
             return jsonify(

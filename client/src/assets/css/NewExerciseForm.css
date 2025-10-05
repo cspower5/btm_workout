@@ -80,3 +80,18 @@ button[type="submit"]:hover {
   color: #721c24;
   border: 1px solid #f5c6cb;
 }
+
+@media (max-width: 600px) {
+  .form-container {
+    max-width: 100%;
+    margin: 0.6rem;
+    padding: 0.6rem;
+  }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 0.5rem;
+    font-size: 0.95rem;
+  }
+  button[type="submit"] { padding: 0.6rem; font-size: 1rem; }
+}

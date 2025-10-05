@@ -76,15 +76,17 @@ function Home() {
           </div>
         </Link>
 
-        {/* The corrected "Refresh Database" Card */}
-        <div 
-          className="feature-card" 
-          onClick={!refreshing ? handleRefreshDatabase : null}
-          style={{ cursor: refreshing ? 'not-allowed' : 'pointer' }}
-        >
-          <h3>Refresh Database</h3>
-          <p>{refreshing ? 'Refreshing...' : 'Reset all data and start over.'}</p>
-          {refreshError && <p className="error-message">{refreshError}</p>}
+        {/* The corrected "Refresh Database" Card - wrapped so it sizes like other cards */}
+        <div className="feature-card-link">
+          <div 
+            className="feature-card" 
+            onClick={!refreshing ? handleRefreshDatabase : null}
+            style={{ cursor: refreshing ? 'not-allowed' : 'pointer' }}
+          >
+            <h3>Refresh Database</h3>
+            <p>{refreshing ? 'Refreshing...' : 'Reset all data and start over.'}</p>
+            {refreshError && <p className="error-message">{refreshError}</p>}
+          </div>
         </div>
 
       </div>

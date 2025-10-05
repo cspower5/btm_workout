@@ -23,3 +23,25 @@
 .exercise-details p, .exercise-details ul {
   text-align: left;
 }
+
+@media (max-width: 600px) {
+  .single-exercise-container {
+    max-width: 100%;
+    margin: 0.75rem;
+    padding: 0.75rem;
+  }
+
+  .exercise-details {
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+    border-radius: 8px;
+  }
+
+  .exercise-details p, .exercise-details ul {
+    font-size: 0.95rem;
+  }
+
+  .exercise-details img {
+    margin: 0.5rem 0;
+  }
+}

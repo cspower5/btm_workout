@@ -1,7 +1,22 @@
 import axios from 'axios';
 
-// --- ABSOLUTE URL FIX: This guarantees requests hit Render and bypasses GitHub Pages ---
-export const API_BASE_URL = 'https://btm-workout.onrender.com';
+// API_BASE_URL: prefer the local backend when running on localhost/LAN for
+// developer workflows; otherwise use the hosted Render URL for production.
+export const API_BASE_URL = (() => {
+    if (typeof window !== 'undefined') {
+        try {
+            const host = window.location.hostname || '';
+            // If running locally (dev) or on a LAN IP, target the local Flask server
+            if (host === 'localhost' || host === '127.0.0.1' || host.startsWith('192.')) {
+                // Default Flask dev server port used in this project is 5000
+                return `${window.location.protocol}//${host}:5000`;
+            }
+        } catch (e) {
+            // fall through to production default
+        }
+    }
+    return 'https://btm-workout.onrender.com';
+})();
 
 // ===================================
 // GETTERS (Data Retrieval)

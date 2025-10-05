@@ -16,7 +16,19 @@ function ManageItemsPage({ title, fetchUrl, deleteUrl }) {
             // is served from.
             const fullFetchUrl = fetchUrl.startsWith('/') ? `${API_BASE_URL}${fetchUrl}` : fetchUrl;
             const response = await axios.get(fullFetchUrl);
-            setItems(response.data);
+            // Ensure items is always an array of simple names or objects with `name`
+            const data = response.data || [];
+            // Some endpoints return objects (e.g., exercises) while others return strings.
+            // Normalize to an array where each element is either the string name or
+            // an object { name: <string>, ... } so rendering and deletion work.
+            const normalized = data.map((it) => {
+                if (it && typeof it === 'object') {
+                    // backend may return { name } or { exercise_name } or full exercise docs
+                    return it.name || it.exercise_name || it.exercise_name || it;
+                }
+                return it;
+            });
+            setItems(normalized);
             setMessage('');
             setIsError(false);
         } catch (error) {
@@ -25,9 +37,11 @@ function ManageItemsPage({ title, fetchUrl, deleteUrl }) {
         }
     };
 
-    const handleDelete = async (name) => {
+    const handleDelete = async (maybeItem) => {
         setMessage('');
         setIsError(false);
+        // Accept either the name string or an object containing the name
+        const name = (maybeItem && typeof maybeItem === 'object') ? (maybeItem.name || maybeItem.exercise_name || maybeItem) : maybeItem;
         if (window.confirm(`Are you sure you want to delete '${name}'?`)) {
             const encodedName = encodeURIComponent(name);
             const urlToDelete = deleteUrl.startsWith('/') ? `${API_BASE_URL}${deleteUrl}` : deleteUrl;
@@ -40,7 +54,12 @@ function ManageItemsPage({ title, fetchUrl, deleteUrl }) {
                 const response = await axios.delete(fullDeleteUrl);
                 setMessage(response.data.message);
                 setIsError(false);
-                setItems(items.filter(item => item.name !== name));
+                // Remove the item from state regardless of whether it was stored as
+                // a plain string or an object with a `name` property.
+                setItems(items.filter((item) => {
+                    if (item && typeof item === 'object') return (item.name || item.exercise_name || item) !== name;
+                    return item !== name;
+                }));
             } catch (error) {
                 setMessage(error.response.data.error || 'Failed to delete item.');
                 setIsError(true);

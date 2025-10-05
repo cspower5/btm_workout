@@ -2,6 +2,7 @@
 import { createRequire } from 'module';
 import { spawn } from 'child_process';
 import path from 'path';
+import { fileURLToPath } from 'url';
 const require = createRequire(import.meta.url);
 
 async function tryImport(name){
@@ -67,10 +68,11 @@ async function main(){
   }
   console.log('Spawning e2e runner for script:', script);
   // Spawn a small CommonJS runner that imports the ESM script via a file URL.
-  // Resolve the runner path relative to the repository root (one level up from client
-  // when this wrapper is executed from ./client in CI). This avoids MODULE_NOT_FOUND
-  // when the CWD is client/ and scripts are at repo root.
-  const repoRoot = path.resolve(process.cwd(), '..');
+  // Resolve the runner path relative to the script's location so this wrapper
+  // works regardless of the current working directory.
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  const repoRoot = path.resolve(__dirname, '..');
   const runner = path.resolve(repoRoot, 'scripts', 'e2e_runner.cjs');
   // Pass the discovered script path as an argument to the runner so it can import
   // the correct ESM file regardless of working directory.
