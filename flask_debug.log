@@ -1,0 +1,37 @@
+nohup: ignoring input
+⚠️ Warning: Missing MONGO_USER/MONGO_PASS/MONGO_HOST; falling back to localhost without auth for local/test usage.
+✅ Successfully connected to MongoDB database: btm_workout_db
+ * Serving Flask app 'flask_server'
+ * Debug mode: on
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 922-527-217
+127.0.0.1 - - [07/Oct/2025 22:48:42] "POST /api/v1/insert_exercise HTTP/1.1" 200 -
+ * Detected change in '/home/cspower/Python/projects/btm_workout/flask_server.py', reloading
+⚠️ Warning: Missing MONGO_USER/MONGO_PASS/MONGO_HOST; falling back to localhost without auth for local/test usage.
+✅ Successfully connected to MongoDB database: btm_workout_db
+DEBUG: User object: {'id': '68e5ddfdbfaa9d5e43daacf2', 'username': 'testuser', 'email': 'test@test.com', 'preferences': {}, 'created_at': '2025-10-08T03:43:57.296000'}
+DEBUG: User ID: 68e5ddfdbfaa9d5e43daacf2
+DEBUG: Found 55 existing exercises
+DEBUG: About to insert exercise: {'exercise_name': 'Test Push Up 4', 'body_part': 'chest', 'equipment': 'body weight', 'target': 'pectorals', 'difficulty': 'beginner', 'instructions': 'Do a push up', 'name': 'test push up 4'}
+DEBUG: Adding to user: 68e5ddfdbfaa9d5e43daacf2
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 922-527-217
+ * Detected change in '/home/cspower/Python/projects/btm_workout/flask_server.py', reloading
+⚠️ Warning: Missing MONGO_USER/MONGO_PASS/MONGO_HOST; falling back to localhost without auth for local/test usage.
+✅ Successfully connected to MongoDB database: btm_workout_db
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 922-527-217
+ * Detected change in '/home/cspower/Python/projects/btm_workout/flask_server.py', reloading
+⚠️ Warning: Missing MONGO_USER/MONGO_PASS/MONGO_HOST; falling back to localhost without auth for local/test usage.
+✅ Successfully connected to MongoDB database: btm_workout_db
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 922-527-217
+⚠️ Warning: Missing MONGO_USER/MONGO_PASS/MONGO_HOST; falling back to localhost without auth for local/test usage.
+✅ Successfully connected to MongoDB database: btm_workout_db

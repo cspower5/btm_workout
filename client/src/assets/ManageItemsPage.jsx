@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { API_BASE_URL } from './api/index.jsx';
+import { API_BASE_URL, getExercisesList, getBodyParts, getEquipmentList } from './api/index.jsx';
 import './css/ManageItemsPage.css';
 
 function ManageItemsPage({ title, fetchUrl, deleteUrl }) {
@@ -10,25 +10,65 @@ function ManageItemsPage({ title, fetchUrl, deleteUrl }) {
 
     const fetchItems = async () => {
         try {
-            // If the provided fetchUrl is a relative path (starts with '/'),
-            // prefix it with the absolute API base so requests go to the
-            // configured backend (Render) instead of the origin the app
-            // is served from.
-            const fullFetchUrl = fetchUrl.startsWith('/') ? `${API_BASE_URL}${fetchUrl}` : fetchUrl;
-            const response = await axios.get(fullFetchUrl);
-            // Ensure items is always an array of simple names or objects with `name`
-            const data = response.data || [];
-            // Some endpoints return objects (e.g., exercises) while others return strings.
-            // Normalize to an array where each element is either the string name or
-            // an object { name: <string>, ... } so rendering and deletion work.
+            let data = [];
+            
+            // Use the appropriate API function based on the fetchUrl
+            if (fetchUrl.includes('exercises_list')) {
+                data = await getExercisesList();
+            } else if (fetchUrl.includes('body_parts_list')) {
+                data = await getBodyParts();
+            } else if (fetchUrl.includes('equipment_list')) {
+                data = await getEquipmentList();
+            } else {
+                // Fallback to direct axios call for other endpoints
+                const fullFetchUrl = fetchUrl.startsWith('/') ? `${API_BASE_URL}${fetchUrl}` : fetchUrl;
+                
+                // Get the token from localStorage for authentication
+                const token = localStorage.getItem('authToken');
+                const headers = {};
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+                
+                const response = await axios.get(fullFetchUrl, { headers });
+                data = response.data || [];
+            }
+            
+            // For exercises, keep the full object to display index fields
+            // For other items (body parts, equipment), normalize to simple names
             const normalized = data.map((it) => {
-                if (it && typeof it === 'object') {
-                    // backend may return { name } or { exercise_name } or full exercise docs
-                    return it.name || it.exercise_name || it.exercise_name || it;
+                if (fetchUrl.includes('exercises_list') && it && typeof it === 'object') {
+                    // For exercises, keep the full object with all fields
+                    return {
+                        name: it.name || it.exercise_name,
+                        bodyPart: it.bodyPart || it.body_part,
+                        equipment: it.equipment,
+                        // Keep the original object for reference
+                        original: it
+                    };
+                } else if (it && typeof it === 'object') {
+                    // For other endpoints, extract just the name
+                    return it.name || it.exercise_name || it;
                 }
                 return it;
             });
-            setItems(normalized);
+            
+            // Sort items alphabetically (Issue 2: Ascending alphabetical order)
+            const sorted = normalized.sort((a, b) => {
+                let nameA, nameB;
+                if (fetchUrl.includes('exercises_list')) {
+                    // For exercises, sort by exercise name
+                    nameA = (typeof a === 'object' ? a.name : a).toString().toLowerCase();
+                    nameB = (typeof b === 'object' ? b.name : b).toString().toLowerCase();
+                } else {
+                    // For other items, use the existing logic
+                    nameA = (typeof a === 'object' ? (a.name || a.exercise_name || a) : a).toString().toLowerCase();
+                    nameB = (typeof b === 'object' ? (b.name || b.exercise_name || b) : b).toString().toLowerCase();
+                }
+                return nameA.localeCompare(nameB);
+            });
+            
+            setItems(sorted);
             setMessage('');
             setIsError(false);
         } catch (error) {
@@ -41,8 +81,21 @@ function ManageItemsPage({ title, fetchUrl, deleteUrl }) {
         setMessage('');
         setIsError(false);
         // Accept either the name string or an object containing the name
-        const name = (maybeItem && typeof maybeItem === 'object') ? (maybeItem.name || maybeItem.exercise_name || maybeItem) : maybeItem;
-        if (window.confirm(`Are you sure you want to delete '${name}'?`)) {
+        let name, displayName;
+        if (maybeItem && typeof maybeItem === 'object') {
+            name = maybeItem.name || maybeItem.exercise_name || maybeItem;
+            // For exercises, create a descriptive display name
+            if (maybeItem.bodyPart && maybeItem.equipment) {
+                displayName = `${name} (${maybeItem.bodyPart}, ${maybeItem.equipment})`;
+            } else {
+                displayName = name;
+            }
+        } else {
+            name = maybeItem;
+            displayName = name;
+        }
+        
+        if (window.confirm(`Are you sure you want to delete '${displayName}'?`)) {
             const encodedName = encodeURIComponent(name);
             const urlToDelete = deleteUrl.startsWith('/') ? `${API_BASE_URL}${deleteUrl}` : deleteUrl;
             const fullDeleteUrl = `${urlToDelete}/${encodedName}`;
@@ -51,17 +104,27 @@ function ManageItemsPage({ title, fetchUrl, deleteUrl }) {
             console.log("Attempting to delete with URL:", fullDeleteUrl);
 
             try {
-                const response = await axios.delete(fullDeleteUrl);
+                // Get the token from localStorage for authentication
+                const token = localStorage.getItem('authToken');
+                const headers = {};
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+                
+                const response = await axios.delete(fullDeleteUrl, { headers });
                 setMessage(response.data.message);
                 setIsError(false);
                 // Remove the item from state regardless of whether it was stored as
                 // a plain string or an object with a `name` property.
                 setItems(items.filter((item) => {
-                    if (item && typeof item === 'object') return (item.name || item.exercise_name || item) !== name;
+                    if (item && typeof item === 'object') {
+                        const itemName = item.name || item.exercise_name || item;
+                        return itemName !== name;
+                    }
                     return item !== name;
                 }));
             } catch (error) {
-                setMessage(error.response.data.error || 'Failed to delete item.');
+                setMessage(error.response?.data?.error || 'Failed to delete item.');
                 setIsError(true);
             }
         }
@@ -83,8 +146,19 @@ function ManageItemsPage({ title, fetchUrl, deleteUrl }) {
                 {items.length > 0 ? (
                     items.map((item, index) => (
                         <li key={index} className="item-list-item">
-                            <span>{item.name || item}</span>
-                            <button onClick={() => handleDelete(item.name || item)}>Delete</button>
+                            {/* Show all three index fields for exercises */}
+                            {item && typeof item === 'object' && item.bodyPart && item.equipment ? (
+                                <div className="exercise-details">
+                                    <div className="exercise-name">{item.name}</div>
+                                    <div className="exercise-meta">
+                                        <span className="body-part">{item.bodyPart}</span>
+                                        <span className="equipment">{item.equipment}</span>
+                                    </div>
+                                </div>
+                            ) : (
+                                <span>{item.name || item}</span>
+                            )}
+                            <button onClick={() => handleDelete(item)}>Delete</button>
                         </li>
                     ))
                 ) : (

@@ -1,10 +1,12 @@
+import os
 from flask import Flask, jsonify, request
 from flask_cors import cross_origin  # <-- Keep CORS and Import cross_origin
 import btm_workout_db_connect as db_connect
 from database_refresh import insert_exercises_if_not_exist
 from pymongo.errors import DuplicateKeyError
-
-import os
+from auth import init_auth, register_user, login_user, verify_token, require_auth
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from user_data_manager import UserDataManager, optional_auth, get_current_user_id
 
 # Production-only allowed origin
 PROD_ORIGINS = ["https://cspower5.github.io"]
@@ -17,6 +19,7 @@ DEV_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:5174",
     "http://127.0.0.1:5174",
+    "http://192.168.40.88:5174",
     # Playwright/CI often serves the built site at port 8080 during tests
     "http://localhost:8080",
     "http://127.0.0.1:8080",
@@ -52,6 +55,9 @@ def log_cors_origin_mismatch():
 app = Flask(__name__)
 # NOTE: The global CORS(app) is REMOVED. @cross_origin is used on each route for guaranteed functionality.
 
+# Initialize JWT authentication
+jwt = init_auth(app)
+
 
 # Register before_request CORS logger (helps surface CORS origin rejections in server logs)
 @app.before_request
@@ -64,21 +70,15 @@ def _log_cors_wrapper():
 
 @app.route("/api/v1/insert_exercise", methods=["POST"])
 @cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
-def api_insert_exercise():
-    db = db_connect.get_db()
-    if db is None:
-        return jsonify({"error": "Database not connected."}), 500
-
+@require_auth  # Require authentication for adding exercises
+def api_insert_exercise(user):
     try:
         data = request.json
-        exercises_collection = db["exercises"]
-
-        # Accept legacy aliases and normalize to canonical payload keys:
-        # - "name" -> "exercise_name"
-        # - "bodyPart" -> "body_part"
-        # Enforce canonical payload: expect `exercise_name`, `body_part`, `equipment`, `target`
         if data is None:
             return jsonify({"error": "Invalid or missing JSON body."}), 400
+
+        # Initialize user data manager
+        user_data_manager = UserDataManager()
 
         # Normalize aliases into canonical names
         if "name" in data and "exercise_name" not in data:
@@ -93,30 +93,23 @@ def api_insert_exercise():
                 400,
             )
 
-        # Insert using canonical schema
         # Remove unrelated/legacy fields if present
         data.pop("category", None)
         data.pop("bodyPart", None)
         data.pop("name", None)
 
-        # Ensure backward compatibility: include legacy `name` field so
-        # the existing unique index on (name, body_part, equipment) will
-        # be effective. Normalize canonical fields to lowercase to avoid
-        # duplicates caused by case differences (e.g., 'Squat' vs 'squat').
+        # Normalize fields for consistency
         def _safe_strip(val):
             try:
                 return val.strip() if isinstance(val, str) else val
             except Exception:
                 return val
 
-        # Preserve the original exercise_name for display, but maintain
-        # lowercased fields used for uniqueness/indexing so case-variants
-        # don't create duplicate entries.
         original_ex_name = _safe_strip(data.get("exercise_name"))
         bp = _safe_strip(data.get("body_part"))
         eq = _safe_strip(data.get("equipment"))
 
-        # Normalized values (lowercased) used by the unique index
+        # Normalized values (lowercased) used for uniqueness checking
         norm_name = (
             original_ex_name.lower()
             if isinstance(original_ex_name, str)
@@ -125,38 +118,35 @@ def api_insert_exercise():
         norm_bp = bp.lower() if isinstance(bp, str) else bp
         norm_eq = eq.lower() if isinstance(eq, str) else eq
 
-        # Store both display and normalized/index fields
+        # Store both display and normalized fields
         data["exercise_name"] = original_ex_name
         data["name"] = norm_name
         data["body_part"] = norm_bp
         data["equipment"] = norm_eq
-        existing = exercises_collection.find_one(
-            {
-                "$or": [
-                    {
-                        "name": data["name"],
-                        "body_part": data["body_part"],
-                        "equipment": data["equipment"],
-                    },
-                    {
-                        "exercise_name": original_ex_name,
-                        "body_part": data["body_part"],
-                        "equipment": data["equipment"],
-                    },
-                ]
-            }
-        )
-        if existing:
-            return (
-                jsonify(
-                    {
-                        "error": "An exercise with this name, body part, and equipment already exists."
-                    }
-                ),
-                409,
-            )
 
-        result = exercises_collection.insert_one(data)
+        # Check for duplicates in user's exercises (including public exercises)
+        user_id = user[
+            "id"
+        ]  # Use the user object passed by the decorator (note: it's 'id', not '_id')
+        existing_exercises = user_data_manager.get_exercises(user_id)
+
+        for existing in existing_exercises:
+            if (
+                existing.get("name") == norm_name
+                and existing.get("body_part") == norm_bp
+                and existing.get("equipment") == norm_eq
+            ):
+                return (
+                    jsonify(
+                        {
+                            "error": "An exercise with this name, body part, and equipment already exists."
+                        }
+                    ),
+                    409,
+                )
+
+        # Add exercise with user isolation
+        result = user_data_manager.add_exercise(data, user_id)
 
         return jsonify(
             {"message": "Exercise inserted successfully", "id": str(result.inserted_id)}
@@ -177,23 +167,21 @@ def api_insert_exercise():
         return jsonify({"error": "Failed to insert exercise."}), 500
 
 
-# API endpoint to get 3 random exercises for a selected body part
+# API endpoint to get random exercises for a selected body part
 @app.route("/api/v1/get_random_exercises", methods=["POST"])
 @cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
+@optional_auth  # Allow both authenticated and unauthenticated access
 def api_get_random_exercises():
-    db = db_connect.get_db()
-    if db is None:
-        return jsonify({"error": "Database not connected."}), 500
-
     try:
         data = request.json
         # Accept either `bodyPart` (frontend legacy) or `body_part` (canonical)
         selected_body_part = None
+        selected_equipment = None
         if data is not None:
             selected_body_part = data.get("body_part") or data.get("bodyPart")
+            selected_equipment = data.get("equipment")  # Optional equipment filter
 
-        # Normalize and validate number of exercises: accept numExercises (camelCase)
-        # or num_exercises (snake_case). Coerce to int and enforce safe bounds.
+        # Normalize and validate number of exercises
         raw_num = None
         if data:
             raw_num = data.get("numExercises")
@@ -216,52 +204,47 @@ def api_get_random_exercises():
     if not selected_body_part:
         return jsonify({"error": "No body part provided."}), 400
 
-    # Use case-insensitive matching against the canonical `body_part` field
+    # Use UserDataManager to get exercises (includes both user's and public exercises)
     try:
-        # Match exercises where either the canonical `body_part` OR the
-        # legacy `bodyPart` (some older docs) case-insensitively equals
-        # the requested body part. This makes the endpoint resilient to
-        # mixed document schemas in the database.
-        pipeline = [
-            {
-                "$match": {
-                    "$expr": {
-                        "$or": [
-                            {
-                                "$eq": [
-                                    {"$toLower": {"$ifNull": ["$body_part", ""]}},
-                                    selected_body_part.lower(),
-                                ]
-                            },
-                            {
-                                "$eq": [
-                                    {"$toLower": {"$ifNull": ["$bodyPart", ""]}},
-                                    selected_body_part.lower(),
-                                ]
-                            },
-                        ]
-                    }
-                }
-            },
-            {"$sample": {"size": int(num_exercises)}},
-            {"$project": {"_id": 0}},  # Exclude MongoDB's _id field
-        ]
+        user_data_manager = UserDataManager()
+        user_id = get_current_user_id()
 
-        random_exercises = list(db.exercises.aggregate(pipeline))
+        # Get all exercises available to the user
+        all_exercises = user_data_manager.get_exercises(user_id)
 
-        if not random_exercises:
-            return (
-                jsonify(
-                    {
-                        "error": f"No exercises found for body part: {selected_body_part}."
-                    }
-                ),
-                404,
-            )
+        # Filter by body part (case-insensitive) and optional equipment
+        matching_exercises = []
+        for exercise in all_exercises:
+            body_part = exercise.get("body_part") or exercise.get("bodyPart", "")
+            equipment = exercise.get("equipment", "")
 
-        # Transform canonical DB fields into the legacy frontend shape so the
-        # existing client UI (which expects `name`, `bodyPart`, `reps`, `sets`)
-        # will display values correctly. Keep original fields where present.
+            # Check if body part matches
+            body_part_matches = body_part.lower() == selected_body_part.lower()
+
+            # Check if equipment matches (if specified)
+            equipment_matches = True  # Default to True if no equipment filter
+            if selected_equipment:
+                equipment_matches = equipment.lower() == selected_equipment.lower()
+
+            # Include exercise if both conditions are met
+            if body_part_matches and equipment_matches:
+                matching_exercises.append(exercise)
+
+        if not matching_exercises:
+            error_msg = f"No exercises found for body part: {selected_body_part}"
+            if selected_equipment:
+                error_msg += f" with equipment: {selected_equipment}"
+            return jsonify({"error": error_msg + "."}), 404
+
+        # Sample random exercises
+        import random
+
+        if len(matching_exercises) <= num_exercises:
+            random_exercises = matching_exercises
+        else:
+            random_exercises = random.sample(matching_exercises, num_exercises)
+
+        # Transform canonical DB fields into the legacy frontend shape
         def transform(doc):
             return {
                 # frontend expects `name`; canonical DB has `exercise_name`
@@ -299,30 +282,52 @@ def api_refresh_db():
 # API endpoint to get a single exercise by its name
 @app.route("/api/v1/exercise/<string:name>", methods=["GET"])
 @cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
+@optional_auth
 def api_get_exercise_details(name):
     db = db_connect.get_db()
     if db is None:
         return jsonify({"error": "Database not connected."}), 500
     try:
-        exercises_collection = db["exercises"]
-        # Accept queries by display name or normalized name. Normalize the
-        # incoming parameter to lowercase and attempt both lookups so existing
-        # clients that pass the original cased name continue to work.
+        # Get current user ID from JWT token (if authenticated)
+        current_user_id = None
+        try:
+            current_user_id = get_jwt_identity()
+        except Exception:
+            pass  # User not authenticated, that's okay
+
+        # Use UserDataManager to get exercise (respects user data isolation)
+        user_data_manager = UserDataManager()
+
+        # Get all exercises accessible to this user
+        all_exercises = user_data_manager.get_exercises(user_id=current_user_id)
+
+        # Find the specific exercise by name (case-insensitive)
         try:
             norm_query = name.strip().lower()
         except Exception:
             norm_query = name
 
-        exercise = exercises_collection.find_one(
-            {"$or": [{"exercise_name": name}, {"name": norm_query}]}, {"_id": 0}
-        )
+        exercise = None
+        for ex in all_exercises:
+            ex_name = (ex.get("exercise_name") or ex.get("name", "")).lower()
+            if (
+                ex_name == norm_query
+                or ex.get("exercise_name") == name
+                or ex.get("name") == name
+            ):
+                exercise = ex
+                break
 
         if exercise:
+            # Remove _id if present
+            if "_id" in exercise:
+                del exercise["_id"]
             return jsonify(exercise)
 
         return jsonify({"error": "Exercise not found."}), 404
 
-    except Exception:
+    except Exception as e:
+        print(f"Error in exercise details: {e}")
         return jsonify({"error": "Failed to retrieve exercise details."}), 500
 
 
@@ -470,129 +475,102 @@ def api_delete_equipment(name):
 # API endpoint to get a list of all body parts
 @app.route("/api/v1/body_parts_list", methods=["GET"])
 @cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
+@optional_auth  # Allow both authenticated and unauthenticated access
 def api_body_parts_list():
-    db = db_connect.get_db()
-    if db is None:
-        return jsonify({"error": "Database not connected."}), 500
     try:
-        # FIX: Use Aggregation to force all names to lowercase and return unique list
-        # Only include documents where 'name' exists and is a string so $toLower is safe
-        pipeline = [
-            {
-                "$match": {
-                    "name": {"$exists": True, "$type": "string", "$nin": ["", None]}
-                }
-            },
-            {"$group": {"_id": {"$toLower": "$name"}}},
-            {"$sort": {"_id": 1}},
-        ]
+        # Use UserDataManager to get body parts (includes both user's and public body parts)
+        user_data_manager = UserDataManager()
+        user_id = get_current_user_id()
 
-        names_cursor = db.body_parts.aggregate(pipeline)
+        body_parts_docs = user_data_manager.get_body_parts(user_id)
 
-        # The result is the unique lowercase name (stored in _id)
-        body_parts = [doc["_id"] for doc in names_cursor]
+        # Extract unique body part names (case-insensitive)
+        body_parts_set = set()
+        for doc in body_parts_docs:
+            name = doc.get("name") or doc.get("body_part")
+            if name and isinstance(name, str):
+                body_parts_set.add(name.lower())
+
+        # Return sorted list
+        body_parts = sorted(list(body_parts_set))
         return jsonify(body_parts)
+
     except Exception as e:
-        # NOTE: This endpoint still fails on bad data, but we rely on a clean deploy now.
         return jsonify({"error": f"Failed to retrieve body parts list: {str(e)}"}), 500
 
 
 # API endpoint to get a list of all equipment
 @app.route("/api/v1/equipment_list", methods=["GET"])
 @cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
+@optional_auth  # Allow both authenticated and unauthenticated access
 def api_equipment_list():
-    db = db_connect.get_db()
-    if db is None:
-        return jsonify({"error": "Database not connected."}), 500
     try:
-        # FIX: Use Aggregation to force all names to lowercase and return unique list
-        # Only include documents where 'name' exists and is a string so $toLower is safe
-        pipeline = [
-            {
-                "$match": {
-                    "name": {"$exists": True, "$type": "string", "$nin": ["", None]}
-                }
-            },
-            {"$group": {"_id": {"$toLower": "$name"}}},
-            {"$sort": {"_id": 1}},
-        ]
+        # Use UserDataManager to get equipment (includes both user's and public equipment)
+        user_data_manager = UserDataManager()
+        user_id = get_current_user_id()
 
-        names_cursor = db.equipment.aggregate(pipeline)
+        equipment_docs = user_data_manager.get_equipment(user_id)
 
-        # The result is the unique lowercase name (stored in _id)
-        equipment_list = [doc["_id"] for doc in names_cursor]
+        # Extract unique equipment names (case-insensitive)
+        equipment_set = set()
+        for doc in equipment_docs:
+            name = doc.get("name") or doc.get("equipment")
+            if name and isinstance(name, str):
+                equipment_set.add(name.lower())
+
+        # Return sorted list
+        equipment_list = sorted(list(equipment_set))
         return jsonify(equipment_list)
+
     except Exception as e:
-        # Defensive fallback: aggregation may fail on corrupt/mixed-type data.
-        app.logger.warning(
-            "Aggregation failed for equipment_list, falling back to safe scan: %s", e
-        )
-        try:
-            names = set()
-            for doc in db.equipment.find({}, {"name": 1}):
-                name = doc.get("name")
-                if name is None:
-                    continue
-                if not isinstance(name, str):
-                    try:
-                        name = str(name)
-                    except Exception:
-                        continue
-                names.add(name.lower())
-            equipment_list = sorted(names)
-            return jsonify(equipment_list)
-        except Exception:
-            app.logger.exception("Fallback scan also failed for equipment_list")
-            return (
-                jsonify({"error": f"Failed to retrieve equipment list: {str(e)}"}),
-                500,
-            )
+        return jsonify({"error": f"Failed to retrieve equipment list: {str(e)}"}), 500
 
 
 # API endpoint to get a list of all exercises
 @app.route("/api/v1/exercises_list", methods=["GET"])
 @cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
+@optional_auth  # Allow both authenticated and unauthenticated access
 def api_exercises_list():
-    db = db_connect.get_db()
-    if db is None:
-        return jsonify({"error": "Database not connected."}), 500
     try:
-        exercises_list = list(db.exercises.find({}, {"_id": 0}))
-        return jsonify(exercises_list)
+        # Use UserDataManager to get exercises (includes both user's and public exercises)
+        user_data_manager = UserDataManager()
+        user_id = get_current_user_id()
+
+        exercises = user_data_manager.get_exercises(user_id)
+
+        # Remove MongoDB _id field for clean JSON response
+        for exercise in exercises:
+            exercise.pop("_id", None)
+
+        return jsonify(exercises)
+
     except Exception as e:
         return jsonify({"error": f"Failed to retrieve exercises list: {str(e)}"}), 500
 
 
 # API endpoint to get a list of all difficulties
 @app.route("/api/v1/difficulties", methods=["GET"])
-@cross_origin(origins=["https://cspower5.github.io"])  # <--- CORS FIX
+@cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
+@optional_auth  # Allow both authenticated and unauthenticated access
 def api_difficulties():
-    db = db_connect.get_db()
-    if db is None:
-        return jsonify({"error": "Database not connected."}), 500
     try:
-        # FIX: Use Aggregation to force all difficulties to lowercase and return unique list
-        # Only include documents where 'difficulty' is present and a string to avoid $toLower on other types
-        pipeline = [
-            {
-                "$match": {
-                    "difficulty": {
-                        "$exists": True,
-                        "$type": "string",
-                        "$nin": [None, ""],
-                    }
-                }
-            },
-            {"$group": {"_id": {"$toLower": "$difficulty"}}},
-            {"$sort": {"_id": 1}},
-        ]
+        # Use UserDataManager to get exercises (includes both user's and public exercises)
+        user_data_manager = UserDataManager()
+        user_id = get_current_user_id()
 
-        difficulties_cursor = db.exercises.aggregate(pipeline)
+        exercises = user_data_manager.get_exercises(user_id)
 
-        # The result is the unique lowercase name (stored in _id)
-        difficulties = [doc["_id"] for doc in difficulties_cursor]
+        # Extract unique difficulty levels (case-insensitive)
+        difficulties_set = set()
+        for exercise in exercises:
+            difficulty = exercise.get("difficulty")
+            if difficulty and isinstance(difficulty, str):
+                difficulties_set.add(difficulty.lower())
 
+        # Return sorted list
+        difficulties = sorted(list(difficulties_set))
         return jsonify(difficulties)
+
     except Exception as e:
         return jsonify({"error": f"Failed to retrieve difficulties: {str(e)}"}), 500
 
@@ -645,6 +623,106 @@ def api_admin_allowed_origins():
     if not token or not auth or auth.strip() != f"Bearer {token}":
         return jsonify({"error": "Unauthorized"}), 401
     return jsonify({"allowed_origins": ALLOWED_ORIGINS}), 200
+
+
+# --- Authentication Routes ---
+
+
+@app.route("/api/v1/auth/register", methods=["POST"])
+@cross_origin(origins=ALLOWED_ORIGINS)
+def api_register():
+    """Register a new user account."""
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"error": "Request body is required"}), 400
+
+        result = register_user(data)
+
+        if result["success"]:
+            return (
+                jsonify(
+                    {
+                        "success": True,
+                        "user": result["user"],
+                        "access_token": result["access_token"],
+                        "message": result["message"],
+                    }
+                ),
+                201,
+            )
+        else:
+            return jsonify({"success": False, "errors": result["errors"]}), 400
+
+    except Exception as e:
+        app.logger.error(f"Registration endpoint error: {str(e)}")
+        return jsonify({"error": "Registration failed"}), 500
+
+
+@app.route("/api/v1/auth/login", methods=["POST"])
+@cross_origin(origins=ALLOWED_ORIGINS)
+def api_login():
+    """Authenticate user login."""
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"error": "Request body is required"}), 400
+
+        result = login_user(data)
+
+        if result["success"]:
+            return (
+                jsonify(
+                    {
+                        "success": True,
+                        "user": result["user"],
+                        "access_token": result["access_token"],
+                        "message": result["message"],
+                    }
+                ),
+                200,
+            )
+        else:
+            return jsonify({"success": False, "errors": result["errors"]}), 401
+
+    except Exception as e:
+        app.logger.error(f"Login endpoint error: {str(e)}")
+        return jsonify({"error": "Login failed"}), 500
+
+
+@app.route("/api/v1/auth/verify", methods=["GET"])
+@cross_origin(origins=ALLOWED_ORIGINS)
+@jwt_required()
+def api_verify_token():
+    """Verify JWT token and return user data."""
+    try:
+        result = verify_token()
+
+        if result["success"]:
+            return (
+                jsonify(
+                    {
+                        "success": True,
+                        "user": result["user"],
+                        "message": result["message"],
+                    }
+                ),
+                200,
+            )
+        else:
+            return jsonify({"success": False, "error": result["error"]}), 401
+
+    except Exception as e:
+        app.logger.error(f"Token verification endpoint error: {str(e)}")
+        return jsonify({"error": "Token verification failed"}), 500
+
+
+@app.route("/api/v1/auth/me", methods=["GET"])
+@cross_origin(origins=ALLOWED_ORIGINS)
+@require_auth
+def api_get_current_user(current_user):
+    """Get current user profile."""
+    return jsonify({"success": True, "user": current_user}), 200
 
 
 # --- Run Server (Production/Development) ---

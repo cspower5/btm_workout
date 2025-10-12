@@ -1,0 +1,510 @@
+:root {
+  /* Color system */
+  --primary-color: #007bff;
+  --secondary-color: #6c757d;
+  --background-color: #f8f9fa;
+  --card-background: #ffffff;
+  --text-color: #212529;
+  --header-background: #1E90FF;
+  --header-text-color: white;
+  
+  /* Layout and spacing */
+  --border-radius: 8px;
+  --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  
+  /* Header dimensions - focused on logo and branding */
+  --header-height: 300px;
+  
+  /* Logo dimensions - prominent and central */
+  --logo-height: 200px;
+  --logo-max-width: 600px;
+  
+  /* Typography - fluid scaling */
+  --header-title-size: clamp(1.0rem, 2.5vw, 1.4rem);
+  --header-title-size-mobile: clamp(0.9rem, 2.2vw, 1.1rem);
+  --user-info-size: clamp(0.8rem, 1.5vw, 1rem);
+  --button-size: clamp(0.7rem, 1.2vw, 0.85rem);
+  --nav-font-size-mobile: clamp(0.7rem, 1.5vw, 0.9rem);
+  
+  /* Navigation sizing */
+  --footer-nav-height: 30px;
+  --footer-nav-padding: 0.18rem 0.25rem;
+  --nav-item-padding: 0.08rem 0.12rem;
+  --nav-item-gap: 0.12rem;
+  
+  /* Z-index system */
+  --z-header: 1000;
+  --z-modal: 1100;
+  --z-tooltip: 1200;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 
+  'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  margin: 0;
+  padding: 0;
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+.App {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  text-align: center;
+}
+
+.App-header {
+  background-color: var(--header-background);
+  min-height: var(--header-height);
+  display: grid;
+  grid-template-rows: 1fr auto;
+  grid-template-areas: 
+    "logo"  
+    "user-info";
+  align-items: center;
+  justify-items: center;
+  font-size: calc(10px + 2vmin);
+  color: var(--header-text-color);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-header);
+  padding: 1rem;
+}
+
+/* Logo gets center stage in grid - now the main focus */
+.header-brand {
+  grid-area: logo;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-self: center;
+}
+
+/* User info positioned at bottom right */
+.user-info-section {
+  grid-area: user-info;
+  justify-self: end;
+  align-self: start; /* Position at top of grid area */
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem; /* Add some padding for visibility */
+}
+
+.App-header h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+/* Professional logo sizing - natural dimensions approach */
+.header-logo {
+  width: var(--logo-max-width);
+  height: var(--logo-height);
+  max-width: 90vw; /* Responsive limit */
+  max-height: none;
+  object-fit: contain; /* Maintain aspect ratio */
+  object-position: center;
+  margin: 0.5rem auto;
+  border-radius: 8px;
+  display: block;
+}
+
+.user-welcome {
+  color: var(--header-text-color);
+  font-size: var(--user-info-size);
+  font-weight: 500;
+}
+
+.logout-btn {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: var(--header-text-color);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.6rem 1rem; /* Increased padding */
+  border-radius: calc(var(--border-radius) / 2);
+  font-size: 0.9rem; /* Increased font size */
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.logout-btn:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+@media (max-width: 600px) {
+  .App-header h1 {
+    font-size: 1rem;
+  }
+
+  /* User info section for mobile */
+  .user-info-section {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.3rem;
+  }
+
+  .user-welcome {
+    font-size: 0.85rem;
+    text-align: right;
+  }
+
+  .logout-btn {
+    padding: 0.2rem 0.5rem;
+    font-size: 0.7rem;
+  }
+
+  /* Simple main content padding */
+  main { 
+    padding-top: var(--header-height);
+    padding-bottom: 56px;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* Auth pages use same spacing */
+  main .auth-page-container {
+    padding-top: var(--header-height);
+  }
+
+  /* when open, show the nav as a vertical overlay list for easier tapping */
+  .header-nav.open nav ul {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem; /* Increase gap for tap targets */
+    padding: 1rem; /* Better padding inside the overlay */
+    background: none; /* Remove background gradient */
+    border-radius: 0; /* Remove border radius */
+    height: auto; /* Don't force 100% height here */
+    /* gap: 0.25rem;
+    padding: 0.5rem 0.25rem;
+    background: linear-gradient(180deg, rgba(0,0,0,0.05), rgba(0,0,0,0.0));
+    border-radius: 6px;
+    height: 100%; */
+  }
+
+  .header-nav.open nav li { margin: 0; }
+  .header-nav.open nav a { display: block; padding: 0.5rem 0.6rem; font-size: 0.95rem; }
+
+  .App-header h1 {
+    font-size: 1.2rem; /* smaller heading on mobile */
+    line-height: 1.05;
+  }
+
+  .header-nav nav ul {
+    /* Keep nav items horizontal and force a single row; each item stretches
+       so links fill the top bar. On very small screens we scale sizes down
+       rather than stacking to preserve the desktop layout visually. */
+    flex-direction: column;
+    gap: 0.35rem;
+    align-items: stretch;
+    width: 100%;
+    flex-wrap: nowrap;
+  }
+
+  .header-nav nav li {
+    /* Keep nav horizontal on small screens and stretch items across the width */
+    flex-direction: row;
+    gap: 0.25rem;
+    align-items: center;
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+  }
+
+  .footer-nav {
+    position: fixed;
+    left: 0; 
+    right: 0; 
+    bottom: 0; 
+    z-index: var(--z-header);
+    padding: var(--footer-nav-padding);
+    min-height: var(--footer-nav-height);
+  }
+
+  /* Mobile navigation layout using CSS custom properties */
+  .footer-nav nav ul {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    gap: var(--nav-item-gap);
+    flex-wrap: nowrap;
+  }
+
+  .footer-nav nav li,
+  .header-nav nav li {
+    flex: 0 0 auto;
+    margin: 0 var(--nav-item-gap);
+    text-align: center;
+    padding: 0;
+  }
+  
+  /* Compact navigation anchors with proper sizing */
+  .header-nav a, .footer-nav a {
+    display: inline-block;
+    padding: var(--nav-item-padding);
+    font-size: var(--nav-font-size-mobile);
+    white-space: nowrap;
+  }
+  
+  /* Navigation layout distribution */
+  .header-nav nav ul, .footer-nav nav ul { 
+    display: flex; 
+  }
+  
+  .header-nav nav li, .footer-nav nav li { 
+    flex: 1 1 0; 
+  }
+  
+  .header-nav nav a, .footer-nav nav a { 
+    display: block; 
+    width: 100%; 
+  }
+  .workout-list {
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)) !important;
+    gap: 0.25rem !important;
+    padding: 0 0.15rem !important;
+  }
+  .exercise-card {
+    padding: 0.12rem !important;
+    font-size: 0.7rem !important;
+    min-height: 0 !important; /* allow aspect-ratio to control size */
+  }
+  
+  /* Add padding to main so content isn't hidden behind fixed header/footer */
+  body main,
+  main.main-content,
+  main { 
+    padding-top: 320px !important; /* Adjusted for clean header-only layout */
+    padding-bottom: 56px !important;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* Special spacing for auth pages */
+  main .auth-page-container {
+    padding-top: 340px !important; /* Adjusted for clean header-only layout */
+  }
+  
+  /* Landscape phones: make footer non-fixed so it pushes content (avoid overlay and extra scroll) */
+  @media (orientation: landscape) {
+    .footer-nav { position: relative !important; left: auto !important; right: auto !important; bottom: auto !important; padding: 0.2rem 0.3rem !important; }
+    main { padding-bottom: 20px !important; }
+  }
+}
+
+/* Ensure header nav matches footer nav in narrow landscape viewports
+   (centered, compressed, no-wrap). These rules are high-specificity and
+   appended here so they override other mobile rules. */
+@media (orientation: landscape) and (max-width: 900px) {
+  /* Make header area slightly tighter to free horizontal space */
+  .App-header { padding-left: 8px !important; padding-right: 8px !important; }
+
+  /* Force header nav to center and match footer sizing */
+  .header-nav,
+  .header-nav nav ul { 
+    display: flex !important; 
+    justify-content: center !important; 
+    align-items: center !important; 
+    gap: 6px !important; 
+    flex-wrap: nowrap !important; 
+  }
+
+  .header-nav nav li { 
+    flex: 0 0 auto !important; 
+    margin: 0 !important; 
+    padding: 0 !important; 
+  }
+
+  .header-nav a { 
+    font-size: 0.5rem !important; 
+    padding: 3px 6px !important; 
+    white-space: nowrap !important; 
+    display: inline-block !important; 
+  }
+
+  /* Reduce title slightly in landscape to give links more room */
+  .App-header h1 { font-size: 1.4rem !important; }
+
+  /* Ensure footer remains centered and uses same sizing */
+  .footer-nav nav ul { justify-content: center !important; gap: 6px !important; flex-wrap: nowrap !important; }
+  .footer-nav a { font-size: 0.5rem !important; padding: 3px 6px !important; }
+}
+
+/* Source-level final landscape override (highest specificity) */
+@media (orientation: landscape) and (max-width: 900px) {
+  .header-nav nav ul { 
+    justify-content: center !important; 
+    gap: 4px !important; 
+    flex-wrap: nowrap !important;
+  }
+  .header-nav nav li { 
+    flex: 0 0 auto !important; 
+    margin: 0 !important; 
+    padding: 0 !important;
+  }
+  .header-nav a { 
+    font-size: 0.46rem !important; 
+    padding: 2px 6px !important; 
+    white-space: nowrap !important; 
+    display: inline-block !important;
+  }
+  .App-header h1 { 
+    font-size: 1.1rem !important; 
+  }
+}
+
+/* Increase header/banner thickness on wide landscape displays (min-width: 900px) */
+@media (min-width: 900px) and (orientation: landscape) {
+  .App-header {
+    /* make the blue banner noticeably thicker in landscape */
+    min-height: 200px !important;
+    height: 200px !important;
+    padding-top: 1.25rem !important;
+    padding-bottom: 1.25rem !important;
+  }
+
+  .App-header h1 {
+    font-size: 2.0rem !important; /* slightly larger title to match taller banner */
+    line-height: 1.05 !important;
+    margin-top: 0.25rem !important;
+  }
+}
+
+/* Extra-small devices: tighten spacing and font sizes further */
+@media (max-width: 420px) {
+  .App-header {
+    min-height: 84px;
+    padding: 0.5rem 0.5rem;
+  }
+  .App-header h1 {
+    font-size: 1.0rem;
+  }
+  .header-nav a {
+    font-size: 0.95rem;
+    padding: 0.4rem 0.25rem;
+    display: block;
+  }
+  .controls .form-fields {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: stretch;
+  }
+  .controls label {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    align-items: center;
+  }
+}
+
+/* Removed duplicate main rule that was conflicting with header spacing */
+
+.header-nav {
+  padding-bottom: 0; 
+}
+
+.footer-nav {
+  background-color: var(--primary-color);
+  box-shadow: var(--box-shadow);
+  margin-top: 1.25rem;
+  /* do not force a large min-height; let content size naturally */
+  min-height: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* place the logo near top and links toward bottom when space allows */
+  align-items: center;
+  padding: 1rem;
+}
+
+.footer-nav nav ul,
+.header-nav nav ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  /* prefer space-between so items stretch across the bar; allow wrapping on smaller screens */
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin: 0;
+}
+
+.footer-nav nav li,
+.header-nav nav li {
+  margin: 0 0.5rem;
+  flex: 0 1 auto;
+}
+
+.footer-nav a,
+.header-nav a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  display: inline-block;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.8rem;  /* Smaller text to prevent logo overlap */
+}
+
+.footer-nav a:hover,
+.header-nav a:hover {
+  text-decoration: underline;
+}
+
+main {
+  flex-grow: 1;
+  /* Removed conflicting padding - header spacing handled elsewhere */
+}
+
+.controls {
+  margin-bottom: 2rem;
+}
+
+.controls label, .controls select, .controls button {
+  font-size: 1.1rem;
+  margin: 0 0.5rem;
+}
+
+.controls select, .controls button {
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--secondary-color);
+}
+
+.controls button {
+  background-color: var(--primary-color);
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.controls button:hover {
+  background-color: #0056b3;
+}
+
+.controls button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: #dc3545;
+  margin-top: 1rem;
+}
+
+footer {
+  padding: 1rem;
+  background-color: var(--secondary-color);
+  color: white;
+}
+
+/* Mobile styles for auth elements (responsive design handled in main media query) */
+@media (max-width: 768px) {
+  /* Additional mobile-specific styles can go here if needed */
+}

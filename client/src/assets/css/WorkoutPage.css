@@ -1,92 +1,406 @@
 .workout-page-container {
-  padding: 2rem 1rem;
+  height: 100%; /* Use full available height like home page */
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 1rem;
+  padding-top: 20rem; /* Increased padding for more separation from header */
+  padding-bottom: 5rem; /* Space for footer with large logo */
+  box-sizing: border-box;
+  overflow: hidden; /* Prevent scrolling */
+  background-color: var(--background-color); /* Use white background like home page */
+  gap: 0.5rem; /* Small gap between elements */
+  margin: 0; /* Remove all margins like home page */
+}
+
+/* Page title styling */
+.workout-page-title {
+  font-size: 1.8rem; /* Even smaller for compact layout */
+  font-weight: 700;
+  margin: 0 0 0.25rem 0; /* Minimal margins */
+  color: var(--primary-color);
+  text-align: center;
+  flex-shrink: 0; /* Don't shrink */
+}
+
+.workout-page-subtitle {
+  font-size: 0.9rem; /* Smaller for compact layout */
+  margin: 0 0 0.5rem 0; /* Minimal margins */
+  color: var(--secondary-color);
+  text-align: center;
+  max-width: 600px;
+  flex-shrink: 0; /* Don't shrink */
 }
 
 .controls {
   display: flex;
-  flex-direction: column; /* Stacks the field row and the button vertically */
-  align-items: center; /* Centers everything horizontally */
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem; /* Reduced gap for compact layout */
+  margin-bottom: 1rem; /* Reduced space before workout list */
+  padding: 1.5rem; /* Increased padding for better spacing */
+  background-color: var(--card-background);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  max-width: 800px; /* Increased width to prevent number selector overflow */
+  width: 100%;
+  flex-shrink: 0; /* Prevent controls from shrinking */
+}
+
+.controls:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 8px 20px rgba(0, 123, 255, 0.15);
 }
 
 .form-fields {
   display: flex;
-  justify-content: center; /* Centers the fields horizontally */
+  justify-content: center;
   align-items: center;
-  gap: 1.5rem; /* Adds space between the two fields */
+  gap: 2rem; /* Larger gap between fields */
+  width: 100%;
 }
 
-.controls label,
-.controls button {
-  font-size: 1.1rem;
-  font-weight: bold;
+.controls label {
+  font-size: 1.2rem; /* Larger labels */
+  font-weight: 600;
+  color: var(--primary-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: center;
 }
 
 .controls input,
 .controls select {
-  padding: 0.5rem;
-  border-radius: 8px;
-  border: 1px solid var(--secondary-color);
-  margin-left: 0.5rem;
+  padding: 0.75rem 1rem; /* More generous padding */
+  border-radius: var(--border-radius);
+  border: 2px solid #E0E0E0;
+  margin: 0;
+  font-size: 1rem;
+  min-width: 180px;
+  transition: all 0.2s ease;
+}
+
+.controls input:focus,
+.controls select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
 .controls button {
-  padding: 0.75rem 1.5rem;
+  padding: 1rem 2.5rem; /* Larger button */
   background-color: var(--primary-color);
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--border-radius);
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
+  font-size: 1.1rem;
+  font-weight: 600;
+  min-width: 200px;
 }
 
-.controls button:hover {
+.controls button:hover:not(:disabled) {
   background-color: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.controls button:disabled {
+  background-color: var(--secondary-color);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Number input with plus/minus buttons */
+.number-input-container {
+  display: inline-flex;
+  align-items: stretch;
+  border: none;
+  border-radius: var(--border-radius);
+  margin: 0;
+  background-color: transparent;
+  overflow: visible;
+  min-width: 120px; /* Total width for 3 equal sections */
+  width: 120px;
+  height: 44px; /* Match the controls input height */
+}
+
+.number-btn {
+  background-color: var(--primary-color);
+  color: white;
+  border: 2px solid var(--primary-color);
+  padding: 0;
+  cursor: pointer;
+  font-size: 0.9rem !important; /* Force override */
+  font-weight: bold;
+  transition: all 0.2s ease;
+  width: 40px !important; /* Force equal width */
+  height: 44px !important; /* Force consistent height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 0;
+}
+
+/* Specific targeting for button classes */
+.number-btn.minus-btn,
+.number-btn.plus-btn {
+  width: 40px !important;
+  height: 44px !important;
+  font-size: 0.9rem !important;
+  min-width: 40px !important;
+  max-width: 40px !important;
+}
+
+.number-btn:first-child {
+  border-radius: var(--border-radius) 0 0 var(--border-radius);
+  border-right: none;
+}
+
+.number-btn:last-child {
+  border-radius: 0 var(--border-radius) var(--border-radius) 0;
+  border-left: none;
+}
+
+.number-btn:hover:not(:disabled) {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+
+.number-btn:disabled {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.number-display {
+  padding: 0;
+  font-size: 0.9rem !important; /* Force override */
+  font-weight: bold;
+  width: 40px !important; /* Force equal width as buttons */
+  text-align: center;
+  background-color: white;
+  border-top: 2px solid #E0E0E0;
+  border-bottom: 2px solid #E0E0E0;
+  border-left: none;
+  border-right: none;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px !important; /* Force consistent height */
+}
+
+/* Generate Workout Button */
+.controls button {
+  padding: 1rem 2.5rem; /* Larger button */
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1.1rem;
+  font-weight: 600;
+  min-width: 200px;
+}
+
+.controls button:hover:not(:disabled) {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.controls button:disabled {
+  background-color: var(--secondary-color);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .workout-list {
   display: grid;
-  /*grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));*/
-  grid-template-columns: repeat(auto-fit, minmax(210px, 250px));
-  gap: 2rem;
-  max-width: 1000px; 
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Smaller minimum for more tiles */
+  gap: 1.5rem; /* Slightly smaller gap */
+  max-width: 1400px; /* Wider container to accommodate 4+ tiles */
   width: 100%;
   justify-content: center;
-  margin: 0 auto; /* Ensures the whole list container is centered */
-  padding: 0 1rem;
-  /*max-width: 800px;*/
-
+  margin: 0 auto;
+  padding: 0 1rem 1rem 1rem; /* Add bottom padding for better scrolling */
+  flex: 1; /* Take remaining space */
+  overflow-y: auto; /* Allow scrolling within this container */
+  max-height: calc(100% - 20rem); /* Constrain height to prevent page overflow */
+  min-height: 0; /* Allow shrinking */
 }
 
-/* Mobile adjustments so more tiles fit on a phone screen */
-@media (max-width: 600px) {
-  .workout-list {
-    /* allow many small tiles to flow; use smaller min width so more fit on a single viewport width */
-    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-    gap: 0.35rem;
-    padding: 0 0.4rem;
+/* When there are 4 or more tiles, make them smaller */
+.workout-list:has(:nth-child(4)) {
+  grid-template-columns: repeat(auto-fit, minmax(250px, 300px)); /* Smaller tiles for 4+ */
+  gap: 1rem; /* Tighter spacing */
+}
+
+/* When there are 8 or more tiles, make them even smaller for 5 across */
+.workout-list:has(:nth-child(8)) {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 250px)); /* Even smaller for 5+ tiles */
+  gap: 0.75rem; /* Even tighter spacing */
+  max-width: 1500px; /* Wider container for 5 tiles */
+}
+
+.exercise-card-link {
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: block;
+}
+
+.exercise-card-link:hover {
+  transform: translateY(-4px); /* Match Home page hover effect */
+  text-decoration: none;
+  color: inherit;
+}
+
+.exercise-card {
+  background-color: var(--card-background);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  padding: 2rem 1.5rem; /* More generous padding */
+  text-align: left;
+  cursor: pointer;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* Align content to top */
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  min-height: 180px; /* Consistent height */
+}
+
+.exercise-card:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 8px 20px rgba(0, 123, 255, 0.15); /* Match Home page shadow */
+}
+
+.exercise-card h3 {
+  color: var(--primary-color);
+  margin: 0 0 1.5rem 0;
+  text-align: center;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.exercise-card p {
+  margin: 0.5rem 0;
+  text-align: left;
+  width: 100%;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.exercise-card p strong {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .workout-page-container {
+    padding: 1.5rem 0.5rem;
+    min-height: calc(100vh - 120px);
+    max-height: calc(100vh - 120px);
+  }
+
+  .workout-page-title {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+  }
+
+  .workout-page-subtitle {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .controls {
+    padding: 1.5rem;
+    margin-bottom: 2rem;
     max-width: 100%;
   }
 
-  /* Remove rigid square aspect on mobile so cards can be slightly taller and fit content
-     while still being compact horizontally. Force full-width within the grid column. */
-  .exercise-card {
-    padding: 0.45rem;
-    aspect-ratio: auto;
-    min-height: 44px;
-    font-size: 0.88rem;
-    align-items: stretch; /* make headings/paragraphs fill width */
+  .form-fields {
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+    align-items: center;
   }
 
-  .exercise-card h3 { font-size: 0.95rem; margin: 0.25rem 0; }
-  .exercise-card p { font-size: 0.82rem; margin: 0.15rem 0; }
+  .controls label {
+    width: 100%;
+    text-align: center;
+    font-size: 1.1rem;
+  }
 
-  /* Ensure the anchor fills the grid cell so touch targets are large */
-  .exercise-card-link { display: block; width: 100%; }
+  .controls input,
+  .controls select {
+    width: 100%;
+    max-width: 280px;
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+
+  .controls button {
+    padding: 1rem 2rem;
+    min-width: 180px;
+  }
+
+  /* Make number input container more mobile-friendly */
+  .number-input-container {
+    margin: 0;
+    width: 120px; /* Match our main design */
+    height: 44px; /* Match main design height */
+    overflow: visible;
+    flex-shrink: 0;
+  }
+
+  .number-btn {
+    width: 40px; /* Same as main design - equal width */
+    height: 44px; /* Match main design */
+    font-size: 0.9rem; /* Match main design */
+    padding: 0;
+  }
+
+  .number-display {
+    font-size: 0.9rem; /* Match main design */
+    padding: 0;
+    height: 44px; /* Match main design */
+    line-height: 1;
+    width: 40px; /* Same as buttons - equal width */
+  }
+
+  .workout-list {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding: 0 0.5rem;
+  }
+
+  .exercise-card {
+    padding: 1.5rem 1rem;
+    min-height: 160px;
+  }
+
+  .exercise-card h3 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+
+  .exercise-card p {
+    font-size: 0.9rem;
+  }
 }
 
 .exercise-card-link {

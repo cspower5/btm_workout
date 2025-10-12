@@ -1,0 +1,30 @@
+[
+  {
+    "_id": "68d2ef768e7cf0dd5bc29715",
+    "name": "back"
+  },
+  {
+    "_id": "68d2ef768e7cf0dd5bc29716",
+    "name": "chest"
+  },
+  {
+    "_id": "68d2ef768e7cf0dd5bc29718",
+    "name": "lower legs"
+  },
+  {
+    "_id": "68d2ef768e7cf0dd5bc29719",
+    "name": "shoulders"
+  },
+  {
+    "_id": "68d2ef768e7cf0dd5bc2971a",
+    "name": "upper arms"
+  },
+  {
+    "_id": "68d2ef768e7cf0dd5bc2971b",
+    "name": "upper legs"
+  },
+  {
+    "_id": "68d2ef768e7cf0dd5bc2971c",
+    "name": "waist"
+  }
+]

@@ -1,0 +1,1205 @@
+[
+  {
+    "_id": "68cdd737cea3309f307e742a",
+    "bodyPart": "waist",
+    "equipment": "body weight",
+    "id": "0006",
+    "name": "alternate heel touchers",
+    "target": "abs",
+    "secondaryMuscles": [
+      "obliques"
+    ],
+    "instructions": [
+      "Lie flat on your back with your knees bent and feet flat on the ground.",
+      "Extend your arms straight out to the sides, parallel to the ground.",
+      "Engaging your abs, lift your shoulders off the ground and reach your right hand towards your right heel.",
+      "Return to the starting position and repeat on the left side, reaching your left hand towards your left heel.",
+      "Continue alternating sides for the desired number of repetitions."
+    ],
+    "description": "Alternate heel touchers is a bodyweight exercise targeting the abdominal muscles, particularly the obliques. It involves lying on your back, lifting your shoulders, and reaching side to side to touch your heels, engaging your core throughout.",
+    "difficulty": "beginner"
+  },
+  {
+    "_id": "68cdd737cea3309f307e742b",
+    "bodyPart": "back",
+    "equipment": "cable",
+    "id": "0007",
+    "name": "alternate lateral pulldown",
+    "target": "lats",
+    "secondaryMuscles": [
+      "biceps",
+      "rhomboids"
+    ],
+    "instructions": [
+      "Sit on the cable machine with your back straight and feet flat on the ground.",
+      "Grasp the handles with an overhand grip, slightly wider than shoulder-width apart.",
+      "Lean back slightly and pull the handles towards your chest, squeezing your shoulder blades together.",
+      "Pause for a moment at the peak of the movement, then slowly release the handles back to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "description": "The alternate lateral pulldown is a cable machine exercise targeting the latissimus dorsi, with secondary emphasis on the biceps and rhomboids. It involves pulling handles towards the chest in an alternating fashion, focusing on back strength and muscle engagement.",
+    "difficulty": "beginner"
+  },
+  {
+    "_id": "68cdd737cea3309f307e742c",
+    "bodyPart": "chest",
+    "equipment": "leverage machine",
+    "id": "0009",
+    "name": "assisted chest dip (kneeling)",
+    "target": "pectorals",
+    "secondaryMuscles": [
+      "triceps",
+      "shoulders"
+    ],
+    "instructions": [
+      "Adjust the machine to your desired height and secure your knees on the pad.",
+      "Grasp the handles with your palms facing down and your arms fully extended.",
+      "Lower your body by bending your elbows until your upper arms are parallel to the floor.",
+      "Pause for a moment, then push yourself back up to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "description": "The assisted chest dip (kneeling) is a chest-focused exercise performed on a leverage machine, where the user kneels on a pad for support. This machine-assisted variation helps reduce the load, making it accessible for those building strength or learning proper dip technique.",
+    "difficulty": "beginner"
+  },
+  {
+    "_id": "68cdd737cea3309f307e742d",
+    "bodyPart": "waist",
+    "equipment": "assisted",
+    "id": "0010",
+    "name": "assisted hanging knee raise with throw down",
+    "target": "abs",
+    "secondaryMuscles": [
+      "hip flexors",
+      "lower back"
+    ],
+    "instructions": [
+      "Hang from a pull-up bar with your arms fully extended and your palms facing away from you.",
+      "Engage your core and lift your knees towards your chest, keeping your legs together.",
+      "Once your knees are at chest level, explosively throw your legs down towards the ground, extending them fully.",
+      "Allow your legs to swing back up and repeat the movement for the desired number of repetitions."
+    ],
+    "description": "The assisted hanging knee raise with throw down is an advanced core exercise that targets the abdominal muscles, with additional engagement of the hip flexors and lower back. The movement involves hanging from a pull-up bar, raising the knees to the chest, and then explosively throwing the legs downward, requiring significant core strength, coordination, and control.",
+    "difficulty": "advanced"
+  },
+  {
+    "_id": "68cdd737cea3309f307e742e",
+    "bodyPart": "waist",
+    "equipment": "assisted",
+    "id": "0011",
+    "name": "assisted hanging knee raise",
+    "target": "abs",
+    "secondaryMuscles": [
+      "hip flexors"
+    ],
+    "instructions": [
+      "Hang from a pull-up bar with your arms fully extended and your palms facing away from you.",
+      "Engage your core muscles and lift your knees towards your chest, bending at the hips and knees.",
+      "Pause for a moment at the top of the movement, squeezing your abs.",
+      "Slowly lower your legs back down to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "description": "The assisted hanging knee raise is an abdominal exercise performed while hanging from a pull-up bar, using assistance to help lift the knees toward the chest. It primarily targets the abs and also works the hip flexors.",
+    "difficulty": "beginner"
+  },
+  {
+    "_id": "68cdd737cea3309f307e742f",
+    "bodyPart": "waist",
+    "equipment": "assisted",
+    "id": "0012",
+    "name": "assisted lying leg raise with lateral throw down",
+    "target": "abs",
+    "secondaryMuscles": [
+      "hip flexors",
+      "obliques"
+    ],
+    "instructions": [
+      "Lie flat on your back with your legs extended and your arms by your sides.",
+      "Place your hands under your glutes for support.",
+      "Engage your abs and lift your legs off the ground, keeping them straight.",
+      "While keeping your legs together, lower them to one side until they are a few inches above the ground.",
+      "Pause for a moment, then lift your legs back to the starting position.",
+      "Repeat the movement to the other side.",
+      "Continue alternating sides for the desired number of repetitions."
+    ],
+    "description": "The assisted lying leg raise with lateral throw down is an abdominal exercise that targets the abs while also engaging the hip flexors and obliques. The movement involves lifting the legs while lying on your back, then lowering them to each side in a controlled manner, which challenges core stability and strength.",
+    "difficulty": "intermediate"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7430",
+    "bodyPart": "waist",
+    "equipment": "assisted",
+    "id": "0013",
+    "name": "assisted lying leg raise with throw down",
+    "target": "abs",
+    "secondaryMuscles": [
+      "hip flexors",
+      "quadriceps"
+    ],
+    "instructions": [
+      "Lie flat on your back with your legs extended and your arms by your sides.",
+      "Place your hands under your glutes for support.",
+      "Engage your core and lift your legs off the ground, keeping them straight.",
+      "Raise your legs until they are perpendicular to the ground.",
+      "Lower your legs back down to the starting position.",
+      "Simultaneously, throw your legs down towards the ground, keeping them straight.",
+      "Raise your legs back up to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "description": "The assisted lying leg raise with throw down is an abdominal exercise that targets the abs while also engaging the hip flexors and quadriceps. The movement involves raising the legs while lying on your back, then forcefully lowering them (throwing them down) and raising them again, often with a partner providing resistance or assistance.",
+    "difficulty": "intermediate"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7431",
+    "bodyPart": "chest",
+    "equipment": "cable",
+    "id": "0227",
+    "name": "cable standing fly",
+    "target": "pectorals",
+    "secondaryMuscles": [
+      "deltoids",
+      "triceps"
+    ],
+    "instructions": [
+      "Attach the handles to the cables at chest height.",
+      "Stand with your feet shoulder-width apart, facing away from the cable machine.",
+      "Grasp the handles with an overhand grip, palms facing forward.",
+      "Step forward slightly to create tension in the cables.",
+      "Keep your core engaged and your back straight throughout the exercise.",
+      "With a slight bend in your elbows, slowly bring your arms forward and together in front of your chest.",
+      "Squeeze your chest muscles at the peak of the movement.",
+      "Slowly reverse the movement, returning your arms to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "description": "The cable standing fly is a chest isolation exercise performed using a cable machine. It targets the pectoral muscles and also engages the deltoids and triceps. The movement requires good form, balance, and control to execute safely and effectively.",
+    "difficulty": "intermediate"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7432",
+    "bodyPart": "upper legs",
+    "equipment": "cable",
+    "id": "0228",
+    "name": "cable standing hip extension",
+    "target": "glutes",
+    "secondaryMuscles": [
+      "hamstrings",
+      "quadriceps"
+    ],
+    "instructions": [
+      "Attach a cable to a low pulley and stand facing away from the machine.",
+      "Place the cable around your ankle and stand with your feet shoulder-width apart.",
+      "Keep your core engaged and your back straight throughout the exercise.",
+      "Slowly extend your leg straight back, squeezing your glutes at the top of the movement.",
+      "Pause for a moment, then return to the starting position.",
+      "Repeat for the desired number of repetitions.",
+      "Switch sides and repeat with the other leg."
+    ],
+    "description": "The cable standing hip extension targets the glutes by extending the leg backward against resistance. It also engages the hamstrings and quadriceps as secondary muscles. This exercise is performed using a cable machine and requires balance and core stability.",
+    "difficulty": "intermediate"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7433",
+    "bodyPart": "upper arms",
+    "equipment": "cable",
+    "id": "0229",
+    "name": "cable standing inner curl",
+    "target": "biceps",
+    "secondaryMuscles": [
+      "forearms"
+    ],
+    "instructions": [
+      "Stand facing a cable machine with your feet shoulder-width apart.",
+      "Grasp the cable handle with an underhand grip, palms facing up.",
+      "Keep your elbows close to your sides and your upper arms stationary.",
+      "Exhale and curl the cable handle towards your shoulders, contracting your biceps.",
+      "Pause for a moment at the top of the movement, squeezing your biceps.",
+      "Inhale and slowly lower the cable handle back to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "description": "The cable standing inner curl is an isolation exercise targeting the biceps, performed using a cable machine. It emphasizes controlled movement and contraction of the biceps while also engaging the forearms.",
+    "difficulty": "beginner"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7434",
+    "bodyPart": "waist",
+    "equipment": "cable",
+    "id": "0230",
+    "name": "cable standing lift",
+    "target": "abs",
+    "secondaryMuscles": [
+      "obliques",
+      "lower back"
+    ],
+    "instructions": [
+      "Stand facing the cable machine with your feet shoulder-width apart.",
+      "Hold the cable handle with both hands and position it at waist height.",
+      "Engage your core and maintain a straight back throughout the exercise.",
+      "Keeping your arms straight, exhale and lift the cable handle up towards your opposite shoulder, rotating your torso.",
+      "Pause for a moment at the top, then inhale and slowly lower the cable handle back to the starting position.",
+      "Repeat for the desired number of repetitions, then switch sides."
+    ],
+    "description": "The cable standing lift is an exercise targeting the abdominal muscles, especially the obliques and lower back, by using a cable machine to perform a rotational lifting movement.",
+    "difficulty": "intermediate"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7435",
+    "bodyPart": "upper arms",
+    "equipment": "cable",
+    "id": "0231",
+    "name": "cable standing one arm triceps extension",
+    "target": "triceps",
+    "secondaryMuscles": [
+      "shoulders"
+    ],
+    "instructions": [
+      "Stand with your feet shoulder-width apart, facing the cable machine.",
+      "Hold the cable handle with your right hand, palm facing down, and position your arm so that it is fully extended and parallel to the ground.",
+      "Keep your elbow stationary and close to your body.",
+      "Slowly bend your elbow, lowering the cable handle towards the back of your head.",
+      "Pause for a moment at the bottom of the movement, then extend your arm back to the starting position.",
+      "Repeat for the desired number of repetitions, then switch sides and perform the exercise with your left arm."
+    ],
+    "description": "The cable standing one arm triceps extension is an isolation exercise that targets the triceps using a cable machine. It is performed standing, one arm at a time, and requires controlled movement to effectively engage the triceps while minimizing shoulder involvement.",
+    "difficulty": "intermediate"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7436",
+    "bodyPart": "upper arms",
+    "equipment": "cable",
+    "id": "0232",
+    "name": "cable standing pulldown (with rope)",
+    "target": "biceps",
+    "secondaryMuscles": [
+      "forearms",
+      "shoulders"
+    ],
+    "instructions": [
+      "Attach a rope to the cable machine at the highest setting.",
+      "Stand facing the machine with your feet shoulder-width apart.",
+      "Grasp the rope with an overhand grip, palms facing down.",
+      "Keep your back straight and core engaged throughout the exercise.",
+      "Pull the rope down towards your thighs, squeezing your biceps.",
+      "Pause for a moment at the bottom, then slowly release the rope back up.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "description": "The cable standing pulldown (with rope) is an isolation exercise primarily targeting the biceps, with secondary emphasis on the forearms and shoulders. It uses a cable machine with a rope attachment and is performed standing, requiring good form and control.",
+    "difficulty": "beginner"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7437",
+    "bodyPart": "shoulders",
+    "equipment": "cable",
+    "id": "0233",
+    "name": "cable standing rear delt row (with rope)",
+    "target": "delts",
+    "secondaryMuscles": [
+      "trapezius",
+      "rhomboids",
+      "biceps"
+    ],
+    "instructions": [
+      "Stand facing a cable machine with your feet shoulder-width apart.",
+      "Hold the cable attachment with both hands, palms facing each other, and step back to create tension in the cable.",
+      "Keep your back straight and your core engaged.",
+      "Pull the cable towards your body, squeezing your shoulder blades together.",
+      "Pause for a moment at the peak of the movement, then slowly release the cable back to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "description": "The cable standing rear delt row (with rope) targets the rear deltoids and upper back muscles using a cable machine and rope attachment. It requires proper form to effectively engage the shoulders and upper back while maintaining core stability.",
+    "difficulty": "intermediate"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7438",
+    "bodyPart": "back",
+    "equipment": "cable",
+    "id": "0234",
+    "name": "cable standing row (v-bar)",
+    "target": "upper back",
+    "secondaryMuscles": [
+      "biceps",
+      "shoulders"
+    ],
+    "instructions": [
+      "Stand facing the cable machine with your feet shoulder-width apart.",
+      "Grasp the v-bar attachment with an overhand grip, palms facing down.",
+      "Keep your back straight and your core engaged.",
+      "Pull the v-bar towards your body, squeezing your shoulder blades together.",
+      "Pause for a moment at the peak of the movement, then slowly release the tension and return to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "description": "The cable standing row (v-bar) is a compound exercise that targets the upper back using a cable machine and a v-bar attachment. It also engages the biceps and shoulders as secondary muscles. The movement requires proper posture and core engagement to perform safely and effectively.",
+    "difficulty": "beginner"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7439",
+    "bodyPart": "shoulders",
+    "equipment": "cable",
+    "id": "0235",
+    "name": "cable standing shoulder external rotation",
+    "target": "delts",
+    "secondaryMuscles": [
+      "rotator cuff",
+      "trapezius"
+    ],
+    "instructions": [
+      "Stand with your feet shoulder-width apart and your knees slightly bent.",
+      "Hold the cable handle with your arm extended in front of you, parallel to the ground.",
+      "Keep your elbow slightly bent and your shoulder blades pulled back.",
+      "Slowly rotate your arm outward, away from your body, while keeping your elbow in the same position.",
+      "Pause for a moment at the end of the movement, then slowly return to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "description": "The cable standing shoulder external rotation is an exercise that targets the deltoid muscles, particularly focusing on shoulder stability and external rotation. It also engages the rotator cuff and trapezius muscles, making it effective for improving shoulder health and function.",
+    "difficulty": "beginner"
+  },
+  {
+    "_id": "68cdd737cea3309f307e743a",
+    "bodyPart": "back",
+    "equipment": "cable",
+    "id": "0236",
+    "name": "cable standing twist row (v-bar)",
+    "target": "upper back",
+    "secondaryMuscles": [
+      "biceps",
+      "shoulders"
+    ],
+    "instructions": [
+      "Attach a v-bar attachment to a cable machine at chest height.",
+      "Stand facing the cable machine with your feet shoulder-width apart.",
+      "Grasp the v-bar with an overhand grip, palms facing down.",
+      "Take a step back to create tension in the cable.",
+      "Keep your back straight and core engaged throughout the exercise.",
+      "Pull the v-bar towards your torso by retracting your shoulder blades and bending your elbows.",
+      "As you pull, twist your torso to one side, squeezing your shoulder blades together.",
+      "Pause for a moment at the top of the movement, feeling the contraction in your upper back.",
+      "Slowly release the tension and return to the starting position, untwisting your torso.",
+      "Repeat the movement for the desired number of repetitions, alternating the twisting direction with each rep."
+    ],
+    "description": "The cable standing twist row (v-bar) is a compound exercise that targets the upper back while also engaging the biceps and shoulders. It incorporates a twisting motion, which adds a rotational component to the traditional row, enhancing core engagement and coordination.",
+    "difficulty": "intermediate"
+  },
+  {
+    "_id": "68cdd737cea3309f307e743e",
+    "bodyPart": "waist",
+    "equipment": "body weight",
+    "id": "0456",
+    "name": "flexion leg sit up (bent knee)",
+    "target": "abs",
+    "secondaryMuscles": [
+      "hip flexors"
+    ],
+    "instructions": [
+      "Lie flat on your back with your knees bent and feet flat on the ground.",
+      "Place your hands behind your head with your elbows pointing outwards.",
+      "Engaging your abs, slowly lift your upper body off the ground, curling forward until your torso is at a 45-degree angle.",
+      "At the same time, lift your legs off the ground, bending your knees and bringing them towards your chest.",
+      "Pause for a moment at the top, then slowly lower your upper body and legs back down to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "description": "The flexion leg sit up (bent knee) is an abdominal exercise performed with body weight. It involves curling the upper body and bringing the knees toward the chest simultaneously, targeting the abs and hip flexors.",
+    "difficulty": "intermediate"
+  },
+  {
+    "_id": "68cdd737cea3309f307e743f",
+    "bodyPart": "waist",
+    "equipment": "body weight",
+    "id": "0457",
+    "name": "flexion leg sit up (straight arm)",
+    "target": "abs",
+    "secondaryMuscles": [
+      "hip flexors",
+      "quadriceps"
+    ],
+    "instructions": [
+      "Lie flat on your back with your legs extended and arms straight above your head.",
+      "Engaging your abs, lift your upper body off the ground while simultaneously lifting your legs towards your chest.",
+      "Reach your hands towards your toes as you lift your upper body and legs.",
+      "Pause for a moment at the top, then slowly lower your upper body and legs back down to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "description": "The flexion leg sit up (straight arm) is an abdominal exercise performed with body weight. It involves lying flat, extending the arms overhead, and simultaneously lifting the upper body and legs to meet in the middle, targeting the abs and engaging the hip flexors and quadriceps.",
+    "difficulty": "intermediate"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7440",
+    "bodyPart": "chest",
+    "equipment": "barbell",
+    "id": "0458",
+    "name": "floor fly (with barbell)",
+    "target": "pectorals",
+    "secondaryMuscles": [
+      "deltoids",
+      "triceps"
+    ],
+    "instructions": [
+      "Lie flat on your back on the floor with your knees bent and feet flat on the ground.",
+      "Hold a barbell with an overhand grip, arms extended straight up over your chest.",
+      "Slowly lower the barbell out to the sides, keeping a slight bend in your elbows.",
+      "Lower the barbell until your arms are parallel to the floor, feeling a stretch in your chest.",
+      "Pause for a moment, then squeeze your chest muscles to bring the barbell back to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "description": "The floor fly with barbell is a chest exercise performed lying on the floor, focusing on stretching and contracting the pectoral muscles while using a barbell for resistance.",
+    "difficulty": "intermediate"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7441",
+    "bodyPart": "upper legs",
+    "equipment": "body weight",
+    "id": "0459",
+    "name": "flutter kicks",
+    "target": "glutes",
+    "secondaryMuscles": [
+      "hip flexors",
+      "lower abs"
+    ],
+    "instructions": [
+      "Lie flat on your back with your legs extended and your hands by your sides.",
+      "Engage your core and lift your legs off the ground about 6 inches.",
+      "Keeping your legs straight, alternate lifting one leg slightly higher than the other.",
+      "Continue this fluttering motion for the desired number of repetitions."
+    ],
+    "description": "Flutter kicks are a bodyweight exercise performed lying on your back, where you lift your legs off the ground and alternate kicking them up and down in a fluttering motion. This movement primarily targets the glutes, with secondary emphasis on the hip flexors and lower abs.",
+    "difficulty": "beginner"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7442",
+    "bodyPart": "waist",
+    "equipment": "body weight",
+    "id": "0464",
+    "name": "front plank with twist",
+    "target": "abs",
+    "secondaryMuscles": [
+      "obliques",
+      "shoulders"
+    ],
+    "instructions": [
+      "Start in a high plank position with your hands directly under your shoulders and your body in a straight line from head to toe.",
+      "Engage your core and glutes to maintain a stable position.",
+      "Rotate your torso to the right, lifting your right arm and extending it towards the ceiling.",
+      "Keep your hips and legs stable as you twist.",
+      "Hold for a moment, then return to the starting position.",
+      "Repeat the twist on the left side.",
+      "Continue alternating sides for the desired number of repetitions."
+    ],
+    "description": "The front plank with twist is a core exercise that targets the abs and obliques while also engaging the shoulders. It involves rotating the torso while maintaining a plank position, which challenges stability and coordination.",
+    "difficulty": "intermediate"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7443",
+    "bodyPart": "back",
+    "equipment": "body weight",
+    "id": "0466",
+    "name": "gironda sternum chin",
+    "target": "lats",
+    "secondaryMuscles": [
+      "biceps",
+      "rhomboids",
+      "rear deltoids"
+    ],
+    "instructions": [
+      "Stand facing a high bar with your feet shoulder-width apart.",
+      "Reach up and grab the bar with an overhand grip, slightly wider than shoulder-width apart.",
+      "Hang from the bar with your arms fully extended and your body straight.",
+      "Engage your lats and biceps to pull your chest up towards the bar, leading with your sternum.",
+      "Pause for a moment at the top, then slowly lower yourself back down to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "description": "The Gironda sternum chin is a challenging bodyweight exercise that targets the lats and requires pulling your chest up to the bar, emphasizing a strong contraction in the upper back. It also engages the biceps, rhomboids, and rear deltoids.",
+    "difficulty": "advanced"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7444",
+    "bodyPart": "waist",
+    "equipment": "body weight",
+    "id": "0467",
+    "name": "gorilla chin",
+    "target": "abs",
+    "secondaryMuscles": [
+      "forearms",
+      "biceps"
+    ],
+    "instructions": [
+      "Stand with your feet shoulder-width apart and your knees slightly bent.",
+      "Grasp a pull-up bar with an overhand grip, slightly wider than shoulder-width apart.",
+      "Hang from the bar with your arms fully extended and your palms facing away from you.",
+      "Engage your core and pull your body up towards the bar, bringing your chin above the bar.",
+      "Pause for a moment at the top, then slowly lower your body back down to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "description": "The gorilla chin is a challenging bodyweight exercise that targets the abs while also engaging the forearms and biceps. It involves a pull-up motion with a strong core contraction to bring the chin above the bar.",
+    "difficulty": "advanced"
+  },
+  {
+    "_id": "68cdd737cea3309f307e744f",
+    "bodyPart": "back",
+    "equipment": "body weight",
+    "id": "1327",
+    "name": "close grip chin-up",
+    "target": "lats",
+    "secondaryMuscles": [
+      "biceps",
+      "forearms"
+    ],
+    "instructions": [
+      "Grab the pull-up bar with your palms facing towards you and your hands shoulder-width apart.",
+      "Hang from the bar with your arms fully extended and your feet off the ground.",
+      "Engage your back muscles and pull your body up towards the bar, keeping your elbows close to your body.",
+      "Continue pulling until your chin is above the bar.",
+      "Pause for a moment at the top, then slowly lower your body back down to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "description": "The close grip chin-up is a bodyweight exercise targeting the lats, with significant involvement of the biceps and forearms. It requires pulling your body up to a bar with a close, underhand grip, emphasizing upper body strength.",
+    "difficulty": "intermediate"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7450",
+    "bodyPart": "back",
+    "equipment": "dumbbell",
+    "id": "1328",
+    "name": "dumbbell lying rear delt row",
+    "target": "upper back",
+    "secondaryMuscles": [
+      "shoulders",
+      "biceps"
+    ],
+    "instructions": [
+      "Lie face down on a flat bench with a dumbbell in each hand, palms facing inwards.",
+      "Extend your arms straight down towards the floor, keeping a slight bend in your elbows.",
+      "Engaging your back muscles, lift the dumbbells up towards your chest, squeezing your shoulder blades together.",
+      "Pause for a moment at the top, then slowly lower the dumbbells back down to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "description": "The dumbbell lying rear delt row targets the upper back and rear deltoids, performed while lying face down on a bench and rowing dumbbells upward.",
+    "difficulty": "intermediate"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7451",
+    "bodyPart": "back",
+    "equipment": "dumbbell",
+    "id": "1329",
+    "name": "dumbbell palm rotational bent over row",
+    "target": "upper back",
+    "secondaryMuscles": [
+      "biceps",
+      "forearms"
+    ],
+    "instructions": [
+      "Stand with your feet shoulder-width apart, holding a dumbbell in each hand with an overhand grip.",
+      "Bend forward at the hips, keeping your back straight and your knees slightly bent.",
+      "Let your arms hang straight down, palms facing your body.",
+      "Engage your core and pull the dumbbells up towards your chest, keeping your elbows close to your body.",
+      "As you pull the dumbbells up, rotate your palms so they face away from your body.",
+      "Squeeze your shoulder blades together at the top of the movement.",
+      "Slowly lower the dumbbells back down to the starting position, rotating your palms back to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "description": "The dumbbell palm rotational bent over row is a compound exercise targeting the upper back, with additional engagement of the biceps and forearms. The rotational component adds a coordination challenge and increases muscle activation.",
+    "difficulty": "intermediate"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7452",
+    "bodyPart": "back",
+    "equipment": "dumbbell",
+    "id": "1330",
+    "name": "dumbbell reverse grip incline bench one arm row",
+    "target": "upper back",
+    "secondaryMuscles": [
+      "biceps",
+      "shoulders"
+    ],
+    "instructions": [
+      "Set up an incline bench at a 45-degree angle.",
+      "Place a dumbbell on the floor next to the bench.",
+      "Stand facing the bench with your feet shoulder-width apart.",
+      "Bend at the waist and place your left knee and left hand on the bench for support.",
+      "Pick up the dumbbell with your right hand using a reverse grip (palm facing down).",
+      "Keep your back straight and your core engaged.",
+      "Pull the dumbbell up towards your chest, keeping your elbow close to your body.",
+      "Squeeze your back muscles at the top of the movement.",
+      "Lower the dumbbell back down to the starting position in a controlled manner.",
+      "Repeat for the desired number of repetitions.",
+      "Switch sides and repeat the exercise with your left arm."
+    ],
+    "description": "The dumbbell reverse grip incline bench one arm row is a strength exercise targeting the upper back, performed on an incline bench using a single dumbbell and a reverse grip.",
+    "difficulty": "intermediate"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7453",
+    "bodyPart": "back",
+    "equipment": "dumbbell",
+    "id": "1331",
+    "name": "dumbbell reverse grip incline bench two arm row",
+    "target": "upper back",
+    "secondaryMuscles": [
+      "biceps",
+      "forearms"
+    ],
+    "instructions": [
+      "Set up an incline bench at a 45-degree angle.",
+      "Sit on the bench with your chest against the backrest and your feet flat on the ground.",
+      "Hold a dumbbell in each hand with an underhand grip.",
+      "Lean forward and let your arms hang straight down, fully extended.",
+      "Pull the dumbbells up towards your chest, squeezing your shoulder blades together.",
+      "Pause for a moment at the top, then slowly lower the dumbbells back down to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "description": "The dumbbell reverse grip incline bench two arm row is a strength exercise targeting the upper back, performed on an incline bench with dumbbells using an underhand grip. It also engages the biceps and forearms.",
+    "difficulty": "intermediate"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7454",
+    "bodyPart": "back",
+    "equipment": "stability ball",
+    "id": "1332",
+    "name": "exercise ball alternating arm ups",
+    "target": "lats",
+    "secondaryMuscles": [
+      "shoulders",
+      "core"
+    ],
+    "instructions": [
+      "Sit on the stability ball with your feet flat on the ground and your back straight.",
+      "Hold a dumbbell in each hand with your palms facing inwards and your arms extended down by your sides.",
+      "Engage your core and slowly lift one arm up towards your shoulder, keeping your elbow slightly bent.",
+      "Pause for a moment at the top, then slowly lower your arm back down to the starting position.",
+      "Repeat the movement with the other arm.",
+      "Continue alternating arms for the desired number of repetitions."
+    ],
+    "description": "This exercise targets the latissimus dorsi (lats) and involves alternating arm lifts while seated on a stability ball, engaging the core and shoulders for balance and control.",
+    "difficulty": "beginner"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7455",
+    "bodyPart": "back",
+    "equipment": "stability ball",
+    "id": "1333",
+    "name": "exercise ball back extension with arms extended",
+    "target": "spine",
+    "secondaryMuscles": [
+      "glutes",
+      "hamstrings"
+    ],
+    "instructions": [
+      "Place the stability ball on the ground and lie face down on top of it, with your hips resting on the ball and your feet against a wall for stability.",
+      "Extend your arms straight out in front of you, with your palms facing down.",
+      "Engage your core and slowly lift your upper body off the ball, keeping your back straight and your neck in line with your spine.",
+      "Pause for a moment at the top, then slowly lower your upper body back down to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "description": "The exercise ball back extension with arms extended targets the spinal erectors and helps strengthen the lower back, glutes, and hamstrings. It requires balance and core engagement due to the instability of the ball and the extended arm position.",
+    "difficulty": "intermediate"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7456",
+    "bodyPart": "back",
+    "equipment": "stability ball",
+    "id": "1334",
+    "name": "exercise ball back extension with hands behind head",
+    "target": "spine",
+    "secondaryMuscles": [
+      "glutes",
+      "hamstrings"
+    ],
+    "instructions": [
+      "Place the stability ball on the ground and lie face down on top of it with your hips resting on the ball.",
+      "Position your feet against a wall or other stable surface for support.",
+      "Cross your arms behind your head, with your hands touching the back of your head.",
+      "Engage your core and slowly lift your upper body off the ball, extending your back until your body forms a straight line from your head to your hips.",
+      "Pause for a moment at the top of the movement, then slowly lower your upper body back down to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "description": "This exercise targets the spinal erectors and involves performing back extensions while lying face down on a stability ball, with hands placed behind the head for increased difficulty. It also engages the glutes and hamstrings as secondary muscles.",
+    "difficulty": "intermediate"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7457",
+    "bodyPart": "back",
+    "equipment": "stability ball",
+    "id": "1335",
+    "name": "exercise ball back extension with knees off ground",
+    "target": "spine",
+    "secondaryMuscles": [
+      "glutes",
+      "hamstrings"
+    ],
+    "instructions": [
+      "Place the stability ball on the ground and lie face down on top of it, with your hips resting on the ball and your feet against a wall for stability.",
+      "Position your hands behind your head or crossed over your chest.",
+      "Engage your core and slowly lift your upper body off the ball, extending your back until your body forms a straight line from your head to your heels.",
+      "Pause for a moment at the top, then slowly lower your upper body back down to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "description": "This exercise targets the spinal erectors and requires you to perform a back extension while balancing your hips on a stability ball with your knees off the ground. It challenges your core, glutes, and hamstrings, and requires balance and coordination.",
+    "difficulty": "intermediate"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7458",
+    "bodyPart": "back",
+    "equipment": "stability ball",
+    "id": "1336",
+    "name": "exercise ball back extension with rotation",
+    "target": "spine",
+    "secondaryMuscles": [
+      "glutes",
+      "hamstrings"
+    ],
+    "instructions": [
+      "Start by lying face down on the stability ball with your hips resting on the ball and your feet firmly planted on the ground.",
+      "Place your hands behind your head or cross them over your chest.",
+      "Engage your core and slowly lift your upper body off the ball, extending your back until your body forms a straight line from your head to your heels.",
+      "Pause for a moment at the top, then slowly rotate your torso to one side, keeping your hips and legs stable.",
+      "Return to the center and repeat the rotation to the other side.",
+      "Lower your upper body back down to the starting position and repeat for the desired number of repetitions."
+    ],
+    "description": "The exercise ball back extension with rotation is a movement that targets the spinal erectors and involves extending the back while lying face down on a stability ball, then adding a rotational component to engage the obliques and improve core stability.",
+    "difficulty": "intermediate"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7459",
+    "bodyPart": "upper arms",
+    "equipment": "dumbbell",
+    "id": "1670",
+    "name": "dumbbell one arm standing curl",
+    "target": "biceps",
+    "secondaryMuscles": [
+      "forearms"
+    ],
+    "instructions": [
+      "Stand up straight with a dumbbell in one hand, palm facing forward and arm fully extended.",
+      "Keeping your upper arm stationary, exhale and curl the weight upward while contracting your biceps.",
+      "Continue to raise the dumbbell until your biceps are fully contracted and the dumbbell is at shoulder level.",
+      "Hold the contracted position for a brief pause as you squeeze your biceps.",
+      "Inhale and slowly lower the dumbbell back to the starting position.",
+      "Repeat for the desired number of repetitions, then switch arms."
+    ],
+    "description": "The dumbbell one arm standing curl is a classic isolation exercise targeting the biceps. It involves curling a dumbbell with one arm while standing, focusing on strict form to maximize biceps engagement.",
+    "difficulty": "beginner"
+  },
+  {
+    "_id": "68cdd737cea3309f307e745a",
+    "bodyPart": "upper arms",
+    "equipment": "dumbbell",
+    "id": "1671",
+    "name": "dumbbell one arm standing hammer curl",
+    "target": "biceps",
+    "secondaryMuscles": [
+      "forearms"
+    ],
+    "instructions": [
+      "Stand up straight with a dumbbell in each hand, palms facing your torso.",
+      "Keep your elbows close to your torso and your upper arms stationary.",
+      "Exhale and curl the weights while contracting your biceps.",
+      "Continue to raise the weights until your biceps are fully contracted and the dumbbells are at shoulder level.",
+      "Hold the contracted position for a brief pause as you squeeze your biceps.",
+      "Inhale and slowly begin to lower the dumbbells back to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "description": "The dumbbell one arm standing hammer curl is an isolation exercise targeting the biceps and forearms. It is performed standing, with a dumbbell in one hand, curling the weight up while keeping the palm facing the torso throughout the movement.",
+    "difficulty": "beginner"
+  },
+  {
+    "_id": "68cdd737cea3309f307e745b",
+    "bodyPart": "upper arms",
+    "equipment": "dumbbell",
+    "id": "1672",
+    "name": "dumbbell one arm zottman preacher curl",
+    "target": "biceps",
+    "secondaryMuscles": [
+      "forearms"
+    ],
+    "instructions": [
+      "Sit on a preacher curl bench and hold a dumbbell in one hand with an underhand grip.",
+      "Rest your upper arm on the preacher bench pad, allowing your arm to fully extend.",
+      "Curl the dumbbell up towards your shoulder, keeping your upper arm stationary.",
+      "At the top of the curl, rotate your wrist so that your palm faces up.",
+      "Slowly lower the dumbbell back down to the starting position, rotating your wrist back to the starting position.",
+      "Repeat for the desired number of repetitions, then switch arms."
+    ],
+    "description": "The dumbbell one arm Zottman preacher curl is an isolation exercise targeting the biceps and forearms, performed on a preacher bench with a dumbbell, emphasizing both the curl and rotational movement for forearm engagement.",
+    "difficulty": "intermediate"
+  },
+  {
+    "_id": "68cdd737cea3309f307e745c",
+    "bodyPart": "upper arms",
+    "equipment": "dumbbell",
+    "id": "1673",
+    "name": "dumbbell preacher curl over exercise ball",
+    "target": "biceps",
+    "secondaryMuscles": [
+      "forearms"
+    ],
+    "instructions": [
+      "Sit on an exercise ball with your feet flat on the ground and your back straight.",
+      "Hold a dumbbell in one hand with an underhand grip, resting your elbow on the exercise ball.",
+      "Keeping your upper arm stationary, exhale and curl the dumbbell up towards your shoulder.",
+      "Pause for a moment at the top, then inhale and slowly lower the dumbbell back to the starting position.",
+      "Repeat for the desired number of repetitions, then switch arms."
+    ],
+    "description": "The dumbbell preacher curl over exercise ball targets the biceps by isolating the muscle with the support of an exercise ball, requiring stability and control. It also engages the forearms as secondary muscles.",
+    "difficulty": "intermediate"
+  },
+  {
+    "_id": "68cdd737cea3309f307e745d",
+    "bodyPart": "upper arms",
+    "equipment": "dumbbell",
+    "id": "1674",
+    "name": "dumbbell prone incline hammer curl",
+    "target": "biceps",
+    "secondaryMuscles": [
+      "forearms"
+    ],
+    "instructions": [
+      "Adjust the bench to a 45-degree incline.",
+      "Lie face down on the bench with a dumbbell in each hand, palms facing each other.",
+      "Allow your arms to hang straight down towards the floor, keeping your elbows slightly bent.",
+      "Keeping your upper arms stationary, exhale and curl the weights while contracting your biceps.",
+      "Continue to raise the dumbbells until your biceps are fully contracted and the dumbbells are at shoulder level.",
+      "Hold the contracted position for a brief pause as you squeeze your biceps.",
+      "Inhale and slowly begin to lower the dumbbells back to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "description": "The dumbbell prone incline hammer curl is an isolation exercise targeting the biceps and forearms. It is performed lying face down on an incline bench, which helps minimize momentum and focus the work on the biceps.",
+    "difficulty": "intermediate"
+  },
+  {
+    "_id": "68cdd737cea3309f307e745e",
+    "bodyPart": "upper arms",
+    "equipment": "dumbbell",
+    "id": "1675",
+    "name": "dumbbell reverse spider curl",
+    "target": "biceps",
+    "secondaryMuscles": [
+      "forearms"
+    ],
+    "instructions": [
+      "Stand up straight with a dumbbell in each hand, palms facing your body and arms fully extended.",
+      "Keeping your upper arms stationary, exhale and curl the weights while contracting your biceps.",
+      "Continue to raise the dumbbells until your biceps are fully contracted and the dumbbells are at shoulder level.",
+      "Hold the contracted position for a brief pause as you squeeze your biceps.",
+      "Inhale and slowly begin to lower the dumbbells back to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "description": "The dumbbell reverse spider curl is an isolation exercise targeting the biceps and forearms. It is performed standing with dumbbells, focusing on curling the weights with palms facing the body, which emphasizes the brachialis and forearm muscles.",
+    "difficulty": "beginner"
+  },
+  {
+    "_id": "68cdd737cea3309f307e745f",
+    "bodyPart": "upper arms",
+    "equipment": "dumbbell",
+    "id": "1676",
+    "name": "dumbbell seated alternate hammer curl on exercise ball",
+    "target": "biceps",
+    "secondaryMuscles": [
+      "forearms"
+    ],
+    "instructions": [
+      "Sit on an exercise ball with your feet flat on the ground and your back straight.",
+      "Hold a dumbbell in each hand with your palms facing your body and your arms fully extended.",
+      "Keeping your upper arms stationary, exhale and curl one dumbbell up towards your shoulder while keeping your palm facing your body.",
+      "Continue to raise the dumbbell until your biceps are fully contracted and the dumbbell is at shoulder level.",
+      "Hold the contracted position for a brief pause as you squeeze your biceps.",
+      "Inhale and slowly lower the dumbbell back to the starting position.",
+      "Repeat the movement with the opposite arm.",
+      "Continue alternating arms for the desired number of repetitions."
+    ],
+    "description": "The dumbbell seated alternate hammer curl on an exercise ball is a biceps-focused exercise that also engages the forearms and core due to the instability of the exercise ball. It involves curling dumbbells alternately while seated on an exercise ball, which requires additional balance and coordination.",
+    "difficulty": "intermediate"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7460",
+    "bodyPart": "upper arms",
+    "equipment": "dumbbell",
+    "id": "1677",
+    "name": "dumbbell seated bicep curl",
+    "target": "biceps",
+    "secondaryMuscles": [
+      "forearms"
+    ],
+    "instructions": [
+      "Sit on a bench with your feet flat on the ground and hold a dumbbell in each hand, palms facing up.",
+      "Keep your back straight and your elbows close to your torso.",
+      "Exhale and curl the dumbbells up towards your shoulders, contracting your biceps.",
+      "Pause for a moment at the top, then inhale and slowly lower the dumbbells back down to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "description": "The dumbbell seated bicep curl is a strength exercise targeting the biceps, performed while seated to minimize body movement and focus on arm muscle engagement.",
+    "difficulty": "beginner"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7461",
+    "bodyPart": "upper arms",
+    "equipment": "dumbbell",
+    "id": "1678",
+    "name": "dumbbell seated hammer curl",
+    "target": "biceps",
+    "secondaryMuscles": [
+      "forearms"
+    ],
+    "instructions": [
+      "Sit on a bench with a dumbbell in each hand, palms facing your torso and arms extended straight down.",
+      "Keeping your upper arms stationary, exhale and curl the weights while contracting your biceps.",
+      "Continue to raise the dumbbells until your biceps are fully contracted and the dumbbells are at shoulder level.",
+      "Hold the contracted position for a brief pause as you squeeze your biceps.",
+      "Inhale and slowly begin to lower the dumbbells back to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "description": "The dumbbell seated hammer curl is an isolation exercise targeting the biceps and forearms. It is performed while seated, using a neutral grip (palms facing in) to emphasize the brachialis and brachioradialis muscles.",
+    "difficulty": "beginner"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7462",
+    "bodyPart": "upper arms",
+    "equipment": "dumbbell",
+    "id": "1679",
+    "name": "dumbbell seated one arm bicep curl on exercise ball with leg raised",
+    "target": "biceps",
+    "secondaryMuscles": [
+      "forearms",
+      "shoulders"
+    ],
+    "instructions": [
+      "Sit on an exercise ball with your feet flat on the ground and your back straight.",
+      "Hold a dumbbell in one hand with your palm facing up and your arm fully extended.",
+      "Place your other hand on your hip for stability.",
+      "Slowly curl the dumbbell towards your shoulder, keeping your upper arm stationary.",
+      "Pause for a moment at the top of the movement, squeezing your bicep.",
+      "Slowly lower the dumbbell back to the starting position.",
+      "Repeat for the desired number of repetitions.",
+      "Switch arms and repeat the exercise."
+    ],
+    "description": "This exercise involves performing a seated one-arm bicep curl on an exercise ball while raising one leg, increasing the challenge to balance and core stability in addition to targeting the biceps.",
+    "difficulty": "advanced"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7463",
+    "bodyPart": "chest",
+    "equipment": "body weight",
+    "id": "3145",
+    "name": "push-up plus",
+    "target": "pectorals",
+    "secondaryMuscles": [
+      "triceps",
+      "shoulders"
+    ],
+    "instructions": [
+      "Start in a high plank position with your hands slightly wider than shoulder-width apart and your body in a straight line from head to heels.",
+      "Lower your body towards the ground by bending your elbows, keeping them close to your sides.",
+      "Once your chest is just above the ground, push through your hands to extend your arms and lift your upper body up.",
+      "At the top of the movement, protract your shoulder blades by pushing your upper back towards the ceiling.",
+      "Pause for a moment, then reverse the movement by retracting your shoulder blades and lowering your body back down to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "description": "The push-up plus is a variation of the standard push-up that adds an extra movement at the top of the push-up by protracting the shoulder blades, which further engages the serratus anterior and improves shoulder stability.",
+    "difficulty": "intermediate"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7464",
+    "bodyPart": "waist",
+    "equipment": "body weight",
+    "id": "3147",
+    "name": "pelvic tilt",
+    "target": "abs",
+    "secondaryMuscles": [
+      "lower back"
+    ],
+    "instructions": [
+      "Lie flat on your back with your knees bent and feet flat on the ground.",
+      "Place your hands by your sides.",
+      "Engage your abs and tilt your pelvis upward, pressing your lower back into the ground.",
+      "Hold this position for a few seconds, focusing on contracting your abs.",
+      "Release the tilt and return to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "description": "The pelvic tilt is a bodyweight exercise that targets the abdominal muscles and helps improve core stability and lower back health. It is often used in rehabilitation and as a foundational movement for beginners.",
+    "difficulty": "beginner"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7465",
+    "bodyPart": "back",
+    "equipment": "body weight",
+    "id": "3156",
+    "name": "bodyweight standing close-grip one arm row",
+    "target": "upper back",
+    "secondaryMuscles": [
+      "biceps",
+      "forearms"
+    ],
+    "instructions": [
+      "Stand with your feet shoulder-width apart, knees slightly bent, and hold a dumbbell in one hand with a neutral grip.",
+      "Bend forward at the hips, keeping your back straight and your core engaged.",
+      "Pull the dumbbell up towards your chest, keeping your elbow close to your body and squeezing your shoulder blades together.",
+      "Pause for a moment at the top, then slowly lower the dumbbell back down to the starting position.",
+      "Repeat for the desired number of repetitions, then switch sides."
+    ],
+    "description": "The bodyweight standing close-grip one arm row is a unilateral exercise targeting the upper back, performed with body weight and focusing on pulling strength and stability.",
+    "difficulty": "intermediate"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7466",
+    "bodyPart": "back",
+    "equipment": "body weight",
+    "id": "3158",
+    "name": "bodyweight standing close-grip row",
+    "target": "upper back",
+    "secondaryMuscles": [
+      "biceps",
+      "forearms"
+    ],
+    "instructions": [
+      "Stand with your feet shoulder-width apart and knees slightly bent.",
+      "Bend forward at the waist, keeping your back straight and your core engaged.",
+      "Extend your arms straight in front of you, gripping the bar or handles with a close grip.",
+      "Pull the bar or handles towards your body, squeezing your shoulder blades together.",
+      "Pause for a moment at the top of the movement, then slowly release and return to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "description": "The bodyweight standing close-grip row targets the upper back using only body weight for resistance. It involves pulling a bar or handles towards the body while maintaining a bent-over position, focusing on squeezing the shoulder blades together.",
+    "difficulty": "beginner"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7467",
+    "bodyPart": "back",
+    "equipment": "body weight",
+    "id": "3161",
+    "name": "bodyweight standing one arm row (with towel)",
+    "target": "upper back",
+    "secondaryMuscles": [
+      "biceps",
+      "forearms"
+    ],
+    "instructions": [
+      "Stand with your feet shoulder-width apart, knees slightly bent, and hold a towel with one hand.",
+      "Bend forward at the hips, keeping your back straight and your core engaged.",
+      "Pull the towel towards your chest, squeezing your shoulder blades together.",
+      "Pause for a moment at the top, then slowly lower the towel back to the starting position.",
+      "Repeat for the desired number of repetitions, then switch to the other arm."
+    ],
+    "description": "A bodyweight exercise targeting the upper back, performed by pulling a towel with one arm while standing, engaging the biceps and forearms as secondary muscles.",
+    "difficulty": "beginner"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7468",
+    "bodyPart": "back",
+    "equipment": "body weight",
+    "id": "3162",
+    "name": "bodyweight standing one arm row",
+    "target": "upper back",
+    "secondaryMuscles": [
+      "biceps",
+      "forearms"
+    ],
+    "instructions": [
+      "Stand with your feet shoulder-width apart, knees slightly bent, and hold a dumbbell in one hand.",
+      "Bend forward at the hips, keeping your back straight and your core engaged.",
+      "Let the dumbbell hang straight down in front of you, with your arm fully extended.",
+      "Pull the dumbbell up towards your chest, keeping your elbow close to your body.",
+      "Squeeze your shoulder blades together at the top of the movement.",
+      "Lower the dumbbell back down to the starting position.",
+      "Repeat for the desired number of repetitions, then switch sides."
+    ],
+    "description": "The bodyweight standing one arm row is a unilateral exercise targeting the upper back, performed by hinging at the hips and pulling a weight toward the chest with one arm.",
+    "difficulty": "beginner"
+  },
+  {
+    "_id": "68cdd737cea3309f307e7469",
+    "bodyPart": "back",
+    "equipment": "body weight",
+    "id": "3165",
+    "name": "bodyweight standing row (with towel)",
+    "target": "upper back",
+    "secondaryMuscles": [
+      "biceps",
+      "shoulders"
+    ],
+    "instructions": [
+      "Stand with your feet shoulder-width apart and hold a towel in front of you with both hands.",
+      "Bend your knees slightly and hinge forward at the hips, keeping your back straight.",
+      "Pull the towel towards your chest, squeezing your shoulder blades together.",
+      "Pause for a moment at the top, then slowly release the tension and return to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "description": "The bodyweight standing row (with towel) is a back exercise that targets the upper back using a towel for resistance. It also engages the biceps and shoulders. The movement is performed by pulling the towel towards your chest while maintaining a strong posture.",
+    "difficulty": "beginner"
+  },
+  {
+    "_id": "68cdd737cea3309f307e746a",
+    "bodyPart": "back",
+    "equipment": "body weight",
+    "id": "3166",
+    "name": "bodyweight standing row",
+    "target": "upper back",
+    "secondaryMuscles": [
+      "biceps",
+      "shoulders"
+    ],
+    "instructions": [
+      "Stand with your feet shoulder-width apart and knees slightly bent.",
+      "Grasp a bar or handles with an overhand grip, palms facing down.",
+      "Keep your back straight and core engaged.",
+      "Pull the bar or handles towards your body, squeezing your shoulder blades together.",
+      "Pause for a moment at the top of the movement.",
+      "Slowly release and extend your arms back to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "description": "The bodyweight standing row is a back exercise that targets the upper back using only body weight for resistance. It also engages the biceps and shoulders as secondary muscles. The movement involves pulling a bar or handles towards the body while standing, focusing on squeezing the shoulder blades together.",
+    "difficulty": "beginner"
+  },
+  {
+    "_id": "68cdd737cea3309f307e746b",
+    "bodyPart": "back",
+    "equipment": "body weight",
+    "id": "3167",
+    "name": "bodyweight squatting row (with towel)",
+    "target": "upper back",
+    "secondaryMuscles": [
+      "biceps",
+      "shoulders"
+    ],
+    "instructions": [
+      "Stand with your feet shoulder-width apart, holding a towel in front of you with your palms facing down.",
+      "Bend your knees and lower your body into a squat position, keeping your back straight and your chest up.",
+      "As you lower into the squat, simultaneously pull the towel towards your chest, squeezing your shoulder blades together.",
+      "Pause for a moment at the bottom of the squat, then slowly return to the starting position while extending your arms.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "description": "The bodyweight squatting row (with towel) is a compound exercise that targets the upper back while also engaging the biceps and shoulders. It combines a squat with a rowing motion using a towel for resistance, making it a functional movement that develops strength and coordination.",
+    "difficulty": "beginner"
+  },
+  {
+    "_id": "68cdd737cea3309f307e746c",
+    "bodyPart": "back",
+    "equipment": "body weight",
+    "id": "3168",
+    "name": "bodyweight squatting row",
+    "target": "upper back",
+    "secondaryMuscles": [
+      "biceps",
+      "shoulders"
+    ],
+    "instructions": [
+      "Stand with your feet shoulder-width apart, holding onto a sturdy object or suspension trainer with your arms extended.",
+      "Lower your body into a squat position, keeping your back straight and your knees behind your toes.",
+      "From the squat position, pull your body up towards the object or suspension trainer, squeezing your shoulder blades together.",
+      "Pause for a moment at the top, then slowly lower your body back down to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ],
+    "description": "The bodyweight squatting row is a compound exercise that targets the upper back while also engaging the biceps and shoulders. It combines a squatting motion with a rowing movement, requiring coordination and strength.",
+    "difficulty": "intermediate"
+  },
+  {
+    "_id": "68d43ee3e3faa587571ad91e",
+    "bodyPart": "chest",
+    "equipment": "barbell",
+    "name": "Bench Press",
+    "target": "Chest",
+    "secondaryMuscles": [
+      "Triceps",
+      "Shoulders"
+    ],
+    "instructions": [
+      "lay flat on Bench"
+    ],
+    "description": "Push weight up from chest.",
+    "difficulty": "intermediate"
+  }
+]

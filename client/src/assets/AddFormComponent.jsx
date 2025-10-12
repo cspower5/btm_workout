@@ -37,7 +37,11 @@ function AddFormComponent({ title, apiFunction, placeholder }) {
     };
 
     return (
-        <div className="form-container">
+        <div className={
+            title === "Add New Body Part" || title === "Add New Equipment"
+                ? "small-form-container"
+                : "form-container"
+        }>
             <h2>{title}</h2>
             <form onSubmit={handleSubmit}>
                 <div className="form-group">

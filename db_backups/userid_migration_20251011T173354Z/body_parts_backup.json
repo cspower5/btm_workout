@@ -1,0 +1,50 @@
+[
+  {
+    "_id": "68e046d895853318dd750383",
+    "name": "back"
+  },
+  {
+    "_id": "68e046d895853318dd750384",
+    "name": "cardio"
+  },
+  {
+    "_id": "68e046d895853318dd750385",
+    "name": "chest"
+  },
+  {
+    "_id": "68e046d895853318dd750386",
+    "name": "lower arms"
+  },
+  {
+    "_id": "68e046d895853318dd750387",
+    "name": "lower legs"
+  },
+  {
+    "_id": "68e046d895853318dd750388",
+    "name": "neck"
+  },
+  {
+    "_id": "68e046d895853318dd750389",
+    "name": "shoulders"
+  },
+  {
+    "_id": "68e046d895853318dd75038a",
+    "name": "upper arms"
+  },
+  {
+    "_id": "68e046d995853318dd75038b",
+    "name": "upper legs"
+  },
+  {
+    "_id": "68e046d995853318dd75038c",
+    "name": "waist"
+  },
+  {
+    "_id": "68e1578e5c02004788faeb77",
+    "name": "glutes"
+  },
+  {
+    "_id": "68e157dc5c02004788faeb78",
+    "name": "traps"
+  }
+]

@@ -1,11 +1,181 @@
+/* Hamburger icon styles */
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  z-index: 1200;
+}
+.hamburger-box {
+  width: 32px;
+  height: 32px;
+  display: inline-block;
+  position: relative;
+}
+.hamburger-inner {
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 24px;
+  height: 2px;
+  background: #fff;
+  border-radius: 2px;
+  box-shadow: 0 8px 0 0 #fff, 0 -8px 0 0 #fff;
+  transform: translate(-50%, -50%);
+  transition: all 0.3s ease;
+}
+.hamburger.open .hamburger-inner {
+  background: transparent;
+  box-shadow: none;
+}
+.hamburger.open .hamburger-inner:before,
+.hamburger.open .hamburger-inner:after {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 24px;
+  height: 2px;
+  background: #fff;
+  border-radius: 2px;
+}
+.hamburger.open .hamburger-inner:before {
+  top: 0;
+  transform: rotate(45deg);
+}
+.hamburger.open .hamburger-inner:after {
+  top: 0;
+  transform: rotate(-45deg);
+}
+
+/* Mobile menu overlay styles */
+.mobile-menu-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 1300;
+  transition: opacity 0.3s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+.mobile-menu-overlay.open {
+  display: block;
+  opacity: 1;
+  pointer-events: auto;
+}
+.mobile-menu {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 80vw;
+  max-width: 320px;
+  height: 100vh;
+  background: #1E90FF;
+  box-shadow: -2px 0 12px rgba(0,0,0,0.15);
+  padding: 2rem 1.5rem 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  z-index: 1400;
+  transition: transform 0.3s ease;
+  transform: translateX(100%);
+}
+.mobile-menu-overlay.open .mobile-menu {
+  transform: translateX(0);
+}
+.mobile-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+.mobile-menu li {
+  margin-bottom: 1.2rem;
+}
+.mobile-menu a, .mobile-menu button {
+  color: #fff;
+  font-size: 1.2rem;
+  text-decoration: none;
+  background: none;
+  border: none;
+  padding: 0.5rem 0;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+.mobile-menu button.logout-btn {
+  color: #fff;
+  font-weight: bold;
+  background: #dc3545;
+  border-radius: 6px;
+  margin-top: 1rem;
+}
+.mobile-hamburger {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .desktop-nav {
+    display: none !important;
+  }
+  .mobile-hamburger {
+    display: block !important;
+    position: absolute;
+    top: 1.2rem;
+    right: 1.2rem;
+    z-index: 1200;
+  }
+  .footer-nav .mobile-hamburger {
+    position: static;
+    margin: 0 auto;
+    top: auto;
+    right: auto;
+    left: auto;
+  }
+}
 :root {
+  /* Color system */
   --primary-color: #007bff;
   --secondary-color: #6c757d;
   --background-color: #f8f9fa;
   --card-background: #ffffff;
   --text-color: #212529;
+  --header-background: #1E90FF;
+  --header-text-color: white;
+  
+  /* Layout and spacing */
   --border-radius: 8px;
   --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  
+  /* Header dimensions - focused on logo and branding */
+  --header-height: 300px;
+  
+  /* Logo dimensions - prominent and central */
+  --logo-height: 200px;
+  --logo-max-width: 600px;
+  
+  /* Typography - fluid scaling */
+  --header-title-size: clamp(1.0rem, 2.5vw, 1.4rem);
+  --header-title-size-mobile: clamp(0.9rem, 2.2vw, 1.1rem);
+  --user-info-size: clamp(0.8rem, 1.5vw, 1rem);
+  --button-size: clamp(0.7rem, 1.2vw, 0.85rem);
+  --nav-font-size-mobile: clamp(0.7rem, 1.5vw, 0.9rem);
+  
+  /* Navigation sizing */
+  --footer-nav-height: 30px;
+  --footer-nav-padding: 0.18rem 0.25rem;
+  --nav-item-padding: 0.08rem 0.12rem;
+  --nav-item-gap: 0.12rem;
+  
+  /* Z-index system */
+  --z-header: 1000;
+  --z-modal: 1100;
+  --z-tooltip: 1200;
 }
 
 body {
@@ -22,80 +192,222 @@ body {
 .App {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh; /* Exact viewport height, not min-height */
   text-align: center;
+  overflow: hidden; /* Prevent scrolling */
 }
 
 .App-header {
-  background-color: var(--primary-color);
-  color: white;
-  /* reduced default header height to improve vertical space on small devices */
-  min-height: 140px;
-  padding: 1rem 2rem;
-  box-shadow: var(--box-shadow);
+  background-color: var(--header-background);
+  min-height: 140px; /* More reasonable header height */
+  display: grid;
+  grid-template-rows: auto auto auto;
+  grid-template-columns: 1fr;
+  grid-template-areas: 
+    "user-info"
+    "logo"
+    "nav";
+  align-items: center;
+  gap: 0.3rem; /* Reduced gap for tighter layout */
+  font-size: calc(10px + 2vmin);
+  color: var(--header-text-color);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-header);
+  padding: 0.8rem; /* Reduced padding */
+}
+
+/* Logo gets center stage - now the main focus */
+.header-brand {
+  grid-area: logo;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   align-items: center;
-  position: relative; 
+  justify-self: center;
+}
+
+/* Navigation at the bottom of header */
+.header-nav {
+  grid-area: nav;
+  justify-self: center;
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.nav-links a {
+  color: var(--header-text-color);
+  text-decoration: none;
+  font-size: 1.3rem; /* Increased from 1.1rem for even better readability */
+  font-weight: 500;
+  padding: 0.5rem 0.75rem;
+  border-radius: calc(var(--border-radius) / 2);
+  transition: background-color 0.2s;
+}
+
+.nav-links a:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* User info positioned in upper right corner */
+.user-info-section {
+  grid-area: user-info;
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  z-index: 10;
 }
 
 .App-header h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.header-subtitle {
   margin: 0;
-  /* reduced default header title size for better mobile/desktop balance */
-  font-size: 1.8rem;
+  font-size: 0.9rem;
+  font-weight: 400;
+  line-height: 1.3;
+  color: rgba(255, 255, 255, 0.9);
+  font-style: italic;
+  max-width: 600px;
+  text-align: center;
 }
 
-/* Hamburger button (hidden on larger screens) */
-.hamburger {
-  display: none; /* shown via media query */
-  background: transparent;
-  border: none;
-  padding: 0.25rem;
-  margin-left: 0.5rem;
-  cursor: pointer;
-  color: white;
-}
-
-.hamburger-box { display: inline-block; width: 28px; height: 18px; position: relative; }
-.hamburger-inner,
-.hamburger-inner::before,
-.hamburger-inner::after {
-  width: 28px;
-  height: 2px;
-  background-color: white;
+/* Professional logo sizing - natural dimensions approach */
+.header-logo {
+  width: var(--logo-max-width);
+  height: var(--logo-height);
+  max-width: 90vw; /* Responsive limit */
+  max-height: none;
+  object-fit: contain; /* Maintain aspect ratio */
+  object-position: center;
+  margin: 0.5rem auto;
+  border-radius: 8px;
   display: block;
-  position: absolute;
-  left: 0;
-  transition: transform 0.25s ease, opacity 0.25s ease;
 }
-.hamburger-inner { top: 50%; transform: translateY(-50%); }
-.hamburger-inner::before { content: ''; top: -8px; }
-.hamburger-inner::after { content: ''; top: 8px; }
-.hamburger.open .hamburger-inner { background-color: transparent; }
-.hamburger.open .hamburger-inner::before { transform: translateY(8px) rotate(45deg); }
-.hamburger.open .hamburger-inner::after { transform: translateY(-8px) rotate(-45deg); }
 
-/* Responsive tweaks for small screens */
+.username {
+  color: var(--header-text-color);
+  font-size: 0.9rem; /* Increased from 0.75rem for better readability */
+  font-weight: 400; /* Lighter weight */
+  text-align: right; /* Right-aligned */
+  margin: 0;
+}
+
+.logout-btn {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: var(--header-text-color);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.4rem 0.8rem; /* Smaller padding */
+  border-radius: calc(var(--border-radius) / 2);
+  font-size: 0.7rem; /* Smaller font size */
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.logout-btn:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
 @media (max-width: 600px) {
   .App-header {
-    min-height: 120px; /* reduce header height on phones */
-    padding: 0.75rem 1rem;
+    min-height: 120px; /* Smaller mobile header */
+    grid-template-rows: auto auto auto;
+    grid-template-columns: 1fr;
+    grid-template-areas: 
+      "user-info"
+      "logo"
+      "nav";
+    gap: 0.3rem;
+    padding: 0.5rem;
   }
 
-  /* show hamburger and hide nav by default on small screens */
-  .hamburger { display: inline-flex; align-items: center; justify-content: center; }
-  .header-nav { display: none; width: 100%; }
-  .header-nav.open { display: block; }
+  .header-brand {
+    justify-self: center;
+  }
+
+  .header-nav {
+    justify-self: center;
+  }
+
+  .nav-links {
+    gap: 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .nav-links a {
+    padding: 0.3rem 0.5rem;
+    font-size: 1.1rem; /* Increased from 0.9rem for mobile */
+  }
+
+  .App-header h1 {
+    font-size: 1rem;
+  }
+
+  /* User info section for mobile - keep in upper right */
+  .user-info-section {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.3rem;
+  }
+
+  .username {
+    font-size: 0.8rem; /* Increased from 0.7rem for mobile */
+    text-align: right;
+  }
+
+  .logout-btn {
+    padding: 0.2rem 0.5rem;
+    font-size: 0.65rem;
+  }
+
+  /* Mobile main content padding - each page handles its own */
+  main { 
+    padding-top: 0 !important; /* Removed global padding - each page handles its own spacing */
+    padding-bottom: 56px !important;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* Auth pages use same spacing */
+  main .auth-page-container {
+    padding-top: var(--header-height);
+  }
 
   /* when open, show the nav as a vertical overlay list for easier tapping */
   .header-nav.open nav ul {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.5rem; /* Increase gap for tap targets */
+    padding: 1rem; /* Better padding inside the overlay */
+    background: none; /* Remove background gradient */
+    border-radius: 0; /* Remove border radius */
+    height: auto; /* Don't force 100% height here */
+    /* gap: 0.25rem;
     padding: 0.5rem 0.25rem;
     background: linear-gradient(180deg, rgba(0,0,0,0.05), rgba(0,0,0,0.0));
     border-radius: 6px;
+    height: 100%; */
   }
 
   .header-nav.open nav li { margin: 0; }
@@ -128,24 +440,85 @@ body {
   }
 
   .footer-nav {
-    padding: 1rem;
-    min-height: auto; /* let footer size to content */
+    position: fixed;
+    left: 0; 
+    right: 0; 
+    bottom: 0; 
+    z-index: var(--z-header);
+    padding: var(--footer-nav-padding);
+    min-height: var(--footer-nav-height);
   }
 
-  /* Force footer/nav links to fill width on small screens */
-  .footer-nav nav ul,
-  .header-nav nav ul {
+  /* Mobile navigation layout using CSS custom properties */
+  .footer-nav nav ul {
+    display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: flex-start;
+    align-items: center;
     width: 100%;
-    gap: 0.25rem;
+    gap: var(--nav-item-gap);
+    flex-wrap: nowrap;
   }
 
   .footer-nav nav li,
   .header-nav nav li {
-    flex: 1 1 auto;
-    margin: 0;
+    flex: 0 0 auto;
+    margin: 0 var(--nav-item-gap);
     text-align: center;
+    padding: 0;
+  }
+  
+  /* Compact navigation anchors with proper sizing */
+  .header-nav a, .footer-nav a {
+    display: inline-block;
+    padding: var(--nav-item-padding);
+    font-size: var(--nav-font-size-mobile);
+    white-space: nowrap;
+  }
+  
+  /* Navigation layout distribution */
+  .header-nav nav ul, .footer-nav nav ul { 
+    display: flex; 
+  }
+  
+  .header-nav nav li, .footer-nav nav li { 
+    flex: 1 1 0; 
+  }
+  
+  .header-nav nav a, .footer-nav nav a { 
+    display: block; 
+    width: 100%; 
+  }
+  .workout-list {
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)) !important;
+    gap: 0.25rem !important;
+    padding: 0 0.15rem !important;
+  }
+  .exercise-card {
+    padding: 0.12rem !important;
+    font-size: 0.7rem !important;
+    min-height: 0 !important; /* allow aspect-ratio to control size */
+  }
+  
+  /* Add padding to main so content isn't hidden behind fixed header/footer */
+  body main,
+  main.main-content,
+  main { 
+    padding-top: 0 !important; /* Removed global padding - each page handles its own spacing */
+    padding-bottom: 56px !important;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* Special spacing for auth pages */
+  main .auth-page-container {
+    padding-top: 400px !important; /* Increased to give proper space below header */
+  }
+  
+  /* Landscape phones: make footer non-fixed so it pushes content (avoid overlay and extra scroll) */
+  @media (orientation: landscape) {
+    .footer-nav { position: relative !important; left: auto !important; right: auto !important; bottom: auto !important; padding: 0.2rem 0.3rem !important; }
+    main { padding-bottom: 20px !important; }
   }
 }
 
@@ -157,15 +530,27 @@ body {
   .App-header { padding-left: 8px !important; padding-right: 8px !important; }
 
   /* Force header nav to center and match footer sizing */
-  header.App-header nav.header-nav,
   .header-nav,
-  .header-nav nav ul { display: flex !important; justify-content: center !important; align-items: center !important; gap: 6px !important; flex-wrap: nowrap !important; }
+  .header-nav nav ul { 
+    display: flex !important; 
+    justify-content: center !important; 
+    align-items: center !important; 
+    gap: 6px !important; 
+    flex-wrap: nowrap !important; 
+  }
 
-  header.App-header nav.header-nav li,
-  .header-nav nav li { flex: 0 0 auto !important; margin: 0 !important; padding: 0 !important; }
+  .header-nav nav li { 
+    flex: 0 0 auto !important; 
+    margin: 0 !important; 
+    padding: 0 !important; 
+  }
 
-  header.App-header nav.header-nav a,
-  .header-nav a { font-size: 0.5rem !important; padding: 3px 6px !important; white-space: nowrap !important; display: inline-block !important; }
+  .header-nav a { 
+    font-size: 0.5rem !important; 
+    padding: 3px 6px !important; 
+    white-space: nowrap !important; 
+    display: inline-block !important; 
+  }
 
   /* Reduce title slightly in landscape to give links more room */
   .App-header h1 { font-size: 1.4rem !important; }
@@ -177,10 +562,42 @@ body {
 
 /* Source-level final landscape override (highest specificity) */
 @media (orientation: landscape) and (max-width: 900px) {
-  header.App-header .header-nav nav ul, .App-header .header-nav nav ul, header.App-header nav.header-nav ul { justify-content:center !important; gap:4px !important; flex-wrap:nowrap !important }
-  header.App-header .header-nav nav li, .App-header .header-nav nav li, header.App-header nav.header-nav li { flex:0 0 auto !important; margin:0 !important; padding:0 !important }
-  header.App-header .header-nav nav a, .App-header .header-nav a, header.App-header nav.header-nav a { font-size:0.46rem !important; padding:2px 6px !important; white-space:nowrap !important; display:inline-block !important }
-  .App-header h1 { font-size:1.1rem !important; }
+  .header-nav nav ul { 
+    justify-content: center !important; 
+    gap: 4px !important; 
+    flex-wrap: nowrap !important;
+  }
+  .header-nav nav li { 
+    flex: 0 0 auto !important; 
+    margin: 0 !important; 
+    padding: 0 !important;
+  }
+  .header-nav a { 
+    font-size: 0.46rem !important; 
+    padding: 2px 6px !important; 
+    white-space: nowrap !important; 
+    display: inline-block !important;
+  }
+  .App-header h1 { 
+    font-size: 1.1rem !important; 
+  }
+}
+
+/* Increase header/banner thickness on wide landscape displays (min-width: 900px) */
+@media (min-width: 900px) and (orientation: landscape) {
+  .App-header {
+    /* make the blue banner noticeably thicker in landscape */
+    min-height: 200px !important;
+    height: 200px !important;
+    padding-top: 1.25rem !important;
+    padding-bottom: 1.25rem !important;
+  }
+
+  .App-header h1 {
+    font-size: 2.0rem !important; /* slightly larger title to match taller banner */
+    line-height: 1.05 !important;
+    margin-top: 0.25rem !important;
+  }
 }
 
 /* Extra-small devices: tighten spacing and font sizes further */
@@ -210,14 +627,7 @@ body {
   }
 }
 
-.footer-logo {
-  max-width: 120px; /* shrink logo for small screens */
-  margin-bottom: 0.75rem;
-}
-
-main {
-  padding: 0.5rem;
-}
+/* Removed duplicate main rule that was conflicting with header spacing */
 
 .header-nav {
   padding-bottom: 0; 
@@ -234,12 +644,6 @@ main {
   justify-content: space-between; /* place the logo near top and links toward bottom when space allows */
   align-items: center;
   padding: 1rem;
-}
-
-  .footer-logo {
-  max-width: 200px; /* Adjust size as needed */
-  height: auto;
-  margin-bottom: 1rem; /* Adds space between the logo and the links */
 }
 
 .footer-nav nav ul,
@@ -266,6 +670,7 @@ main {
   font-weight: bold;
   display: inline-block;
   padding: 0.35rem 0.5rem;
+  font-size: 1.2rem;  /* Increased from 1rem for even better readability */
 }
 
 .footer-nav a:hover,
@@ -273,9 +678,34 @@ main {
   text-decoration: underline;
 }
 
+.footer-logo {
+  margin: 0.5rem 0; /* Reduced margin to save space */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: transparent !important; /* Ensure container has no background */
+}
+
+.footer-logo img {
+  height: 450px; /* Even bigger - increased from 350px */
+  width: auto; /* Maintain aspect ratio */
+  opacity: 1; /* Full opacity for the new logo */
+  transition: opacity 0.3s ease;
+  background: transparent !important; /* Force transparent background */
+  border: none !important; /* Remove any borders */
+  box-shadow: none !important; /* Remove any shadows */
+  border-radius: 0 !important; /* Remove any border radius that might show corners */
+  filter: drop-shadow(0 0 0 transparent); /* Remove any white background with filter */
+}
+
+.footer-logo img:hover {
+  opacity: 1; /* Full opacity on hover */
+}
+
 main {
-  flex-grow: 1;
-  padding: 1rem;
+  flex: 1;
+  overflow-y: auto; /* Allow scrolling within main content only */
+  /* Removed conflicting padding - header spacing handled elsewhere */
 }
 
 .controls {
@@ -320,81 +750,7 @@ footer {
   color: white;
 }
 
-/* Strong mobile overrides: ensure horizontal header/footer nav and compact tiles
-   appended at end so it wins during minification and avoids accidental nesting issues */
-@media (max-width: 600px) {
-  .App-header {
-    padding: 0.45rem 0.6rem !important;
-    min-height: 76px !important;
-    position: fixed !important;
-    top: 0; left: 0; right: 0; z-index: 1000;
-  }
-
-  /* Force header/footer nav to a single horizontal row and stretch links */
-  .header-nav nav ul,
-  .footer-nav nav ul {
-    display: flex !important;
-    flex-direction: row !important;
-    justify-content: flex-start !important;
-    align-items: center !important;
-    width: 100% !important;
-    gap: 0.12rem !important;
-    flex-wrap: nowrap !important; /* prevent wrapping */
-  }
-
-  .header-nav nav li,
-  .footer-nav nav li {
-    flex: 0 0 auto !important; /* don't grow; allow items to size to content */
-    margin: 0 0.12rem !important;
-    text-align: center !important;
-    padding: 0 !important;
-  }
-
-  /* Make nav anchors compact and prevent wrapping */
-  .header-nav a, .footer-nav a {
-    display: inline-block !important;
-    padding: 0.08rem 0.12rem !important;
-    font-size: 0.36rem !important; /* even smaller */
-    white-space: nowrap !important; /* keep label on one line */
-  }
-
-  /* Make list items and anchors stretch evenly across the bar */
-  .header-nav nav ul, .footer-nav nav ul { display:flex !important; }
-  .header-nav nav li, .footer-nav nav li { flex: 1 1 0 !important; }
-  .header-nav nav a, .footer-nav nav a { display:block !important; width:100% !important; }
-
-  /* Portrait: keep footer small and pinned but compact */
-  .footer-nav {
-    position: fixed !important;
-    left: 0; right: 0; bottom: 0; z-index: 1000;
-    padding: 0.06rem 0.22rem !important;
-    min-height: 26px !important; /* make bottom bar shorter */
-  }
-
-  /* Add padding to main so content isn't hidden behind fixed header/footer */
-  main { padding-top: 56px !important; padding-bottom: 56px !important; }
-
-  /* Make the grid very compact so content fits without vertical scroll */
-  .workout-list {
-    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)) !important;
-    gap: 0.25rem !important;
-    padding: 0 0.15rem !important;
-  }
-
-  .exercise-card {
-    padding: 0.12rem !important;
-    font-size: 0.7rem !important;
-    min-height: 0 !important; /* allow aspect-ratio to control size */
-  }
-
-  .footer-nav {
-    padding: 0.18rem 0.25rem !important;
-    min-height: 30px !important;
-  }
-
-  /* Landscape phones: make footer non-fixed so it pushes content (avoid overlay and extra scroll) */
-  @media (orientation: landscape) {
-    .footer-nav { position: relative !important; left: auto !important; right: auto !important; bottom: auto !important; padding: 0.2rem 0.3rem !important; }
-    main { padding-bottom: 20px !important; }
-  }
+/* Mobile styles for auth elements (responsive design handled in main media query) */
+@media (max-width: 768px) {
+  /* Additional mobile-specific styles can go here if needed */
 }

@@ -5,9 +5,17 @@ import axios from 'axios';
 export const API_BASE_URL = (() => {
     if (typeof window !== 'undefined') {
         try {
+            // If a test harness injected a specific API base, honor it. This allows
+            // e2e scripts to route the client to a test backend without changing
+            // build-time configuration.
+            if (window.__TEST_API_BASE__) {
+                return window.__TEST_API_BASE__;
+            }
             const host = window.location.hostname || '';
             // If running locally (dev) or on a LAN IP, target the local Flask server
-            if (host === 'localhost' || host === '127.0.0.1' || host.startsWith('192.')) {
+            // Note: also treat IPv6 loopback '::1' as local so tests using [::1]
+            // resolve correctly.
+            if (host === 'localhost' || host === '127.0.0.1' || host === '::1' || host.startsWith('192.')) {
                 // Default Flask dev server port used in this project is 5000
                 return `${window.location.protocol}//${host}:5000`;
             }
@@ -24,31 +32,91 @@ export const API_BASE_URL = (() => {
 
 // 1. Get List of Body Parts (for dropdown)
 export const getBodyParts = async () => {
-    const response = await axios.get(`${API_BASE_URL}/api/v1/body_parts_list`);
+    // Get the token from localStorage
+    const token = localStorage.getItem('authToken');
+    
+    const headers = {};
+    
+    // Add Authorization header if token exists
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    const response = await axios.get(`${API_BASE_URL}/api/v1/body_parts_list`, {
+        headers
+    });
     return response.data; 
 };
 
 // 2. Get List of Equipment
 export const getEquipmentList = async () => {
-    const response = await axios.get(`${API_BASE_URL}/api/v1/equipment_list`);
+    // Get the token from localStorage
+    const token = localStorage.getItem('authToken');
+    
+    const headers = {};
+    
+    // Add Authorization header if token exists
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    const response = await axios.get(`${API_BASE_URL}/api/v1/equipment_list`, {
+        headers
+    });
     return response.data; 
 };
 
 // 3. Get List of All Exercises
 export const getExercisesList = async () => {
-    const response = await axios.get(`${API_BASE_URL}/api/v1/exercises_list`);
+    // Get the token from localStorage
+    const token = localStorage.getItem('authToken');
+    
+    const headers = {};
+    
+    // Add Authorization header if token exists
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    const response = await axios.get(`${API_BASE_URL}/api/v1/exercises_list`, {
+        headers
+    });
     return response.data;
 };
 
 // 4. Get List of Difficulties
 export const getDifficulties = async () => {
-    const response = await axios.get(`${API_BASE_URL}/api/v1/difficulties`);
+    // Get the token from localStorage
+    const token = localStorage.getItem('authToken');
+    
+    const headers = {};
+    
+    // Add Authorization header if token exists
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    const response = await axios.get(`${API_BASE_URL}/api/v1/difficulties`, {
+        headers
+    });
     return response.data;
 };
 
 // 5. Get Single Exercise Details
 export const getExerciseDetails = async (name) => {
-    const response = await axios.get(`${API_BASE_URL}/api/v1/exercise/${name}`);
+    // Get the token from localStorage
+    const token = localStorage.getItem('authToken');
+    
+    const headers = {};
+    
+    // Add Authorization header if token exists
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    const response = await axios.get(`${API_BASE_URL}/api/v1/exercise/${name}`, {
+        headers
+    });
     return response.data;
 };
 
@@ -58,11 +126,18 @@ export const getExerciseDetails = async (name) => {
 // ===================================
 
 // 6. Generate a Random Workout (for the main page)
-export const generateWorkout = async (bodyPart, numExercises) => {
-    const response = await axios.post(`${API_BASE_URL}/api/v1/get_random_exercises`, {
+export const generateWorkout = async (bodyPart, numExercises, equipment = null) => {
+    const requestData = {
         bodyPart: bodyPart,
         num_exercises: numExercises // use snake_case consistently
-    });
+    };
+    
+    // Only add equipment to request if it's specified
+    if (equipment) {
+        requestData.equipment = equipment;
+    }
+    
+    const response = await axios.post(`${API_BASE_URL}/api/v1/get_random_exercises`, requestData);
     return response.data;
 };
 
@@ -79,7 +154,21 @@ export const refreshDatabase = async () => {
 
 // 8. Insert New Exercise (for Add Exercises Page)
 export const insertExercise = async (exerciseData) => {
-    const response = await axios.post(`${API_BASE_URL}/api/v1/insert_exercise`, exerciseData);
+    // Get the token from localStorage
+    const token = localStorage.getItem('authToken');
+    
+    const headers = {
+        'Content-Type': 'application/json'
+    };
+    
+    // Add Authorization header if token exists
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    const response = await axios.post(`${API_BASE_URL}/api/v1/insert_exercise`, exerciseData, {
+        headers
+    });
     return response.data;
 };
 

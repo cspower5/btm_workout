@@ -10,26 +10,36 @@ def seed_database():
 
     print("Seeding database with initial data...")
 
-    # Sample Body Parts
+    # Seed a sample user
+    user_id = db.users.insert_one(
+        {
+            "username": "seeduser",
+            "email": "seeduser@example.com",
+            "password": "hashedpassword",
+            "first_name": "Seed",
+            "last_name": "User",
+        }
+    ).inserted_id
+
+    # Sample Body Parts (with user_id)
     body_parts_data = [
-        {"name": "Chest"},
-        {"name": "Back"},
-        {"name": "Legs"},
-        {"name": "Shoulders"},
-        {"name": "Arms"},
-        {"name": "Core"},
+        {"name": "Chest", "user_id": user_id},
+        {"name": "Back", "user_id": user_id},
+        {"name": "Legs", "user_id": user_id},
+        {"name": "Shoulders", "user_id": user_id},
+        {"name": "Arms", "user_id": user_id},
+        {"name": "Core", "user_id": user_id},
     ]
-    # Delete existing data before seeding to ensure a clean slate
     db.body_parts.delete_many({})
     db.body_parts.insert_many(body_parts_data)
 
-    # Sample Equipment
+    # Sample Equipment (with user_id)
     equipment_data = [
-        {"name": "Dumbbell"},
-        {"name": "Barbell"},
-        {"name": "Kettlebell"},
-        {"name": "Body Weight"},
-        {"name": "Cable"},
+        {"name": "Dumbbell", "user_id": user_id},
+        {"name": "Barbell", "user_id": user_id},
+        {"name": "Kettlebell", "user_id": user_id},
+        {"name": "Body Weight", "user_id": user_id},
+        {"name": "Cable", "user_id": user_id},
     ]
     db.equipment.delete_many({})
     db.equipment.insert_many(equipment_data)
@@ -37,7 +47,7 @@ def seed_database():
     # Sample Difficulties (You'll need a way to insert these unique values)
     # NOTE: Assuming difficulty levels are used for filtering/dropdowns
 
-    # Sample Exercises
+    # Sample Exercises (with user_id)
     exercises_data = [
         {
             "exercise_name": "Barbell Bench Press",
@@ -52,6 +62,7 @@ def seed_database():
                 "Push the bar back up.",
             ],
             "difficulty": "Intermediate",
+            "user_id": user_id,
         },
         {
             "exercise_name": "Dumbbell Curl",
@@ -66,6 +77,7 @@ def seed_database():
                 "Lower them slowly.",
             ],
             "difficulty": "Beginner",
+            "user_id": user_id,
         },
         {
             "exercise_name": "Squat",
@@ -80,6 +92,7 @@ def seed_database():
                 "Push back up to starting position.",
             ],
             "difficulty": "Beginner",
+            "user_id": user_id,
         },
     ]
     db.exercises.delete_many({})

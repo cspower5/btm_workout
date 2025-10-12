@@ -1,190 +1,194 @@
 .home-container {
   display: flex;
   flex-direction: column;
+  justify-content: center; /* Center content vertically */
   align-items: center;
-  gap: 2rem;
-  padding: 2rem 1rem;
+  gap: 1.5rem; /* Reduced gap to fit better */
+  padding: 1rem; /* Reduced padding */
+  margin: 0; /* Remove all margins */
+  height: 100%; /* Use full available height */
+  overflow: hidden; /* Prevent scrolling */
+  box-sizing: border-box;
 }
 
-/* Tighter welcome heading and intro spacing */
+/* Welcome heading and intro styling */
 .home-container > h2 {
-  font-size: 1.0rem; /* slightly smaller */
-  font-weight: 600;
-  margin: 0.9rem 0 0.25rem 0; /* move heading down */
+  font-size: 2rem; /* Slightly smaller heading */
+  font-weight: 700;
+  margin: 0 0 0.5rem 0; /* Reduced bottom margin */
   letter-spacing: 0.02em;
-  text-transform: none; /* keep existing capitalization from markup */
+  color: var(--primary-color); /* Use primary blue color */
+  text-align: center;
 }
 
 .home-container > p {
-  margin: 0 0 0.4rem 0; /* reduce gap after paragraph */
-  font-size: 0.82rem; /* smaller intro paragraph */
-  max-width: 820px;
+  margin: 0 0 0.5rem 0; /* Reduced bottom margin */
+  font-size: 1rem; /* Slightly smaller intro text */
+  max-width: 650px;
+  line-height: 1.4; /* Tighter line height */
+  color: var(--secondary-color);
+  text-align: center;
 }
 
-/* Header/footer compact overrides for small screens */
-@media (max-width: 600px) {
-  /* Compact the header */
-  .App-header { height: 48px !important; min-height: 48px !important; padding: 0 0.5rem !important; }
-  .App-header h1 { font-size: 1rem !important; line-height: 1.1 !important; margin: 0 !important; }
-  .header-nav a { padding: 0.18rem 0.25rem !important; font-size: 0.85rem !important; }
-
-  /* Compact the footer */
-  .App-footer { height: 40px !important; min-height: 40px !important; padding: 0 0.4rem !important; }
-  .footer-nav a { padding: 0.18rem 0.25rem !important; font-size: 0.85rem !important; }
-
-  /* Ensure main content isn't overlapped by fixed header/footer */
-  main { padding-top: 56px !important; padding-bottom: 56px !important; }
+/* Action buttons */
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1rem;
 }
 
-/* Tighter layout for landscape phones (short viewport height) */
-@media (max-width: 900px) and (orientation: landscape), (max-height: 420px) {
-  /* Make header and footer very compact */
-  .App-header, .App-footer { height: 40px !important; min-height: 40px !important; padding: 0 0.4rem !important; }
-  .App-header h1 { font-size: 0.95rem !important; line-height: 1 !important; }
-
-  /* Reduce card padding and font sizes to avoid overlap */
-  .feature-card { padding: 0.06rem !important; gap: 0.04rem !important; }
-  .feature-card h3 { font-size: 0.68rem !important; }
-  .feature-card p { font-size: 0.56rem !important; }
-
-  /* Reduce main paddings since header/footer are smaller */
-  main { padding-top: 44px !important; padding-bottom: 44px !important; }
-
-  /* Slightly reduce the flex cell size so 3 still fits comfortably */
-  .feature-card-link { flex: 0 0 calc(33.333% - 8px) !important; max-width: calc(33.333% - 8px) !important; }
+.action-button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
 }
 
+.action-button:hover {
+  background-color: #0056b3;
+  text-decoration: none;
+  color: white;
+}
 
+/* Feature cards grid */
 .features-grid {
   display: grid;
-  /* desktop/tablet: reasonably sized cards */
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  row-gap: 2rem;
-  column-gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Smaller cards - reduced from 450px */
+  gap: 1rem; /* Further reduced gap for tighter layout */
   width: 100%;
-  max-width: 1000px;
+  max-width: 1200px; /* Reduced max width - was 1600px */
+  margin: 0; /* No margin to save space */
 }
 
 .feature-card-link {
-  text-decoration: none; /* Removes the underline from the link */
-  color: inherit; /* Ensures the text color is inherited from the parent */
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.feature-card-link:hover {
+  transform: translateY(-4px); /* Subtle lift effect */
+  text-decoration: none;
+  color: inherit;
 }
 
 .feature-card {
   background-color: var(--card-background);
+  padding: 1.5rem 1rem; /* Even smaller padding */
   border-radius: var(--border-radius);
   box-shadow: var(--box-shadow);
-  padding: 1.25rem;
   text-align: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  height: 100%;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  min-height: 140px; /* Even shorter cards */
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  gap: 0.4rem;
-  margin-bottom: 1rem;
-  cursor: pointer;
 }
 
 .feature-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  border-color: var(--primary-color);
+  box-shadow: 0 8px 20px rgba(0, 123, 255, 0.15); /* Enhanced shadow with primary color */
 }
 
 .feature-card h3 {
+  margin: 0 0 2.5rem 0; /* Huge space below title */
   color: var(--primary-color);
-  margin-top: 0;
-  margin-bottom: 0.5rem;
+  font-size: 2rem; /* Very large title */
+  font-weight: 700;
 }
 
 .feature-card p {
-  color: var(--text-color);
-  font-size: 0.98rem;
+  margin: 0;
+  color: var(--secondary-color);
+  font-size: 1.3rem; /* Very large description text */
+  line-height: 1.6;
 }
 
-.feature-card a {
-  text-decoration: none;
-  font-weight: bold;
-  color: var(--primary-color);
-  transition: color 0.3s ease;
+/* Special styling for action cards (like Refresh Database) */
+.feature-card:has(h3:contains("Refresh")) {
+  border: 2px solid #dc3545;
 }
 
-.feature-card a:hover {
-  text-decoration: underline;
-  color: #0056b3;
+.feature-card:has(h3:contains("Refresh")) h3 {
+  color: #dc3545;
 }
 
-/* Compact layout for small screens: allow many small cards to fit in one viewport
-   Reduce padding, fonts, and column min-width so tiles shrink horizontally. */
-@media (max-width: 600px) {
-  .features-grid {
-    /* Use flexbox on very small screens to guarantee 3-across layout */
-    display: flex !important;
-    flex-wrap: wrap !important;
-    gap: 0.15rem !important;
-    padding: 0 0.08rem !important;
-    justify-content: space-between !important;
+.feature-card:has(h3:contains("Refresh")):hover {
+  border-color: #dc3545;
+  box-shadow: 0 8px 20px rgba(220, 53, 69, 0.15);
+}
+
+/* Error message styling */
+.error-message {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  font-weight: 500;
+}
+
+/* Mobile responsive design - keep consistent with desktop until hamburger menu */
+@media (max-width: 768px) {
+  .home-container {
+    gap: 1.5rem; /* Same as desktop */
+    padding: 1rem; /* Same as desktop */
+    height: 100%; /* Same as desktop */
+    overflow: hidden; /* Same as desktop */
+    justify-content: center; /* Same as desktop */
   }
 
-  .feature-card-link {
-    /* anchor is the flex item; size it so three fit per row */
-    display: block !important;
-    flex: 0 0 calc(33.333% - 0.25rem) !important;
-    max-width: calc(33.333% - 0.25rem) !important;
-    box-sizing: border-box !important;
-    padding: 0 !important;
-    margin: 0 !important;
+  .home-container > h2 {
+    font-size: 2rem; /* Same as desktop */
+    margin: 0 0 0.5rem 0; /* Same as desktop */
+  }
+
+  .home-container > p {
+    font-size: 1rem; /* Same as desktop */
+    margin: 0 0 0.5rem 0; /* Same as desktop */
+    line-height: 1.4; /* Same as desktop */
+  }
+
+  .features-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Slightly smaller minmax for mobile */
+    gap: 1rem; /* Same as desktop */
+    margin: 0; /* Same as desktop */
   }
 
   .feature-card {
-    padding: 0.1rem !important;
-    gap: 0.06rem !important;
-    min-height: 34px !important;
-    align-items: stretch !important; /* let inner text span full width */
-    width: 100% !important;
-    box-sizing: border-box !important;
+    padding: 1.5rem 1rem; /* Same as desktop */
+    min-height: 140px; /* Same as desktop */
   }
 
-  /* Reduce visual weight of card text on tiny screens */
-  .feature-card h3 { font-size: 0.56rem !important; margin: 0.04rem 0; }
-  .feature-card p { font-size: 0.46rem !important; margin: 0; display: block; }
+  .feature-card h3 {
+    font-size: inherit; /* Use default size from parent */
+    margin-bottom: inherit; /* Use default margin */
+  }
 
-  /* Make cards consistent square-ish but allow content to wrap */
-  .feature-card-link { display: block; width: 100%; }
-
-  .feature-card h3 { font-size: 0.85rem; margin: 0.08rem 0; }
-  .feature-card p { font-size: 0.72rem; margin: 0; }
-
-  /* Make link wrapper fill the grid cell to increase tap target area */
-  .feature-card-link { display: block; width: 100%; }
+  .feature-card p {
+    font-size: inherit; /* Use default size from parent */
+  }
 }
 
-/* Reduce tile spacing on large screens and landscape mode so tiles sit closer together */
-@media (min-width: 900px) and (orientation: landscape) {
+/* Very small screens - minimal adjustments only */
+@media (max-width: 480px) {
   .features-grid {
-    /* tighten gaps for wide / landscape layouts */
-    row-gap: 0.8rem !important;
-    column-gap: 0.4rem !important;
-    max-width: 1400px;
+    grid-template-columns: 1fr; /* Single column on very small screens */
+    gap: 0.8rem; /* Slightly tighter gap */
   }
-
+  
   .feature-card {
-    /* slightly reduce padding and bottom margin so cards appear closer */
-    padding: 0.75rem !important;
-    margin-bottom: 0.25rem !important;
-    gap: 0.25rem !important;
+    padding: 1.2rem 0.8rem; /* Slightly smaller padding for very small screens */
+    min-height: 120px; /* Slightly shorter on very small screens */
   }
-
-  .feature-card-link {
-    /* nudge the calc sizing so 3 items sit neatly with reduced gaps */
-    flex: 0 0 calc(33.333% - 14px) !important;
-    max-width: calc(33.333% - 14px) !important;
-  }
-}
-
-/* Smaller welcome heading on small screens */
-@media (max-width: 600px) {
-  .home-container > h2 { font-size: 0.9rem !important; margin: 0.6rem 0 0.12rem 0 !important; }
-  .home-container > p { font-size: 0.78rem !important; margin: 0 0 0.3rem 0 !important; }
 }
