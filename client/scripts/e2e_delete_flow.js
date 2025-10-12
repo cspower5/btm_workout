@@ -13,9 +13,36 @@ async function run() {
   await fetch(`${apiBase}/api/v1/add_body_part`, { method: 'POST', headers: {'content-type':'application/json'}, body: JSON.stringify({ name: 'e2e-test-bp' }) });
   await fetch(`${apiBase}/api/v1/insert_exercise`, { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ exercise_name: 'E2E Test', body_part: 'e2e-test-bp', equipment: 'none', target: 'test', instructions: 'none' }) });
 
-  const browser = await puppeteer.launch({ args: ['--no-sandbox','--disable-setuid-sandbox'] });
+  const browser = await puppeteer.launch({ args: ['--no-sandbox','--disable-setuid-sandbox','--disable-web-security','--user-data-dir=/tmp/puppeteer_dev_profile'] });
   const page = await browser.newPage();
   await page.setViewport({ width: 390, height: 844 });
+
+  // Log console messages from the page to help debug API endpoint usage
+  page.on('console', msg => {
+    try {
+      const args = msg.args ? msg.args.map(a => a.toString()).join(' ') : msg.text();
+      console.log('PAGE_CONSOLE:', args);
+    } catch (e) {
+      console.log('PAGE_CONSOLE (unserializable)');
+    }
+  });
+
+  // Log network requests and responses to see what API calls the client makes
+  page.on('request', req => {
+    if (req.url().includes('/api/v1/')) console.log('REQ ->', req.method(), req.url());
+  });
+  page.on('response', async res => {
+    try {
+      if (res.url().includes('/api/v1/')) {
+        const status = res.status();
+        let text = '';
+        try { text = await res.text(); } catch (e) { text = '<no-body>'; }
+        console.log('RESP <-', res.status(), res.url(), text.slice(0,200));
+      }
+    } catch (e) {
+      console.warn('Error logging response', e);
+    }
+  });
 
   // Inject a small override so the client picks the test API during bootstrap.
   // This sets window.__TEST_API_BASE__ and also overrides location.hostname check

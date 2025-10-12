@@ -28,19 +28,32 @@ def test_health_endpoint():
 
 def test_insert_and_get_exercise():
     client = flask_server.app.test_client()
+    # Register and get token
+    reg_resp = client.post(
+        "/api/v1/auth/register",
+        json={
+            "username": "testuser",
+            "email": "testuser@example.com",
+            "password": "testpass123",
+        },
+    )
+    assert reg_resp.status_code == 200 or reg_resp.status_code == 201
+    token = reg_resp.get_json().get("access_token")
+    headers = {"Authorization": f"Bearer {token}"}
+
     payload = {
         "exercise_name": "Test Push",
         "body_part": "Chest",
         "equipment": "Body Weight",
         "target": "Pectorals",
     }
-    insert_resp = client.post("/api/v1/insert_exercise", json=payload)
+    insert_resp = client.post("/api/v1/insert_exercise", json=payload, headers=headers)
     assert insert_resp.status_code == 200
     inserted = insert_resp.get_json()
     assert "id" in inserted
 
     # Retrieve
-    get_resp = client.get("/api/v1/exercise/Test Push")
+    get_resp = client.get("/api/v1/exercise/Test Push", headers=headers)
     assert get_resp.status_code == 200
     got = get_resp.get_json()
     assert got.get("exercise_name") == "Test Push" or got.get("name") == "Test Push"
@@ -48,11 +61,23 @@ def test_insert_and_get_exercise():
 
 def test_lists_and_delete():
     client = flask_server.app.test_client()
+    # Register and get token
+    reg_resp = client.post(
+        "/api/v1/auth/register",
+        json={
+            "username": "testuser2",
+            "email": "testuser2@example.com",
+            "password": "testpass123",
+        },
+    )
+    assert reg_resp.status_code == 200 or reg_resp.status_code == 201
+    token = reg_resp.get_json().get("access_token")
+    headers = {"Authorization": f"Bearer {token}"}
 
     # Add a body part and equipment via endpoints
-    bp = client.post("/api/v1/add_body_part", json={"name": "Neck"})
+    bp = client.post("/api/v1/add_body_part", json={"name": "Neck"}, headers=headers)
     assert bp.status_code == 200
-    eq = client.post("/api/v1/add_equipment", json={"name": "Band"})
+    eq = client.post("/api/v1/add_equipment", json={"name": "Band"}, headers=headers)
     assert eq.status_code == 200
 
     # Add exercise
@@ -62,19 +87,19 @@ def test_lists_and_delete():
         "equipment": "Band",
         "target": "Neck",
     }
-    r = client.post("/api/v1/insert_exercise", json=payload)
+    r = client.post("/api/v1/insert_exercise", json=payload, headers=headers)
     assert r.status_code == 200
 
     # Get lists
-    bl = client.get("/api/v1/body_parts_list")
+    bl = client.get("/api/v1/body_parts_list", headers=headers)
     assert bl.status_code == 200
     assert "neck" in [n.lower() for n in bl.get_json()]
 
-    el = client.get("/api/v1/equipment_list")
+    el = client.get("/api/v1/equipment_list", headers=headers)
     assert el.status_code == 200
     assert "band" in [n.lower() for n in el.get_json()]
 
-    xl = client.get("/api/v1/exercises_list")
+    xl = client.get("/api/v1/exercises_list", headers=headers)
     assert xl.status_code == 200
     exercises = xl.get_json()
     assert any(
@@ -84,5 +109,5 @@ def test_lists_and_delete():
     )
 
     # Delete exercise
-    delr = client.delete("/api/v1/delete_exercise/Neck Stretch")
+    delr = client.delete("/api/v1/delete_exercise/Neck Stretch", headers=headers)
     assert delr.status_code == 200

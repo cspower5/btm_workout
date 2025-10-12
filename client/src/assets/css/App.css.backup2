@@ -1,0 +1,298 @@
+:root {
+  /* Color system */
+  --primary-color: #007bff;
+  --secondary-color: #6c757d;
+  --background-color: #f8f9fa;
+  --card-background: #ffffff;
+  --text-color: #212529;
+  --header-background: #1E90FF;
+  --header-text-color: white;
+  
+  /* Layout and spacing */
+  --border-radius: 8px;
+  --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  
+  /* Simplified header dimensions - no logo */
+  --header-height: 80px;
+  
+  /* Typography - clean and simple */
+  --header-title-size: clamp(1.2rem, 3vw, 1.8rem);
+  --user-info-size: clamp(0.9rem, 1.8vw, 1.1rem);
+  --button-size: clamp(0.8rem, 1.4vw, 1rem);
+  --nav-font-size-mobile: clamp(0.7rem, 1.5vw, 0.9rem);
+  
+  /* Navigation sizing */
+  --footer-nav-height: 60px;
+  --footer-nav-padding: 0.5rem;
+  --nav-item-padding: 0.4rem 0.8rem;
+  --nav-item-gap: 0.5rem;
+  
+  /* Z-index system */
+  --z-header: 1000;
+  --z-modal: 1100;
+  --z-tooltip: 1200;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 
+  'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  margin: 0;
+  padding: 0;
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+.App {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  text-align: center;
+}
+
+/* Simplified header layout - just title and user info */
+.App-header {
+  background-color: var(--header-background);
+  height: var(--header-height);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: calc(10px + 2vmin);
+  color: var(--header-text-color);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-header);
+  padding: 0 2rem;
+}
+
+/* Header brand - simplified without logo */
+.header-brand {
+  display: flex;
+  align-items: center;
+}
+
+/* User info positioned at right */
+.user-info-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.App-header h1 {
+  margin: 0;
+  font-size: var(--header-title-size);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.username {
+  color: var(--header-text-color);
+  font-size: var(--user-info-size);
+  font-weight: 500;
+}
+
+.logout-btn {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: var(--header-text-color);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.6rem 1rem;
+  border-radius: calc(var(--border-radius) / 2);
+  font-size: var(--button-size);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.logout-btn:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Main content spacing */
+main {
+  flex-grow: 1;
+  padding-top: calc(var(--header-height) + 2rem);
+  padding-bottom: calc(var(--footer-nav-height) + 2rem);
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+/* Auth page container spacing */
+main .auth-page-container {
+  padding-top: calc(var(--header-height) + 2rem);
+}
+
+/* Footer navigation */
+.footer-nav {
+  background-color: var(--primary-color);
+  box-shadow: var(--box-shadow);
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-header);
+  min-height: var(--footer-nav-height);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: var(--footer-nav-padding);
+}
+
+.footer-nav nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--nav-item-gap);
+}
+
+.footer-nav nav li {
+  margin: 0;
+}
+
+.footer-nav a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  display: inline-block;
+  padding: var(--nav-item-padding);
+  font-size: 0.9rem;
+  border-radius: var(--border-radius);
+  transition: background-color 0.2s;
+}
+
+.footer-nav a:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  text-decoration: none;
+}
+
+.footer-nav p {
+  margin: 0.5rem 0 0 0;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Form controls */
+.controls {
+  margin-bottom: 2rem;
+}
+
+.controls label, .controls select, .controls button {
+  font-size: 1.1rem;
+  margin: 0 0.5rem;
+}
+
+.controls select, .controls button {
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--secondary-color);
+}
+
+.controls button {
+  background-color: var(--primary-color);
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.controls button:hover {
+  background-color: #0056b3;
+}
+
+.controls button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: #dc3545;
+  margin-top: 1rem;
+}
+
+/* Mobile responsive design */
+@media (max-width: 768px) {
+  :root {
+    --header-height: 60px;
+    --footer-nav-height: 50px;
+  }
+
+  .App-header {
+    padding: 0 1rem;
+  }
+
+  .App-header h1 {
+    font-size: clamp(1rem, 4vw, 1.4rem);
+  }
+
+  .user-info-section {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.3rem;
+  }
+
+  .username {
+    font-size: 0.85rem;
+    text-align: right;
+  }
+
+  .logout-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+
+  main {
+    padding-top: calc(var(--header-height) + 1rem);
+    padding-bottom: calc(var(--footer-nav-height) + 1rem);
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  main .auth-page-container {
+    padding-top: calc(var(--header-height) + 1rem);
+  }
+
+  .footer-nav nav ul {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .footer-nav a {
+    padding: 0.3rem 0.6rem;
+    font-size: var(--nav-font-size-mobile);
+    white-space: nowrap;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 480px) {
+  .App-header {
+    padding: 0 0.5rem;
+  }
+
+  .App-header h1 {
+    font-size: clamp(0.9rem, 4vw, 1.2rem);
+  }
+
+  .footer-nav a {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.7rem;
+  }
+}
+
+/* Landscape orientation adjustments */
+@media (orientation: landscape) and (max-width: 900px) {
+  .footer-nav {
+    position: relative;
+    margin-top: 1rem;
+  }
+
+  main {
+    padding-bottom: 1rem;
+  }
+}

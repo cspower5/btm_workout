@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
+import { getExerciseDetails } from './api/index.jsx';
 import './css/SingleExercisePage.css';
-
-// --- ABSOLUTE URL FIX: Hardcoded host to ensure all API calls hit the Render server ---
-const API_BASE_URL = 'https://btm-workout.onrender.com'; 
 
 function SingleExercisePage() {
     const { name } = useParams();
@@ -17,13 +14,9 @@ function SingleExercisePage() {
             setLoading(true);
             setError(null);
             try {
-                // FIX: Use the absolute URL and the correct /api/v1/ path
-                // encodeURIComponent is used to handle spaces and special characters in the exercise name
-                const url = `${API_BASE_URL}/api/v1/exercise/${encodeURIComponent(name)}`;
-                const response = await axios.get(url);
-                
-                // Note: The API should return a 404 if not found, caught below
-                setExercise(response.data);
+                // Use the centralized API function which includes authentication
+                const exerciseData = await getExerciseDetails(encodeURIComponent(name));
+                setExercise(exerciseData);
             } catch (err) {
                 // Handle 404 errors specifically from the server if exercise name is wrong
                 if (err.response && err.response.status === 404) {

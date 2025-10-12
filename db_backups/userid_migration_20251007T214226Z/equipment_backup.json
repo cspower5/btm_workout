@@ -1,0 +1,34 @@
+[
+  {
+    "_id": "68d2ef8e8e7cf0dd5bc29728",
+    "name": "stability ball"
+  },
+  {
+    "_id": "68d2ef8e8e7cf0dd5bc29729",
+    "name": "body weight"
+  },
+  {
+    "_id": "68d2ef8e8e7cf0dd5bc2972a",
+    "name": "assisted"
+  },
+  {
+    "_id": "68d2ef8e8e7cf0dd5bc2972d",
+    "name": "barbell"
+  },
+  {
+    "_id": "68d2ef8e8e7cf0dd5bc2972e",
+    "name": "cable"
+  },
+  {
+    "_id": "68d2ef8e8e7cf0dd5bc2972f",
+    "name": "leverage machine"
+  },
+  {
+    "_id": "68d2ef8e8e7cf0dd5bc29730",
+    "name": "dumbbell"
+  },
+  {
+    "_id": "68d44071e3faa587571ad922",
+    "name": "Earthquake bar"
+  }
+]

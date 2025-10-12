@@ -37,10 +37,14 @@ function NewExerciseForm() {
                     getDifficulties()
                 ]);
                 
-                // Assuming all helpers return a simple string array:
-                setBodyParts(Array.isArray(bodyPartsRes) ? bodyPartsRes : []);
-                setEquipmentList(Array.isArray(equipmentRes) ? equipmentRes : []);
-                setDifficulties(Array.isArray(difficultiesRes) ? difficultiesRes : []);
+                // Assuming all helpers return a simple string array, sort them alphabetically:
+                const sortedBodyParts = Array.isArray(bodyPartsRes) ? bodyPartsRes.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())) : [];
+                const sortedEquipment = Array.isArray(equipmentRes) ? equipmentRes.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())) : [];
+                const sortedDifficulties = Array.isArray(difficultiesRes) ? difficultiesRes.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())) : [];
+                
+                setBodyParts(sortedBodyParts);
+                setEquipmentList(sortedEquipment);
+                setDifficulties(sortedDifficulties);
 
             } catch (err) {
                 console.error("Failed to fetch dropdown data:", err);

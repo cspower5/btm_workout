@@ -1,6 +1,7 @@
 .manage-container {
     max-width: 800px;
     margin: 2rem auto;
+    margin-top: 17rem; /* Increased top margin for more separation, matches Add Body Part/Equipment */
     padding: 2rem;
     background-color: #ffffff;
     border-radius: 12px;
@@ -43,6 +44,43 @@
     background-color: #c82333;
 }
 
+/* Exercise details styling */
+.exercise-details {
+    flex: 1;
+    text-align: center;
+}
+
+.exercise-name {
+    font-size: 1.1rem;
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.exercise-meta {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.body-part {
+    background-color: #e3f2fd;
+    color: #1976d2;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.equipment {
+    background-color: #f3e5f5;
+    color: #7b1fa2;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
 @media (max-width: 600px) {
     .manage-container {
         max-width: 100%;
@@ -55,5 +93,11 @@
         flex-direction: column;
         align-items: stretch;
     }
+    
+    .exercise-meta {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
     .item-list-item button { width: 100%; padding: 0.45rem; }
 }

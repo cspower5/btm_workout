@@ -11,32 +11,63 @@ def create_initial_collections_and_indexes():
 
     print("\n--- Setting up MongoDB collections and indexes ---")
 
-    # 1. Exercises Collection - Unique index on the primary definition fields
-    # Create compound unique index on (exercise_name, body_part, equipment)
+    # Drop old index if exists
+    try:
+        db.exercises.drop_index("unique_exercise_index")
+        print("Dropped old exercises index: unique_exercise_index")
+    except Exception as e:
+        print(f"No old exercises index to drop or error: {e}")
+    # Create compound unique index on (exercise_name, body_part, equipment, user_id)
     db.exercises.create_index(
         [
             ("exercise_name", ASCENDING),
             ("body_part", ASCENDING),
             ("equipment", ASCENDING),
+            ("user_id", ASCENDING),
         ],
         unique=True,
         name="unique_exercise_index",
     )
-    print("✅ Index created for exercises (exercise_name, body_part, equipment).")
+    print(
+        "✅ Index created for exercises (exercise_name, body_part, equipment, user_id)."
+    )
 
-    # 2. Body Parts Collection - Unique index on name
+    # Drop old index if exists
+    try:
+        db.body_parts.drop_index("unique_body_parts_index")
+        print("Dropped old body_parts index: unique_body_parts_index")
+    except Exception as e:
+        print(f"No old body_parts index to drop or error: {e}")
     db.body_parts.create_index(
-        [("name", ASCENDING)], unique=True, name="unique_body_parts_index"
+        [("name", ASCENDING), ("user_id", ASCENDING)],
+        unique=True,
+        name="unique_body_parts_index",
     )
-    print("✅ Index created for body_parts (name) as unique_body_parts_index.")
+    print("✅ Index created for body_parts (name, user_id) as unique_body_parts_index.")
 
-    # 3. Equipment Collection - Unique index on name
+    # Drop old index if exists
+    try:
+        db.equipment.drop_index("unique_equipment_name")
+        print("Dropped old equipment index: unique_equipment_name")
+    except Exception as e:
+        print(f"No old equipment index to drop or error: {e}")
     db.equipment.create_index(
-        [("name", ASCENDING)], unique=True, name="unique_equipment_name"
+        [("name", ASCENDING), ("user_id", ASCENDING)],
+        unique=True,
+        name="unique_equipment_name",
     )
-    print("✅ Index created for equipment (name).")
+    print("✅ Index created for equipment (name, user_id).")
 
-    # 4. Difficulties Collection - No unique index needed, simple list.
+    # 4. Users Collection - Unique indexes for authentication
+    db.users.create_index([("email", ASCENDING)], unique=True, name="unique_user_email")
+    print("✅ Index created for users (email).")
+
+    db.users.create_index(
+        [("username", ASCENDING)], unique=True, name="unique_username"
+    )
+    print("✅ Index created for users (username).")
+
+    # 5. Difficulties Collection - No unique index needed, simple list.
     print("--- Setup complete ---\n")
 
 

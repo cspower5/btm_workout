@@ -1,0 +1,138 @@
+[
+  {
+    "_id": "68e046d995853318dd75038d",
+    "name": "assisted"
+  },
+  {
+    "_id": "68e046d995853318dd75038e",
+    "name": "assisted (towel)"
+  },
+  {
+    "_id": "68e046d995853318dd75038f",
+    "name": "band"
+  },
+  {
+    "_id": "68e046d995853318dd750390",
+    "name": "barbell"
+  },
+  {
+    "_id": "68e046d995853318dd750391",
+    "name": "body weight"
+  },
+  {
+    "_id": "68e046d995853318dd750392",
+    "name": "body weight (with resistance band)"
+  },
+  {
+    "_id": "68e046d995853318dd750394",
+    "name": "cable"
+  },
+  {
+    "_id": "68e046d995853318dd750395",
+    "name": "dumbbell"
+  },
+  {
+    "_id": "68e046d995853318dd750396",
+    "name": "dumbbell (used as handles for deeper range)"
+  },
+  {
+    "_id": "68e046da95853318dd750397",
+    "name": "dumbbell, exercise ball"
+  },
+  {
+    "_id": "68e046da95853318dd750398",
+    "name": "dumbbell, exercise ball, tennis ball"
+  },
+  {
+    "_id": "68e046da95853318dd750399",
+    "name": "elliptical machine"
+  },
+  {
+    "_id": "68e046da95853318dd75039a",
+    "name": "ez barbell"
+  },
+  {
+    "_id": "68e046da95853318dd75039b",
+    "name": "ez barbell, exercise ball"
+  },
+  {
+    "_id": "68e046da95853318dd75039c",
+    "name": "hammer"
+  },
+  {
+    "_id": "68e046da95853318dd75039d",
+    "name": "kettlebell"
+  },
+  {
+    "_id": "68e046da95853318dd75039e",
+    "name": "leverage machine"
+  },
+  {
+    "_id": "68e046da95853318dd75039f",
+    "name": "medicine ball"
+  },
+  {
+    "_id": "68e046da95853318dd7503a0",
+    "name": "olympic barbell"
+  },
+  {
+    "_id": "68e046da95853318dd7503a1",
+    "name": "resistance band"
+  },
+  {
+    "_id": "68e046da95853318dd7503a2",
+    "name": "roller"
+  },
+  {
+    "_id": "68e046da95853318dd7503a3",
+    "name": "rope"
+  },
+  {
+    "_id": "68e046da95853318dd7503a4",
+    "name": "skierg machine"
+  },
+  {
+    "_id": "68e046da95853318dd7503a5",
+    "name": "sled machine"
+  },
+  {
+    "_id": "68e046da95853318dd7503a6",
+    "name": "smith machine"
+  },
+  {
+    "_id": "68e046da95853318dd7503a7",
+    "name": "stability ball"
+  },
+  {
+    "_id": "68e046da95853318dd7503a8",
+    "name": "stationary bike"
+  },
+  {
+    "_id": "68e046da95853318dd7503a9",
+    "name": "stepmill machine"
+  },
+  {
+    "_id": "68e046da95853318dd7503ab",
+    "name": "trap bar"
+  },
+  {
+    "_id": "68e046da95853318dd7503ad",
+    "name": "weighted"
+  },
+  {
+    "_id": "68e046da95853318dd7503ae",
+    "name": "wheel roller"
+  },
+  {
+    "_id": "68e157035c02004788faeb76",
+    "name": "bosu"
+  },
+  {
+    "_id": "68e1a05a95853318dd760324",
+    "name": "bosu ball"
+  },
+  {
+    "_id": "68e1a05b95853318dd760325",
+    "name": "tire"
+  }
+]

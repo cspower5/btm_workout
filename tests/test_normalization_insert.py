@@ -27,8 +27,21 @@ def test_insert_preserves_display_and_normalizes(client):
         "target": "Pectorals",
     }
 
+    # Register and get token
+    reg_resp = client.post(
+        "/api/v1/auth/register",
+        json={
+            "username": "testuser3",
+            "email": "testuser3@example.com",
+            "password": "testpass123",
+        },
+    )
+    assert reg_resp.status_code == 200 or reg_resp.status_code == 201
+    token = reg_resp.get_json().get("access_token")
+    headers = {"Authorization": f"Bearer {token}"}
+
     # Insert the exercise
-    resp = client.post("/api/v1/insert_exercise", json=payload)
+    resp = client.post("/api/v1/insert_exercise", json=payload, headers=headers)
     assert resp.status_code == 200 or resp.status_code == 201
 
     # Access the mocked DB from the patched connector directly

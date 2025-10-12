@@ -1,0 +1,98 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.4.2, pluggy-1.6.0
+rootdir: /home/cspower/Python/projects/btm_workout
+collected 16 items
+
+tests/test_db_connect.py .                                               [  6%]
+tests/test_db_connect_fallback.py .                                      [ 12%]
+tests/test_delete_cascade.py ....                                        [ 37%]
+tests/test_flask_endpoints.py ..F                                        [ 56%]
+tests/test_integration_mongomock.py .                                    [ 62%]
+tests/test_normalization_insert.py F                                     [ 68%]
+tests/test_num_exercises_validation.py ....                              [ 93%]
+tests/test_proxy_server.py .                                             [100%]
+
+=================================== FAILURES ===================================
+____________________________ test_lists_and_delete _____________________________
+
+    def test_lists_and_delete():
+        client = flask_server.app.test_client()
+        # Register and get token
+        reg_resp = client.post("/api/v1/auth/register", json={
+            "username": "testuser2",
+            "email": "testuser2@example.com",
+            "password": "testpass123"
+        })
+        assert reg_resp.status_code == 200 or reg_resp.status_code == 201
+        token = reg_resp.get_json().get("access_token")
+        headers = {"Authorization": f"Bearer {token}"}
+    
+        # Add a body part and equipment via endpoints
+        bp = client.post("/api/v1/add_body_part", json={"name": "Neck"}, headers=headers)
+        assert bp.status_code == 200
+        eq = client.post("/api/v1/add_equipment", json={"name": "Band"}, headers=headers)
+        assert eq.status_code == 200
+    
+        # Add exercise
+        payload = {
+            "exercise_name": "Neck Stretch",
+            "body_part": "Neck",
+            "equipment": "Band",
+            "target": "Neck",
+        }
+        r = client.post("/api/v1/insert_exercise", json=payload, headers=headers)
+        assert r.status_code == 200
+    
+        # Get lists
+        bl = client.get("/api/v1/body_parts_list", headers=headers)
+        assert bl.status_code == 200
+>       assert "neck" in [n.lower() for n in bl.get_json()]
+E       AssertionError: assert 'neck' in []
+
+tests/test_flask_endpoints.py:90: AssertionError
+_________________ test_insert_preserves_display_and_normalizes _________________
+
+client = <FlaskClient <Flask 'flask_server'>>
+
+    def test_insert_preserves_display_and_normalizes(client):
+        payload = {
+            "exercise_name": "Test Push",
+            "body_part": "Chest ",
+            "equipment": " Body Weight",
+            "target": "Pectorals",
+        }
+    
+        # Register and get token
+        reg_resp = client.post("/api/v1/auth/register", json={
+            "username": "testuser3",
+            "email": "testuser3@example.com",
+            "password": "testpass123"
+        })
+        assert reg_resp.status_code == 200 or reg_resp.status_code == 201
+        token = reg_resp.get_json().get("access_token")
+        headers = {"Authorization": f"Bearer {token}"}
+    
+        # Insert the exercise
+        resp = client.post("/api/v1/insert_exercise", json=payload, headers=headers)
+        assert resp.status_code == 200 or resp.status_code == 201
+    
+        # Access the mocked DB from the patched connector directly
+        from btm_workout_db_connect import get_db
+    
+        stored = get_db().exercises.find_one({})
+>       assert stored is not None
+E       assert None is not None
+
+tests/test_normalization_insert.py:48: AssertionError
+=============================== warnings summary ===============================
+tests/test_flask_endpoints.py::test_insert_and_get_exercise
+tests/test_flask_endpoints.py::test_lists_and_delete
+tests/test_normalization_insert.py::test_insert_preserves_display_and_normalizes
+  /home/cspower/Python/projects/btm_workout/auth.py:122: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    'created_at': datetime.utcnow(),
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_flask_endpoints.py::test_lists_and_delete - AssertionError:...
+FAILED tests/test_normalization_insert.py::test_insert_preserves_display_and_normalizes
+=================== 2 failed, 14 passed, 3 warnings in 1.81s ===================

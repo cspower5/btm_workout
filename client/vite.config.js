@@ -8,8 +8,8 @@ const LIVE_API_URL = "https://btm-workout.onrender.com";
 export default defineConfig({
   plugins: [react()],
   
-  // Ensures assets load correctly from the GitHub Pages subdirectory
-  base: "/btm_workout/", 
+  // Use base path only in production for GitHub Pages
+  base: process.env.NODE_ENV === 'production' ? "/btm_workout/" : "/", 
 
   // FIX: Forces the VITE_API_URL to be defined in the production bundle
   define: {

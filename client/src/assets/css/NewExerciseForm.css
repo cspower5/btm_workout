@@ -1,11 +1,28 @@
 .form-container {
   max-width: 600px;
-  margin: 2rem auto;
-  padding: 2rem;
+  margin: 0 auto;
+  margin-top: 13rem; /* Reduced top margin for better fit */
+  padding: 2.2rem 1.2rem 1.2rem 1.2rem; /* Add top padding for heading, keep rest compact */
   background-color: #ffffff;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   font-family: Arial, sans-serif;
+  max-height: 56rem; /* Restored height for Add Exercise form */
+  overflow-y: visible;
+}
+
+/* Dedicated style for Add Body Part form */
+.small-form-container {
+  max-width: 600px;
+  margin: 0 auto;
+  margin-top: 17rem; /* Increased top margin for more separation (applies to Add Equipment too) */
+  padding: 2.2rem 1.2rem 1.2rem 1.2rem;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-family: Arial, sans-serif;
+  max-height: 20rem;
+  overflow-y: visible;
 }
 
 .form-container h2 {
@@ -79,6 +96,18 @@ button[type="submit"]:hover {
   background-color: #f8d7da;
   color: #721c24;
   border: 1px solid #f5c6cb;
+}
+
+/* Add parent container for no-scroll layout */
+.add-exercise-page-container {
+  height: 100vh;
+  min-height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  background-color: var(--background-color);
 }
 
 @media (max-width: 600px) {

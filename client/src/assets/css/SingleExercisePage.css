@@ -1,6 +1,7 @@
 .single-exercise-container {
   max-width: 800px;
   margin: 2rem auto;
+  margin-top: calc(160px + 2rem); /* Add space for fixed header plus original margin */
   padding: 2rem;
   text-align: center;
 }

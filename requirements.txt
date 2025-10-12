@@ -8,3 +8,6 @@ pytest
 mongomock
 ruff
 black
+PyJWT
+bcrypt
+flask-jwt-extended
