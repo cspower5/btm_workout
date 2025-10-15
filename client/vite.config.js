@@ -1,18 +1,23 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// Example: https://btm-workout-12345.onrender.com
-const LIVE_API_URL = "https://btm-workout.onrender.com"; 
+const LIVE_API_URL = "https://btm-workout.onrender.com";
 
-// https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [react()],
-  
-  // Use base path only in production for GitHub Pages
-  base: process.env.NODE_ENV === 'production' ? "/btm_workout/" : "/", 
-
-  // FIX: Forces the VITE_API_URL to be defined in the production bundle
+    server: {
+      proxy: {
+        '/api': {
+          target: 'https://btm-workout.onrender.com',
+          changeOrigin: true,
+          secure: true,
+          // Optionally rewrite: remove /api prefix if needed
+          // rewrite: (path) => path.replace(/^\/api/, '/api'),
+        },
+      },
+    },
+  base: mode === 'production' ? '/btm_workout/' : '/',
   define: {
     'import.meta.env.VITE_API_URL': JSON.stringify(LIVE_API_URL)
   }
-})
+}));
