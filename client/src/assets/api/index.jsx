@@ -5,10 +5,11 @@ import axios from 'axios';
 // Always use the production backend for GitHub Pages
 //export const API_BASE_URL = 'https://btm-workout.onrender.com';
 // Use the Vite-defined API base URL, falling back to the Render URL if not set
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://btm-workout.onrender.com';
-const BASE_URL = import.meta.env.PROD 
-    ? 'https://your-backend-app.onrender.com' // Production URL (Absolute)
-    : '/api';  
+//export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://btm-workout.onrender.com';
+//const BASE_URL = import.meta.env.PROD 
+    //? 'https://your-backend-app.onrender.com' // Production URL (Absolute)
+    //: '/api';  
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 // ===================================
 // GETTERS (Data Retrieval)
