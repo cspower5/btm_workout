@@ -3,6 +3,8 @@
 /client/node_modules
 /client/dist
 .env
+.env.development
+.env.production
 
 # Root node_modules
 /node_modules
