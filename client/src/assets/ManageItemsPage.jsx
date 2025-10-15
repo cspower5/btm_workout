@@ -15,13 +15,14 @@ function ManageItemsPage({ title, fetchUrl, deleteUrl }) {
             // Use the appropriate API function based on the fetchUrl
             if (fetchUrl.includes('exercises_list')) {
                 data = await getExercisesList();
+                console.log("Fetched exercises data:", data);
             } else if (fetchUrl.includes('body_parts_list')) {
                 data = await getBodyParts();
             } else if (fetchUrl.includes('equipment_list')) {
                 data = await getEquipmentList();
             } else {
                 // Fallback to direct axios call for other endpoints
-                const fullFetchUrl = fetchUrl.startsWith('/') ? `${API_BASE_URL}${fetchUrl}` : fetchUrl;
+                const fullFetchUrl = fetchUrl.startsWith('/') ? `${fetchUrl}` : fetchUrl;
                 
                 // Get the token from localStorage for authentication
                 const token = localStorage.getItem('authToken');
@@ -97,7 +98,7 @@ function ManageItemsPage({ title, fetchUrl, deleteUrl }) {
         
         if (window.confirm(`Are you sure you want to delete '${displayName}'?`)) {
             const encodedName = encodeURIComponent(name);
-            const urlToDelete = deleteUrl.startsWith('/') ? `${API_BASE_URL}${deleteUrl}` : deleteUrl;
+            const urlToDelete = deleteUrl.startsWith('/') ? `${deleteUrl}` : deleteUrl;
             const fullDeleteUrl = `${urlToDelete}/${encodedName}`;
             
             // This line will show the URL being sent to the backend

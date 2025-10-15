@@ -531,20 +531,49 @@ def api_equipment_list():
 @cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
 @optional_auth  # Allow both authenticated and unauthenticated access
 def api_exercises_list():
+    print("[DEBUG] Entered api_exercises_list")
     try:
         # Use UserDataManager to get exercises (includes both user's and public exercises)
         user_data_manager = UserDataManager()
         user_id = get_current_user_id()
 
         exercises = user_data_manager.get_exercises(user_id)
+        print("[DEBUG] Raw exercises from DB:", exercises)
 
-        # Remove MongoDB _id field for clean JSON response
-        for exercise in exercises:
-            exercise.pop("_id", None)
+        # Remove MongoDB _id field for clean JSON response and ensure all fields are serializable
+        from bson import ObjectId
 
-        return jsonify(exercises)
+        def clean_obj(obj):
+            if isinstance(obj, dict):
+                return {
+                    k: clean_obj(v)
+                    for k, v in obj.items()
+                    if not isinstance(v, ObjectId)
+                }
+            elif isinstance(obj, list):
+                return [clean_obj(v) for v in obj]
+            elif isinstance(obj, ObjectId):
+                return str(obj)
+            else:
+                return obj
+
+        cleaned_exercises = [clean_obj(ex) for ex in exercises]
+        print("[DEBUG] Cleaned exercises for response:", cleaned_exercises)
+        import json
+
+        try:
+            print(
+                "[DEBUG] Final JSON response:", json.dumps(cleaned_exercises, indent=2)
+            )
+        except Exception as log_err:
+            print(
+                f"[DEBUG] Could not serialize cleaned_exercises for logging: {log_err}"
+            )
+        return jsonify(cleaned_exercises)
 
     except Exception as e:
+        print(f"[ERROR] Exception in api_exercises_list: {e}")
+
         return jsonify({"error": f"Failed to retrieve exercises list: {str(e)}"}), 500
 
 

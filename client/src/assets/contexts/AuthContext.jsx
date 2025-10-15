@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import { API_BASE_URL } from '../api/index';
 
 // Auth action types
 const AUTH_ACTIONS = {
@@ -20,6 +21,7 @@ const initialState = {
 
 // Auth reducer to manage state transitions
 function authReducer(state, action) {
+  console.log("authReducer called", { state, action });
   switch (action.type) {
     case AUTH_ACTIONS.SET_LOADING:
       return {
@@ -77,10 +79,15 @@ const AuthContext = createContext();
 
 // Auth Provider Component
 export function AuthProvider({ children }) {
+  console.log("AuthProvider started");
+  // Log initial state
+  console.log("Initial auth state:", initialState);
+
   const [state, dispatch] = useReducer(authReducer, initialState);
 
   // Check for existing token on app startup
   useEffect(() => {
+    console.log("useEffect: running checkAuthStatus");
     checkAuthStatus();
   }, []);
 
@@ -89,30 +96,50 @@ export function AuthProvider({ children }) {
     try {
       const token = localStorage.getItem('authToken');
       const userData = localStorage.getItem('userData');
+      console.log("checkAuthStatus: token:", token, "userData:", userData);
 
       if (token && userData) {
         // Verify token with backend
-        const response = await fetch('http://127.0.0.1:5000/api/v1/auth/verify', {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
+        let response;
+        try {
+          response = await fetch(`/api/v1/auth/verify`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            }
+          });
+        } catch (fetchErr) {
+          console.error("checkAuthStatus: fetch error", fetchErr);
+          dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
+          return;
+        }
+        console.log("checkAuthStatus: verify response status:", response && response.status);
+        if (response && response.ok) {
+          let user;
+          try {
+            user = JSON.parse(userData);
+          } catch (jsonErr) {
+            console.error("checkAuthStatus: userData JSON parse error", jsonErr);
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userData');
+            dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
+            return;
           }
-        });
-
-        if (response.ok) {
-          const user = JSON.parse(userData);
           dispatch({
             type: AUTH_ACTIONS.LOGIN_SUCCESS,
             payload: { user, token }
           });
+          console.log("checkAuthStatus: LOGIN_SUCCESS dispatched", { user, token });
         } else {
           // Token is invalid, clear storage
+          console.warn("checkAuthStatus: token invalid or verify failed", response && response.status);
           localStorage.removeItem('authToken');
           localStorage.removeItem('userData');
           dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
         }
       } else {
+        console.log("checkAuthStatus: no token or userData found");
         dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
       }
     } catch (error) {
@@ -130,7 +157,7 @@ export function AuthProvider({ children }) {
 
     try {
       // Call the actual backend API
-      const response = await fetch('http://127.0.0.1:5000/api/v1/auth/login', {
+  const response = await fetch(`/api/v1/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -180,7 +207,7 @@ export function AuthProvider({ children }) {
 
     try {
       // Call the actual backend API
-      const response = await fetch('http://127.0.0.1:5000/api/v1/auth/register', {
+  const response = await fetch(`/api/v1/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -279,6 +306,7 @@ export function AuthProvider({ children }) {
 
 // Custom hook to use auth context
 export function useAuth() {
+  console.log("useAuth called");
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');

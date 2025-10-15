@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-// FIX: Switched from BrowserRouter to HashRouter for GitHub Pages compatibility.
-import { HashRouter as Router, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom'; 
+import { BrowserRouter, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Home from './Home';
 import WorkoutPage from './WorkoutPage';
@@ -18,53 +17,16 @@ function AppContent() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { isAuthenticated, user, logout, loading } = useAuth();
   const location = useLocation();
-  
-  // Define auth pages where header/footer should be hidden
   const isAuthPage = location.pathname === '/signup' || location.pathname === '/signin';
-
-  console.log('AppContent render:', { 
-    isAuthenticated, 
-    user, 
-    loading, 
-    pathname: location.pathname, 
-    isAuthPage,
-    showingAuthFooter: isAuthPage,
-    showingMainFooter: !isAuthPage
-  });
-
-  // Show loading screen while checking authentication
-  if (loading) {
-    return (
-      <div className="App">
-        <div className="loading-screen">
-          <div className="loading-content">
-            <h2>Loading...</h2>
-            <p>Checking authentication status...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   const toggleMobileMenu = () => setMobileMenuOpen((s) => !s);
   const closeMobileMenu = () => setMobileMenuOpen(false);
-
-  const handleLogout = () => {
-    logout();
-    closeMobileMenu();
-  };
+  const handleLogout = () => { logout(); closeMobileMenu(); };
 
   // Hamburger icon for mobile
   const Hamburger = ({ open, onToggle }) => (
-    <button
-      className={`hamburger ${open ? 'open' : ''}`}
-      onClick={onToggle}
-      aria-label="Toggle navigation"
-      aria-expanded={open}
-    >
-      <span className="hamburger-box">
-        <span className="hamburger-inner" />
-      </span>
+    <button className={`hamburger ${open ? 'open' : ''}`} onClick={onToggle} aria-label="Toggle navigation" aria-expanded={open}>
+      <span className="hamburger-box"><span className="hamburger-inner" /></span>
     </button>
   );
 
@@ -89,9 +51,8 @@ function AppContent() {
 
   return (
     <div className="App">
-      {/* Conditional Header - different for auth pages vs main app */}
+      {/* Header */}
       {isAuthPage ? (
-        // Simple header for auth pages
         <header className="auth-header-simple">
           <div className="header-brand">
             <h1 className="header-title">Break the Monotony Workout</h1>
@@ -99,14 +60,11 @@ function AppContent() {
           </div>
         </header>
       ) : (
-        // Full header with navigation for main app
-  <header className="App-header">
+        <header className="App-header">
           <div className="header-brand">
             <h1 className="header-title">Welcome to Break the Monotony Workout</h1>
             <p className="header-subtitle">Tired of the same routine? Break the Monotony chooses your exercises so you can keep your workouts fresh and your results moving.</p>
           </div>
-          
-          {/* Desktop navigation - hidden on mobile */}
           {isAuthenticated && (
             <nav className="header-nav desktop-nav">
               <ul className="nav-links">
@@ -121,16 +79,12 @@ function AppContent() {
               </ul>
             </nav>
           )}
-          {/* Hamburger for mobile */}
           {isAuthenticated && (
             <div className="mobile-hamburger">
               <Hamburger open={mobileMenuOpen} onToggle={toggleMobileMenu} />
             </div>
           )}
-          {/* Mobile popout menu */}
           {isAuthenticated && <MobileMenu open={mobileMenuOpen} onClose={closeMobileMenu} />}
-          
-          {/* User info section - only show if authenticated */}
           {isAuthenticated && (
             <div className="user-info-section">
               <span className="username">Welcome, {user?.username || user?.first_name}</span>
@@ -139,14 +93,11 @@ function AppContent() {
           )}
         </header>
       )}
-      
       <main>
         <Routes key={location.pathname}>
           <Route path="/" element={<Navigate to="/signup" replace />} />
           <Route path="/signup" element={<SignUpPage key="signup" />} />
           <Route path="/signin" element={<SignInPage key="signin" />} />
-          
-          {/* Protected routes for authenticated users */}
           <Route path="/home" element={isAuthenticated ? <Home /> : <Navigate to="/signin" replace />} />
           <Route path="/workout" element={isAuthenticated ? <WorkoutPage /> : <Navigate to="/signin" replace />} />
           <Route path="/add-exercise" element={isAuthenticated ? <NewExerciseForm /> : <Navigate to="/signin" replace />} />
@@ -158,10 +109,8 @@ function AppContent() {
           <Route path="/manage-exercises" element={isAuthenticated ? <ManageItemsPage title="Exercises" fetchUrl="/api/v1/exercises_list" deleteUrl="/api/v1/delete_exercise" /> : <Navigate to="/signin" replace />} />
         </Routes>
       </main>
-      
-      {/* Conditional Footer - different for auth pages vs main app */}
+      {/* Footer */}
       {isAuthPage ? (
-        // Simple footer for auth pages with logo
         <footer className="auth-footer-simple">
           <div className="auth-footer-logo">
             <img src={logoPng} alt="BTM Workout Logo" />
@@ -169,9 +118,7 @@ function AppContent() {
           <p>© 2024 BTM Workout. All rights reserved.</p>
         </footer>
       ) : (
-        // Full footer with navigation for main app  
         <footer className="footer-nav">
-          {/* Desktop navigation - hidden on mobile */}
           {isAuthenticated && (
             <nav className="footer-nav desktop-nav">
               <ul>
@@ -186,19 +133,15 @@ function AppContent() {
               </ul>
             </nav>
           )}
-          {/* Hamburger for mobile */}
           {isAuthenticated && (
             <div className="mobile-hamburger">
               <Hamburger open={mobileMenuOpen} onToggle={toggleMobileMenu} />
             </div>
           )}
-          {/* Mobile popout menu (footer) */}
           {isAuthenticated && <MobileMenu open={mobileMenuOpen} onClose={closeMobileMenu} />}
-          {/* Logo between navigation and copyright */}
           <div className="footer-logo">
             <img src={logoPng} alt="BTM Workout Logo" />
           </div>
-          {/* Copyright always shows */}
           <p>© 2024 BTM Workout. All rights reserved.</p>
         </footer>
       )}
@@ -206,14 +149,12 @@ function AppContent() {
   );
 }
 
-function App() {
+export default function App() {
   return (
-    <Router basename="/btm_workout">
+    <BrowserRouter>
       <AuthProvider>
         <AppContent />
       </AuthProvider>
-    </Router>
+    </BrowserRouter>
   );
 }
-
-export default App;

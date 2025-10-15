@@ -22,21 +22,20 @@ def connect_db():
     MONGO_DB = os.getenv("MONGO_DB", "btm_workout_db")
     MONGO_URI_ATLAS = os.getenv("MONGO_URI")
 
+    # Always prefer MONGO_URI (Atlas connection string)
     if MONGO_URI_ATLAS:
         FINAL_MONGO_URI = MONGO_URI_ATLAS
         print("Connecting with MONGO_URI (Atlas/Deployment).")
     else:
+        # Fallback: build URI from user/pass/host ONLY if explicitly set (not recommended)
         MONGO_USER = os.getenv("MONGO_USER")
         MONGO_PASS = os.getenv("MONGO_PASS")
         MONGO_HOST = os.getenv("MONGO_HOST")
 
         if not all([MONGO_USER, MONGO_PASS, MONGO_HOST]):
-            # Fall back to localhost:27017 (no auth) for local development/tests
-            print(
-                "⚠️ Warning: Missing MONGO_USER/MONGO_PASS/MONGO_HOST; "
-                "falling back to localhost without auth for local/test usage."
+            raise RuntimeError(
+                "MongoDB Atlas connection required: set MONGO_URI or MONGO_USER/MONGO_PASS/MONGO_HOST"
             )
-            FINAL_MONGO_URI = f"mongodb://localhost:27017/{MONGO_DB}"
         else:
             encoded_password = quote_plus(MONGO_PASS)
             FINAL_MONGO_URI = f"mongodb://{MONGO_USER}:{encoded_password}@{MONGO_HOST}:27017/{MONGO_DB}"
