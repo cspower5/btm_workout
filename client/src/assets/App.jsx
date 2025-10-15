@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { BrowserRouter, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
+//import { BrowserRouter, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
+import { HashRouter, Routes, Route, Link, Navigate, useLocation} from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Home from './Home';
 import WorkoutPage from './WorkoutPage';
@@ -151,10 +152,10 @@ function AppContent() {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <AuthProvider>
         <AppContent />
       </AuthProvider>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
