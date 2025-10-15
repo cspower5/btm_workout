@@ -6,6 +6,9 @@ import axios from 'axios';
 //export const API_BASE_URL = 'https://btm-workout.onrender.com';
 // Use the Vite-defined API base URL, falling back to the Render URL if not set
 export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://btm-workout.onrender.com';
+const BASE_URL = import.meta.env.PROD 
+    ? 'https://your-backend-app.onrender.com' // Production URL (Absolute)
+    : '/api';  
 
 // ===================================
 // GETTERS (Data Retrieval)
@@ -23,7 +26,7 @@ export const getBodyParts = async () => {
         headers['Authorization'] = `Bearer ${token}`;
     }
     
-    const response = await axios.get(`/api/v1/body_parts_list`, {
+    const response = await axios.get(`${BASE_URL}/v1/body_parts_list`, {
         headers
     });
     return response.data; 
@@ -41,7 +44,7 @@ export const getEquipmentList = async () => {
         headers['Authorization'] = `Bearer ${token}`;
     }
     
-    const response = await axios.get(`/api/v1/equipment_list`, {
+    const response = await axios.get(`${BASE_URL}/v1/equipment_list`, {
         headers
     });
     return response.data; 
@@ -59,7 +62,7 @@ export const getExercisesList = async () => {
         headers['Authorization'] = `Bearer ${token}`;
     }
     
-    const response = await axios.get(`/api/v1/exercises_list`, {
+    const response = await axios.get(`${BASE_URL}/v1/exercises_list`, {
         headers
     });
     return response.data;
@@ -77,7 +80,7 @@ export const getDifficulties = async () => {
         headers['Authorization'] = `Bearer ${token}`;
     }
     
-    const response = await axios.get(`/api/v1/difficulties`, {
+    const response = await axios.get(`${BASE_URL}/v1/difficulties`, {
         headers
     });
     return response.data;
@@ -95,7 +98,7 @@ export const getExerciseDetails = async (name) => {
         headers['Authorization'] = `Bearer ${token}`;
     }
     
-    const response = await axios.get(`/api/v1/exercise/${name}`, {
+    const response = await axios.get(`${BASE_URL}/v1/exercise/${name}`, {
         headers
     });
     return response.data;
@@ -118,13 +121,13 @@ export const generateWorkout = async (bodyPart, numExercises, equipment = null) 
         requestData.equipment = equipment;
     }
     
-    const response = await axios.post(`/api/v1/get_random_exercises`, requestData);
+    const response = await axios.post(`${BASE_URL}/v1/get_random_exercises`, requestData);
     return response.data;
 };
 
 // 7. Refresh/Seed Database (for the tile)
 export const refreshDatabase = async () => {
-    const response = await axios.post(`/api/v1/refresh_db`);
+    const response = await axios.post(`${BASE_URL}/v1/refresh_db`);
     return response.data;
 };
 
@@ -147,7 +150,7 @@ export const insertExercise = async (exerciseData) => {
         headers['Authorization'] = `Bearer ${token}`;
     }
     
-    const response = await axios.post(`/api/v1/insert_exercise`, exerciseData, {
+    const response = await axios.post(`${BASE_URL}/v1/insert_exercise`, exerciseData, {
         headers
     });
     return response.data;
@@ -155,30 +158,30 @@ export const insertExercise = async (exerciseData) => {
 
 // 9. Add New Body Part (for Management Page)
 export const addBodyPart = async (name) => {
-    const response = await axios.post(`/api/v1/add_body_part`, { name });
+    const response = await axios.post(`${BASE_URL}/v1/add_body_part`, { name });
     return response.data;
 };
 
 // 10. Delete Body Part
 export const deleteBodyPart = async (name) => {
-    const response = await axios.delete(`/api/v1/delete_body_part/${name}`);
+    const response = await axios.delete(`${BASE_URL}/v1/delete_body_part/${name}`);
     return response.data;
 };
 
 // 11. Add New Equipment
 export const addEquipment = async (name) => {
-    const response = await axios.post(`/api/v1/add_equipment`, { name });
+    const response = await axios.post(`${BASE_URL}/v1/add_equipment`, { name });
     return response.data;
 };
 
 // 12. Delete Equipment
 export const deleteEquipment = async (name) => {
-    const response = await axios.delete(`/api/v1/delete_equipment/${name}`);
+    const response = await axios.delete(`${BASE_URL}/v1/delete_equipment/${name}`);
     return response.data;
 };
 
 // 13. Delete Exercise
 export const deleteExercise = async (name) => {
-    const response = await axios.delete(`/api/v1/delete_exercise/${name}`);
+    const response = await axios.delete(`${BASE_URL}/v1/delete_exercise/${name}`);
     return response.data;
 };
