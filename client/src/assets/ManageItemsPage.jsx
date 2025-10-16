@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { API_BASE_URL, getExercisesList, getBodyParts, getEquipmentList } from './api/index.jsx';
+import { getExercisesList, getBodyParts, getEquipmentList } from './api/index.jsx';
 import './css/ManageItemsPage.css';
 
 function ManageItemsPage({ title, fetchUrl, deleteUrl }) {

@@ -1,6 +1,6 @@
 import os
 from flask import Flask, jsonify, request
-from flask_cors import cross_origin  # <-- Keep CORS and Import cross_origin
+from flask_cors import CORS, cross_origin  # <-- Keep CORS and Import cross_origin
 import btm_workout_db_connect as db_connect
 from database_refresh import insert_exercises_if_not_exist
 from pymongo.errors import DuplicateKeyError
@@ -54,6 +54,9 @@ def log_cors_origin_mismatch():
 # --- Initialization ---
 app = Flask(__name__)
 # NOTE: The global CORS(app) is REMOVED. @cross_origin is used on each route for guaranteed functionality.
+
+# Apply your CORS settings to the entire app
+CORS(app, resources={r"/*": {"origins": ALLOWED_ORIGINS}})
 
 # Initialize JWT authentication
 jwt = init_auth(app)
