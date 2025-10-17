@@ -451,7 +451,7 @@ def api_delete_exercise(name):
 @app.route("/v1/delete_body_part/<string:name>", methods=["DELETE"])
 @cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
 @require_auth  # Require authentication for deletion
-def api_delete_body_part(name, user):
+def api_delete_body_part(user, name):
     db = db_connect.get_db()
     if db is None:
         return jsonify({"error": "Database not connected."}), 500
@@ -491,7 +491,7 @@ def api_delete_body_part(name, user):
 @app.route("/v1/delete_equipment/<string:name>", methods=["DELETE"])
 @cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
 @require_auth  # Require authentication for deletion
-def api_delete_equipment(name, user):
+def api_delete_equipment(user, name):
     db = db_connect.get_db()
     if db is None:
         return jsonify({"error": "Database not connected."}), 500
