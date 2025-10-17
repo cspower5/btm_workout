@@ -155,25 +155,77 @@ export const insertExercise = async (exerciseData) => {
 
 // 9. Add New Body Part (for Management Page)
 export const addBodyPart = async (name) => {
-    const response = await axios.post(`${BASE_URL}/v1/add_body_part`, { name });
+    // Get the token from localStorage
+    const token = localStorage.getItem('authToken');
+    
+    const headers = {
+        'Content-Type': 'application/json'
+    };
+    
+    // Add Authorization header if token exists
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    const response = await axios.post(`${BASE_URL}/v1/add_body_part`, { name }, {
+        headers
+    });
     return response.data;
 };
 
 // 10. Delete Body Part
 export const deleteBodyPart = async (name) => {
-    const response = await axios.delete(`${BASE_URL}/v1/delete_body_part/${name}`);
+    // Get the token from localStorage
+    const token = localStorage.getItem('authToken');
+    
+    const headers = {};
+    
+    // Add Authorization header if token exists
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    const response = await axios.delete(`${BASE_URL}/v1/delete_body_part/${name}`, {
+        headers
+    });
     return response.data;
 };
 
 // 11. Add New Equipment
 export const addEquipment = async (name) => {
-    const response = await axios.post(`${BASE_URL}/v1/add_equipment`, { name });
+    // Get the token from localStorage
+    const token = localStorage.getItem('authToken');
+    
+    const headers = {
+        'Content-Type': 'application/json'
+    };
+    
+    // Add Authorization header if token exists
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    const response = await axios.post(`${BASE_URL}/v1/add_equipment`, { name }, {
+        headers
+    });
     return response.data;
 };
 
 // 12. Delete Equipment
 export const deleteEquipment = async (name) => {
-    const response = await axios.delete(`${BASE_URL}/v1/delete_equipment/${name}`);
+    // Get the token from localStorage
+    const token = localStorage.getItem('authToken');
+    
+    const headers = {};
+    
+    // Add Authorization header if token exists
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    const response = await axios.delete(`${BASE_URL}/v1/delete_equipment/${name}`, {
+        headers
+    });
     return response.data;
 };
 
