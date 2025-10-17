@@ -71,7 +71,8 @@ def _log_cors_wrapper():
 # --- API Routes (v1) ---
 
 
-@app.route("/api/v1/insert_exercise", methods=["POST"])
+# @app.route("/api/v1/insert_exercise", methods=["POST"])
+@app.route("/v1/insert_exercise", methods=["POST"])
 @cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
 @require_auth  # Require authentication for adding exercises
 def api_insert_exercise(user):
@@ -171,7 +172,8 @@ def api_insert_exercise(user):
 
 
 # API endpoint to get random exercises for a selected body part
-@app.route("/api/v1/get_random_exercises", methods=["POST"])
+# @app.route("/api/v1/get_random_exercises", methods=["POST"])
+@app.route("/v1/get_random_exercises", methods=["POST"])
 @cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
 @optional_auth  # Allow both authenticated and unauthenticated access
 def api_get_random_exercises():
@@ -269,7 +271,8 @@ def api_get_random_exercises():
 
 
 # API endpoint to refresh the database with new exercises
-@app.route("/api/v1/refresh_db", methods=["POST"])
+# @app.route("/api/v1/refresh_db", methods=["POST"])
+@app.route("/v1/refresh_db", methods=["POST"])
 @cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
 def api_refresh_db():
     try:
@@ -283,7 +286,8 @@ def api_refresh_db():
 
 
 # API endpoint to get a single exercise by its name
-@app.route("/api/v1/exercise/<string:name>", methods=["GET"])
+# @app.route("/api/v1/exercise/<string:name>", methods=["GET"])
+@app.route("/v1/exercise/<string:name>", methods=["GET"])
 @cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
 @optional_auth
 def api_get_exercise_details(name):
@@ -335,7 +339,8 @@ def api_get_exercise_details(name):
 
 
 # API endpoint to handle adding a new body part
-@app.route("/api/v1/add_body_part", methods=["POST"])
+# @app.route("/api/v1/add_body_part", methods=["POST"])
+@app.route("/v1/add_body_part", methods=["POST"])
 @cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
 def api_add_body_part():
     db = db_connect.get_db()
@@ -366,7 +371,8 @@ def api_add_body_part():
 
 
 # API endpoint to handle adding new equipment
-@app.route("/api/v1/add_equipment", methods=["POST"])
+# @app.route("/api/v1/add_equipment", methods=["POST"])
+@app.route("/v1/add_equipment", methods=["POST"])
 @cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
 def api_add_equipment():
     db = db_connect.get_db()
@@ -397,7 +403,8 @@ def api_add_equipment():
 
 
 # API endpoint to delete an exercise by its name
-@app.route("/api/v1/delete_exercise/<path:name>", methods=["DELETE"])
+# @app.route("/api/v1/delete_exercise/<path:name>", methods=["DELETE"])
+@app.route("/v1/delete_exercise/<path:name>", methods=["DELETE"])
 @cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
 def api_delete_exercise(name):
     db = db_connect.get_db()
@@ -414,7 +421,8 @@ def api_delete_exercise(name):
 
 
 # API endpoint to delete a body part by its name
-@app.route("/api/v1/delete_body_part/<string:name>", methods=["DELETE"])
+# @app.route("/api/v1/delete_body_part/<string:name>", methods=["DELETE"])
+@app.route("/v1/delete_body_part/<string:name>", methods=["DELETE"])
 @cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
 def api_delete_body_part(name):
     db = db_connect.get_db()
@@ -448,7 +456,8 @@ def api_delete_body_part(name):
 
 
 # API endpoint to delete equipment by its name
-@app.route("/api/v1/delete_equipment/<string:name>", methods=["DELETE"])
+# @app.route("/api/v1/delete_equipment/<string:name>", methods=["DELETE"])
+@app.route("/v1/delete_equipment/<string:name>", methods=["DELETE"])
 @cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
 def api_delete_equipment(name):
     db = db_connect.get_db()
@@ -476,7 +485,8 @@ def api_delete_equipment(name):
 
 
 # API endpoint to get a list of all body parts
-@app.route("/api/v1/body_parts_list", methods=["GET"])
+# @app.route("/api/v1/body_parts_list", methods=["GET"])
+@app.route("/v1/body_parts_list", methods=["GET"])
 @cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
 @optional_auth  # Allow both authenticated and unauthenticated access
 def api_body_parts_list():
@@ -503,7 +513,8 @@ def api_body_parts_list():
 
 
 # API endpoint to get a list of all equipment
-@app.route("/api/v1/equipment_list", methods=["GET"])
+# @app.route("/api/v1/equipment_list", methods=["GET"])
+@app.route("/v1/equipment_list", methods=["GET"])
 @cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
 @optional_auth  # Allow both authenticated and unauthenticated access
 def api_equipment_list():
@@ -530,7 +541,8 @@ def api_equipment_list():
 
 
 # API endpoint to get a list of all exercises
-@app.route("/api/v1/exercises_list", methods=["GET"])
+# @app.route("/api/v1/exercises_list", methods=["GET"])
+@app.route("/v1/exercises_list", methods=["GET"])
 @cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
 @optional_auth  # Allow both authenticated and unauthenticated access
 def api_exercises_list():
@@ -581,7 +593,8 @@ def api_exercises_list():
 
 
 # API endpoint to get a list of all difficulties
-@app.route("/api/v1/difficulties", methods=["GET"])
+# @app.route("/api/v1/difficulties", methods=["GET"])
+@app.route("/v1/difficulties", methods=["GET"])
 @cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
 @optional_auth  # Allow both authenticated and unauthenticated access
 def api_difficulties():
@@ -640,7 +653,8 @@ def internal_error(error):
 
 
 # --- Health Check ---
-@app.route("/api/v1/health", methods=["GET"])
+# @app.route("/api/v1/health", methods=["GET"])
+@app.route("/v1/health", methods=["GET"])
 @cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
 def api_health_check():
     return jsonify({"status": "ok", "message": "API is running and healthy."}), 200
@@ -648,7 +662,8 @@ def api_health_check():
 
 # Management endpoint: preview configured allowed origins
 # Protect with ADMIN_PREVIEW_TOKEN environment variable (use a strong token)
-@app.route("/api/v1/admin/allowed_origins", methods=["GET"])
+# @app.route("/api/v1/admin/allowed_origins", methods=["GET"])
+@app.route("/v1/admin/allowed_origins", methods=["GET"])
 def api_admin_allowed_origins():
     token = os.getenv("ADMIN_PREVIEW_TOKEN")
     auth = request.headers.get("Authorization")
@@ -660,7 +675,8 @@ def api_admin_allowed_origins():
 # --- Authentication Routes ---
 
 
-@app.route("/api/v1/auth/register", methods=["POST"])
+# @app.route("/api/v1/auth/register", methods=["POST"])
+@app.route("/v1/auth/register", methods=["POST"])
 @cross_origin(origins=ALLOWED_ORIGINS)
 def api_register():
     """Register a new user account."""
@@ -691,7 +707,8 @@ def api_register():
         return jsonify({"error": "Registration failed"}), 500
 
 
-@app.route("/api/v1/auth/login", methods=["POST"])
+# @app.route("/api/v1/auth/login", methods=["POST"])
+@app.route("/v1/auth/login", methods=["POST"])
 @cross_origin(origins=ALLOWED_ORIGINS)
 def api_login():
     """Authenticate user login."""
@@ -722,7 +739,8 @@ def api_login():
         return jsonify({"error": "Login failed"}), 500
 
 
-@app.route("/api/v1/auth/verify", methods=["GET"])
+# @app.route("/api/v1/auth/verify", methods=["GET"])
+@app.route("/v1/auth/verify", methods=["GET"])
 @cross_origin(origins=ALLOWED_ORIGINS)
 @jwt_required()
 def api_verify_token():
@@ -749,7 +767,8 @@ def api_verify_token():
         return jsonify({"error": "Token verification failed"}), 500
 
 
-@app.route("/api/v1/auth/me", methods=["GET"])
+# @app.route("/api/v1/auth/me", methods=["GET"])
+@app.route("/v1/auth/me", methods=["GET"])
 @cross_origin(origins=ALLOWED_ORIGINS)
 @require_auth
 def api_get_current_user(current_user):
