@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { getExercisesList, getBodyParts, getEquipmentList } from './api/index.jsx';
+import { getExercisesList, getBodyParts, getEquipmentList, deleteBodyPart, deleteEquipment, deleteExercise } from './api/index.jsx';
 import './css/ManageItemsPage.css';
 
-function ManageItemsPage({ title, fetchUrl, deleteUrl }) {
+function ManageItemsPage({ title, itemType }) {
     const [items, setItems] = useState([]);
     const [message, setMessage] = useState('');
     const [isError, setIsError] = useState(false);
@@ -12,33 +12,20 @@ function ManageItemsPage({ title, fetchUrl, deleteUrl }) {
         try {
             let data = [];
             
-            // Use the appropriate API function based on the fetchUrl
-            if (fetchUrl.includes('exercises_list')) {
+            // Use the appropriate API function based on itemType
+            if (itemType === 'exercises') {
                 data = await getExercisesList();
                 console.log("Fetched exercises data:", data);
-            } else if (fetchUrl.includes('body_parts_list')) {
+            } else if (itemType === 'body_parts') {
                 data = await getBodyParts();
-            } else if (fetchUrl.includes('equipment_list')) {
+            } else if (itemType === 'equipment') {
                 data = await getEquipmentList();
-            } else {
-                // Fallback to direct axios call for other endpoints
-                const fullFetchUrl = fetchUrl.startsWith('/') ? `${fetchUrl}` : fetchUrl;
-                
-                // Get the token from localStorage for authentication
-                const token = localStorage.getItem('authToken');
-                const headers = {};
-                if (token) {
-                    headers['Authorization'] = `Bearer ${token}`;
-                }
-                
-                const response = await axios.get(fullFetchUrl, { headers });
-                data = response.data || [];
             }
             
             // For exercises, keep the full object to display index fields
             // For other items (body parts, equipment), normalize to simple names
             const normalized = data.map((it) => {
-                if (fetchUrl.includes('exercises_list') && it && typeof it === 'object') {
+                if (itemType === 'exercises' && it && typeof it === 'object') {
                     // For exercises, keep the full object with all fields
                     return {
                         name: it.name || it.exercise_name,
@@ -57,7 +44,7 @@ function ManageItemsPage({ title, fetchUrl, deleteUrl }) {
             // Sort items alphabetically (Issue 2: Ascending alphabetical order)
             const sorted = normalized.sort((a, b) => {
                 let nameA, nameB;
-                if (fetchUrl.includes('exercises_list')) {
+                if (itemType === 'exercises') {
                     // For exercises, sort by exercise name
                     nameA = (typeof a === 'object' ? a.name : a).toString().toLowerCase();
                     nameB = (typeof b === 'object' ? b.name : b).toString().toLowerCase();
@@ -97,23 +84,19 @@ function ManageItemsPage({ title, fetchUrl, deleteUrl }) {
         }
         
         if (window.confirm(`Are you sure you want to delete '${displayName}'?`)) {
-            const encodedName = encodeURIComponent(name);
-            const urlToDelete = deleteUrl.startsWith('/') ? `${deleteUrl}` : deleteUrl;
-            const fullDeleteUrl = `${urlToDelete}/${encodedName}`;
-            
-            // This line will show the URL being sent to the backend
-            console.log("Attempting to delete with URL:", fullDeleteUrl);
-
             try {
-                // Get the token from localStorage for authentication
-                const token = localStorage.getItem('authToken');
-                const headers = {};
-                if (token) {
-                    headers['Authorization'] = `Bearer ${token}`;
+                let response;
+                
+                // Use the appropriate API delete function based on itemType
+                if (itemType === 'exercises') {
+                    response = await deleteExercise(name);
+                } else if (itemType === 'body_parts') {
+                    response = await deleteBodyPart(name);
+                } else if (itemType === 'equipment') {
+                    response = await deleteEquipment(name);
                 }
                 
-                const response = await axios.delete(fullDeleteUrl, { headers });
-                setMessage(response.data.message);
+                setMessage(response.message);
                 setIsError(false);
                 // Remove the item from state regardless of whether it was stored as
                 // a plain string or an object with a `name` property.
@@ -125,7 +108,7 @@ function ManageItemsPage({ title, fetchUrl, deleteUrl }) {
                     return item !== name;
                 }));
             } catch (error) {
-                setMessage(error.response?.data?.error || 'Failed to delete item.');
+                setMessage(error.response?.data?.error || error.message || 'Failed to delete item.');
                 setIsError(true);
             }
         }
@@ -133,7 +116,7 @@ function ManageItemsPage({ title, fetchUrl, deleteUrl }) {
 
     useEffect(() => {
         fetchItems();
-    }, [fetchUrl]);
+    }, [itemType]);
 
     return (
         <div className="manage-container">

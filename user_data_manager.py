@@ -151,7 +151,8 @@ class UserDataManager:
         if not user_id:
             return {"success": False, "error": "Authentication required for deletion"}
 
-        query = {"body_part": body_part_name, "userId": user_id}
+        # Use "name" field to match the schema used when adding body parts
+        query = {"name": body_part_name, "userId": user_id}
         result = self.db.body_parts.delete_one(query)
 
         return {
@@ -167,7 +168,8 @@ class UserDataManager:
         if not user_id:
             return {"success": False, "error": "Authentication required for deletion"}
 
-        query = {"equipment": equipment_name, "userId": user_id}
+        # Use "name" field to match the schema used when adding equipment
+        query = {"name": equipment_name, "userId": user_id}
         result = self.db.equipment.delete_one(query)
 
         return {

@@ -105,9 +105,9 @@ function AppContent() {
           <Route path="/add-body-part" element={isAuthenticated ? <AddBodyPartPage /> : <Navigate to="/signin" replace />} />
           <Route path="/add-equipment" element={isAuthenticated ? <AddEquipmentPage /> : <Navigate to="/signin" replace />} />
           <Route path="/exercise/:name" element={isAuthenticated ? <SingleExercisePage /> : <Navigate to="/signin" replace />} />
-          <Route path="/manage-body-parts" element={isAuthenticated ? <ManageItemsPage title="Body Parts" fetchUrl="/api/v1/body_parts_list" deleteUrl="/api/v1/delete_body_part" /> : <Navigate to="/signin" replace />} />
-          <Route path="/manage-equipment" element={isAuthenticated ? <ManageItemsPage title="Equipment" fetchUrl="/api/v1/equipment_list" deleteUrl="/api/v1/delete_equipment" /> : <Navigate to="/signin" replace />} />
-          <Route path="/manage-exercises" element={isAuthenticated ? <ManageItemsPage title="Exercises" fetchUrl="/api/v1/exercises_list" deleteUrl="/api/v1/delete_exercise" /> : <Navigate to="/signin" replace />} />
+          <Route path="/manage-body-parts" element={isAuthenticated ? <ManageItemsPage title="Body Parts" itemType="body_parts" /> : <Navigate to="/signin" replace />} />
+          <Route path="/manage-equipment" element={isAuthenticated ? <ManageItemsPage title="Equipment" itemType="equipment" /> : <Navigate to="/signin" replace />} />
+          <Route path="/manage-exercises" element={isAuthenticated ? <ManageItemsPage title="Exercises" itemType="exercises" /> : <Navigate to="/signin" replace />} />
         </Routes>
       </main>
       {/* Footer */}

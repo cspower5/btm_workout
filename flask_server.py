@@ -342,7 +342,8 @@ def api_get_exercise_details(name):
 # @app.route("/api/v1/add_body_part", methods=["POST"])
 @app.route("/v1/add_body_part", methods=["POST"])
 @cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
-def api_add_body_part():
+@require_auth  # Require authentication for adding body parts
+def api_add_body_part(user):
     db = db_connect.get_db()
     if db is None:
         return jsonify({"error": "Database not connected."}), 500
@@ -353,14 +354,26 @@ def api_add_body_part():
             return jsonify({"error": "Missing 'name' field."}), 400
         # Normalize: strip and lowercase to avoid case-variant duplicates
         norm_name = name.strip().lower()
-        # Ensure unique index on name exists for body_parts (idempotent)
-        try:
-            db.body_parts.create_index(
-                [("name", 1)], unique=True, name="unique_body_parts_name"
-            )
-        except Exception:
-            pass
-        result = db.body_parts.insert_one({"name": norm_name})
+
+        # Use UserDataManager to add body part with user isolation
+        user_data_manager = UserDataManager()
+        user_id = user["id"]
+
+        # Check if this body part already exists for this user
+        existing_body_parts = user_data_manager.get_body_parts(user_id)
+        for bp in existing_body_parts:
+            bp_name = bp.get("name", "").lower()
+            # Check if user already owns this body part
+            if bp_name == norm_name and bp.get("userId") == user_id:
+                return (
+                    jsonify(
+                        {"error": "This body part already exists in your collection."}
+                    ),
+                    409,
+                )
+
+        # Add body part with userId
+        result = user_data_manager.add_body_part({"name": norm_name}, user_id)
         return jsonify(
             {"message": "Body part added successfully", "id": str(result.inserted_id)}
         )
@@ -374,7 +387,8 @@ def api_add_body_part():
 # @app.route("/api/v1/add_equipment", methods=["POST"])
 @app.route("/v1/add_equipment", methods=["POST"])
 @cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
-def api_add_equipment():
+@require_auth  # Require authentication for adding equipment
+def api_add_equipment(user):
     db = db_connect.get_db()
     if db is None:
         return jsonify({"error": "Database not connected."}), 500
@@ -385,14 +399,26 @@ def api_add_equipment():
             return jsonify({"error": "Missing 'name' field."}), 400
         # Normalize: strip and lowercase to avoid case-variant duplicates
         norm_name = name.strip().lower()
-        # Ensure unique index on name exists for equipment (idempotent)
-        try:
-            db.equipment.create_index(
-                [("name", 1)], unique=True, name="unique_equipment_name"
-            )
-        except Exception:
-            pass
-        result = db.equipment.insert_one({"name": norm_name})
+
+        # Use UserDataManager to add equipment with user isolation
+        user_data_manager = UserDataManager()
+        user_id = user["id"]
+
+        # Check if this equipment already exists for this user
+        existing_equipment = user_data_manager.get_equipment(user_id)
+        for eq in existing_equipment:
+            eq_name = eq.get("name", "").lower()
+            # Check if user already owns this equipment
+            if eq_name == norm_name and eq.get("userId") == user_id:
+                return (
+                    jsonify(
+                        {"error": "This equipment already exists in your collection."}
+                    ),
+                    409,
+                )
+
+        # Add equipment with userId
+        result = user_data_manager.add_equipment({"name": norm_name}, user_id)
         return jsonify(
             {"message": "Equipment added successfully", "id": str(result.inserted_id)}
         )
@@ -424,33 +450,38 @@ def api_delete_exercise(name):
 # @app.route("/api/v1/delete_body_part/<string:name>", methods=["DELETE"])
 @app.route("/v1/delete_body_part/<string:name>", methods=["DELETE"])
 @cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
-def api_delete_body_part(name):
+@require_auth  # Require authentication for deletion
+def api_delete_body_part(name, user):
     db = db_connect.get_db()
     if db is None:
         return jsonify({"error": "Database not connected."}), 500
     try:
-        result = db.body_parts.delete_one({"name": name})
+        user_id = user["id"]
+        user_data_manager = UserDataManager()
 
-        # Also delete associated exercises. Exercise documents may store the
-        # body part in either the modern `body_part` field or legacy `bodyPart`.
-        # Perform a case-insensitive deletion across both fields.
+        # Delete body part (only user's own)
+        result = user_data_manager.delete_body_part(name, user_id)
+
+        if not result["success"]:
+            return jsonify({"error": result.get("error", "Body part not found.")}), 404
+
+        # Cascade delete: Remove user's exercises that use this body part
+        # Only delete exercises owned by this user
         exercises_deleted = db.exercises.delete_many(
             {
+                "userId": user_id,
                 "$or": [
                     {"body_part": {"$regex": f"^{name}$", "$options": "i"}},
                     {"bodyPart": {"$regex": f"^{name}$", "$options": "i"}},
-                ]
+                ],
             }
         )
 
-        if result.deleted_count == 1:
-            return jsonify(
-                {
-                    "message": f"Body part '{name}' and {exercises_deleted.deleted_count} associated exercises deleted successfully."
-                }
-            )
-        else:
-            return jsonify({"error": "Body part not found."}), 404
+        return jsonify(
+            {
+                "message": f"Body part '{name}' and {exercises_deleted.deleted_count} associated exercises deleted successfully."
+            }
+        )
     except Exception as e:
         return jsonify({"error": f"Failed to delete body part: {str(e)}"}), 500
 
@@ -459,27 +490,32 @@ def api_delete_body_part(name):
 # @app.route("/api/v1/delete_equipment/<string:name>", methods=["DELETE"])
 @app.route("/v1/delete_equipment/<string:name>", methods=["DELETE"])
 @cross_origin(origins=ALLOWED_ORIGINS)  # <--- CORS FIX
-def api_delete_equipment(name):
+@require_auth  # Require authentication for deletion
+def api_delete_equipment(name, user):
     db = db_connect.get_db()
     if db is None:
         return jsonify({"error": "Database not connected."}), 500
     try:
-        result = db.equipment.delete_one({"name": name})
+        user_id = user["id"]
+        user_data_manager = UserDataManager()
 
-        # Also delete associated exercises. Equipment may be stored under `equipment`
-        # but perform a case-insensitive match to ensure deletion regardless of case.
+        # Delete equipment (only user's own)
+        result = user_data_manager.delete_equipment(name, user_id)
+
+        if not result["success"]:
+            return jsonify({"error": result.get("error", "Equipment not found.")}), 404
+
+        # Cascade delete: Remove user's exercises that use this equipment
+        # Only delete exercises owned by this user
         exercises_deleted = db.exercises.delete_many(
-            {"equipment": {"$regex": f"^{name}$", "$options": "i"}}
+            {"userId": user_id, "equipment": {"$regex": f"^{name}$", "$options": "i"}}
         )
 
-        if result.deleted_count == 1:
-            return jsonify(
-                {
-                    "message": f"Equipment '{name}' and {exercises_deleted.deleted_count} associated exercises deleted successfully."
-                }
-            )
-        else:
-            return jsonify({"error": "Equipment not found."}), 404
+        return jsonify(
+            {
+                "message": f"Equipment '{name}' and {exercises_deleted.deleted_count} associated exercises deleted successfully."
+            }
+        )
     except Exception as e:
         return jsonify({"error": f"Failed to delete equipment: {str(e)}"}), 500
 

@@ -1,5 +1,8 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
-//import { API_BASE_URL } from '../api/index';
+
+// API Base URL configuration
+const API_BASE_URL = import.meta.env.VITE_API_URL 
+  || (import.meta.env.PROD ? 'https://btm-workout.onrender.com' : '/api');
 
 // Auth action types
 const AUTH_ACTIONS = {
@@ -102,7 +105,7 @@ export function AuthProvider({ children }) {
         // Verify token with backend
         let response;
         try {
-          response = await fetch(`/api/v1/auth/verify`, {
+          response = await fetch(`${API_BASE_URL}/v1/auth/verify`, {
             method: 'GET',
             headers: {
               'Authorization': `Bearer ${token}`,
@@ -157,7 +160,7 @@ export function AuthProvider({ children }) {
 
     try {
       // Call the actual backend API
-  const response = await fetch(`/api/v1/auth/login`, {
+  const response = await fetch(`${API_BASE_URL}/v1/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -207,7 +210,7 @@ export function AuthProvider({ children }) {
 
     try {
       // Call the actual backend API
-  const response = await fetch(`/api/v1/auth/register`, {
+  const response = await fetch(`${API_BASE_URL}/v1/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

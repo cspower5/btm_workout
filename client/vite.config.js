@@ -2,8 +2,9 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [react()],
+  base: mode === 'production' ? '/btm_workout/' : '/',
   server: {
     proxy: {
       // This will catch the '/api' from your .env.development
@@ -13,12 +14,11 @@ export default defineConfig({
         secure: false,
         // Rewrite the path: remove '/api' so the backend gets the correct endpoint
         // e.g., /api/v1/exercises_list becomes /v1/exercises_list
-        // rewrite: (path) => path.replace(/^\/api/, ''),
+        rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
   },
-  // ... other config
-});
+}));
 
 //the code below is old and replaced by the above.
 // import { defineConfig } from 'vite'

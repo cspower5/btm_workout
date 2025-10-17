@@ -2,14 +2,10 @@ import axios from 'axios';
 
 // API_BASE_URL: prefer the local backend when running on localhost/LAN for
 // developer workflows; otherwise use the hosted Render URL for production.
-// Always use the production backend for GitHub Pages
-//export const API_BASE_URL = 'https://btm-workout.onrender.com';
-// Use the Vite-defined API base URL, falling back to the Render URL if not set
-//export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://btm-workout.onrender.com';
-//const BASE_URL = import.meta.env.PROD 
-    //? 'https://your-backend-app.onrender.com' // Production URL (Absolute)
-    //: '/api';  
-const BASE_URL = import.meta.env.VITE_API_URL;
+// In dev: use /api (proxied by Vite to localhost:5000)
+// In prod: use the full Onrender URL
+const BASE_URL = import.meta.env.VITE_API_URL 
+    || (import.meta.env.PROD ? 'https://btm-workout.onrender.com' : '/api');
 
 // ===================================
 // GETTERS (Data Retrieval)
