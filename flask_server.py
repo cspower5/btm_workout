@@ -459,8 +459,11 @@ def api_delete_body_part(user, name):
         user_id = user["id"]
         user_data_manager = UserDataManager()
 
+        # Normalize name to match how it's stored (lowercase)
+        norm_name = name.strip().lower()
+
         # Delete body part (only user's own)
-        result = user_data_manager.delete_body_part(name, user_id)
+        result = user_data_manager.delete_body_part(norm_name, user_id)
 
         if not result["success"]:
             return jsonify({"error": result.get("error", "Body part not found.")}), 404
@@ -471,8 +474,8 @@ def api_delete_body_part(user, name):
             {
                 "userId": user_id,
                 "$or": [
-                    {"body_part": {"$regex": f"^{name}$", "$options": "i"}},
-                    {"bodyPart": {"$regex": f"^{name}$", "$options": "i"}},
+                    {"body_part": {"$regex": f"^{norm_name}$", "$options": "i"}},
+                    {"bodyPart": {"$regex": f"^{norm_name}$", "$options": "i"}},
                 ],
             }
         )
@@ -499,8 +502,11 @@ def api_delete_equipment(user, name):
         user_id = user["id"]
         user_data_manager = UserDataManager()
 
+        # Normalize name to match how it's stored (lowercase)
+        norm_name = name.strip().lower()
+
         # Delete equipment (only user's own)
-        result = user_data_manager.delete_equipment(name, user_id)
+        result = user_data_manager.delete_equipment(norm_name, user_id)
 
         if not result["success"]:
             return jsonify({"error": result.get("error", "Equipment not found.")}), 404
@@ -508,7 +514,10 @@ def api_delete_equipment(user, name):
         # Cascade delete: Remove user's exercises that use this equipment
         # Only delete exercises owned by this user
         exercises_deleted = db.exercises.delete_many(
-            {"userId": user_id, "equipment": {"$regex": f"^{name}$", "$options": "i"}}
+            {
+                "userId": user_id,
+                "equipment": {"$regex": f"^{norm_name}$", "$options": "i"},
+            }
         )
 
         return jsonify(
