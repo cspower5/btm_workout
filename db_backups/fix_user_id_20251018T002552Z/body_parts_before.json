@@ -1,0 +1,32 @@
+[
+  {
+    "_id": "68eadcdad5b7052b28de345a",
+    "name": "Arms",
+    "user_id": "68eadcdad5b7052b28de3455"
+  },
+  {
+    "_id": "68eadcdad5b7052b28de3459",
+    "name": "Shoulders",
+    "user_id": "68eadcdad5b7052b28de3455"
+  },
+  {
+    "_id": "68eadcdad5b7052b28de3458",
+    "name": "Legs",
+    "user_id": "68eadcdad5b7052b28de3455"
+  },
+  {
+    "_id": "68eadcdad5b7052b28de345b",
+    "name": "Core",
+    "user_id": "68eadcdad5b7052b28de3455"
+  },
+  {
+    "_id": "68eadcdad5b7052b28de3457",
+    "name": "Back",
+    "user_id": "68eadcdad5b7052b28de3455"
+  },
+  {
+    "_id": "68eadcdad5b7052b28de3456",
+    "name": "Chest",
+    "user_id": "68eadcdad5b7052b28de3455"
+  }
+]

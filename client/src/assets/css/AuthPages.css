@@ -13,6 +13,12 @@
   left: 0;
   right: 0;
   z-index: 1000;
+  height: 350px;
+  transition: height 0.3s ease, background-color 0.3s ease;
+}
+
+.auth-header-simple.collapse{
+  height: 100px;
 }
 
 .auth-header-simple .header-brand .header-title {
@@ -39,10 +45,10 @@
   color: white; /* White text like header */
   padding: 1.5rem 0; /* Slightly taller footer */
   text-align: center;
-  position: fixed;
+  /* position: fixed;
   bottom: 0;
   left: 0;
-  right: 0;
+  right: 0; */
   z-index: 1000;
 }
 

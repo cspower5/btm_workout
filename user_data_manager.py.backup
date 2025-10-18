@@ -22,7 +22,7 @@ def get_user_query_filter(user_id=None, include_public=True):
 
     Args:
         user_id: User ID to filter by (None for current user)
-        include_public: Whether to include public/legacy data (user_id="public")
+        include_public: Whether to include public/legacy data (userId="public")
 
     Returns:
         dict: MongoDB query filter
@@ -32,18 +32,18 @@ def get_user_query_filter(user_id=None, include_public=True):
 
     if user_id and include_public:
         # Include both user's data and public data
-        return {"$or": [{"user_id": user_id}, {"user_id": "public"}]}
+        return {"$or": [{"userId": user_id}, {"userId": "public"}]}
     elif user_id:
         # Only user's data
-        return {"user_id": user_id}
+        return {"userId": user_id}
     else:
         # Only public data (for unauthenticated access)
-        return {"user_id": "public"}
+        return {"userId": "public"}
 
 
 def add_user_id_to_document(doc, user_id=None):
     """
-    Add user_id to a document before saving.
+    Add userId to a document before saving.
 
     Args:
         doc: Document to modify
@@ -55,7 +55,7 @@ def add_user_id_to_document(doc, user_id=None):
     if user_id is None:
         user_id = get_current_user_id()
 
-    doc["user_id"] = user_id
+    doc["userId"] = user_id
     return doc
 
 
@@ -99,68 +99,67 @@ class UserDataManager:
 
         # Get all matching exercises
         exercises = list(collection.find(query, {"_id": 0}))
-
+        
         # Filter out exercises with hidden body parts or equipment if user is authenticated
         if user_id:
             hidden_items = self.db.hidden_items.find(
-                {"user_id": user_id}, {"item_type": 1, "item_name": 1, "_id": 0}
+                {"userId": user_id},
+                {"itemType": 1, "itemName": 1, "_id": 0}
             )
             hidden_body_parts = set()
             hidden_equipment = set()
-
+            
             for item in hidden_items:
-                if item["item_type"] == "body_part":
-                    hidden_body_parts.add(item["item_name"])
-                elif item["item_type"] == "equipment":
-                    hidden_equipment.add(item["item_name"])
-
+                if item["itemType"] == "body_part":
+                    hidden_body_parts.add(item["itemName"])
+                elif item["itemType"] == "equipment":
+                    hidden_equipment.add(item["itemName"])
+            
             # Filter exercises
             exercises = [
-                ex
-                for ex in exercises
-                if (ex.get("body_part") or ex.get("bodyPart", "")).lower()
-                not in hidden_body_parts
+                ex for ex in exercises
+                if (ex.get("body_part") or ex.get("bodyPart", "")).lower() not in hidden_body_parts
                 and ex.get("equipment", "").lower() not in hidden_equipment
             ]
-
+        
         return exercises
 
     def get_body_parts(self, user_id=None):
         """Get body parts for user, including public/legacy body parts, excluding hidden items"""
         collection = self.db.body_parts
         query = get_user_query_filter(user_id, include_public=True)
-
+        
         # Get all body parts
         body_parts = list(collection.find(query, {"_id": 0}))
-
+        
         # Filter out hidden items if user is authenticated
         if user_id:
             hidden_items = self.db.hidden_items.find(
-                {"user_id": user_id, "item_type": "body_part"},
-                {"item_name": 1, "_id": 0},
+                {"userId": user_id, "itemType": "body_part"},
+                {"itemName": 1, "_id": 0}
             )
-            hidden_names = {item["item_name"] for item in hidden_items}
+            hidden_names = {item["itemName"] for item in hidden_items}
             body_parts = [bp for bp in body_parts if bp.get("name") not in hidden_names]
-
+        
         return body_parts
 
     def get_equipment(self, user_id=None):
         """Get equipment for user, including public/legacy equipment, excluding hidden items"""
         collection = self.db.equipment
         query = get_user_query_filter(user_id, include_public=True)
-
+        
         # Get all equipment
         equipment = list(collection.find(query, {"_id": 0}))
-
+        
         # Filter out hidden items if user is authenticated
         if user_id:
             hidden_items = self.db.hidden_items.find(
-                {"user_id": user_id, "item_type": "equipment"},
-                {"item_name": 1, "_id": 0},
+                {"userId": user_id, "itemType": "equipment"},
+                {"itemName": 1, "_id": 0}
             )
-            hidden_names = {item["item_name"] for item in hidden_items}
+            hidden_names = {item["itemName"] for item in hidden_items}
             equipment = [eq for eq in equipment if eq.get("name") not in hidden_names]
-
+        
         return equipment
 
     def add_exercise(self, exercise_data, user_id=None):
@@ -186,8 +185,8 @@ class UserDataManager:
         if not user_id:
             return {"success": False, "error": "Authentication required for deletion"}
 
-        # Only allow deletion of user's own exercises using 'name' field
-        query = {"name": exercise_name, "user_id": user_id}
+        # Only allow deletion of user's own exercises
+        query = {"exercise_name": exercise_name, "userId": user_id}
         result = self.db.exercises.delete_one(query)
 
         return {
@@ -204,7 +203,7 @@ class UserDataManager:
             return {"success": False, "error": "Authentication required for deletion"}
 
         # Use "name" field to match the schema used when adding body parts
-        query = {"name": body_part_name, "user_id": user_id}
+        query = {"name": body_part_name, "userId": user_id}
         result = self.db.body_parts.delete_one(query)
 
         return {
@@ -221,7 +220,7 @@ class UserDataManager:
             return {"success": False, "error": "Authentication required for deletion"}
 
         # Use "name" field to match the schema used when adding equipment
-        query = {"name": equipment_name, "user_id": user_id}
+        query = {"name": equipment_name, "userId": user_id}
         result = self.db.equipment.delete_one(query)
 
         return {

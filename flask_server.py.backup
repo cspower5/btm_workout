@@ -86,12 +86,12 @@ def api_insert_exercise(user):
         user_data_manager = UserDataManager()
 
         # Normalize aliases into canonical names
-        # Frontend may send 'name' or keep it as is
+        if "name" in data and "exercise_name" not in data:
+            data["exercise_name"] = data.pop("name")
         if "bodyPart" in data and "body_part" not in data:
             data["body_part"] = data.pop("bodyPart")
 
-        # We now use 'name' as the canonical field (lowercase)
-        required = ("name", "body_part", "equipment", "target")
+        required = ("exercise_name", "body_part", "equipment", "target")
         if not all(k in data for k in required):
             return (
                 jsonify({"error": f"Missing required fields. Required: {required}"}),
@@ -101,6 +101,7 @@ def api_insert_exercise(user):
         # Remove unrelated/legacy fields if present
         data.pop("category", None)
         data.pop("bodyPart", None)
+        data.pop("name", None)
 
         # Normalize fields for consistency
         def _safe_strip(val):
@@ -109,11 +110,11 @@ def api_insert_exercise(user):
             except Exception:
                 return val
 
-        original_ex_name = _safe_strip(data.get("name"))
+        original_ex_name = _safe_strip(data.get("exercise_name"))
         bp = _safe_strip(data.get("body_part"))
         eq = _safe_strip(data.get("equipment"))
 
-        # Normalized values (lowercased) used for uniqueness checking and storage
+        # Normalized values (lowercased) used for uniqueness checking
         norm_name = (
             original_ex_name.lower()
             if isinstance(original_ex_name, str)
@@ -122,7 +123,8 @@ def api_insert_exercise(user):
         norm_bp = bp.lower() if isinstance(bp, str) else bp
         norm_eq = eq.lower() if isinstance(eq, str) else eq
 
-        # Store normalized fields (lowercase for uniqueness)
+        # Store both display and normalized fields
+        data["exercise_name"] = original_ex_name
         data["name"] = norm_name
         data["body_part"] = norm_bp
         data["equipment"] = norm_eq
@@ -248,11 +250,11 @@ def api_get_random_exercises():
         else:
             random_exercises = random.sample(matching_exercises, num_exercises)
 
-        # Transform canonical DB fields into the frontend shape
+        # Transform canonical DB fields into the legacy frontend shape
         def transform(doc):
             return {
-                # frontend expects `name`; DB uses `name` (lowercase)
-                "name": doc.get("name"),
+                # frontend expects `name`; canonical DB has `exercise_name`
+                "name": doc.get("exercise_name") or doc.get("name"),
                 # frontend expects `bodyPart`; canonical DB has `body_part`
                 "bodyPart": doc.get("body_part") or doc.get("bodyPart"),
                 # equipment is consistent
@@ -281,7 +283,7 @@ def api_refresh_db(user):
         admin_emails = ["admin@btmworkout.com", "cspower5@gmail.com"]  # Configure these
         if user.get("email") not in admin_emails:
             return jsonify({"error": "Unauthorized. Admin access required."}), 403
-
+        
         # Calls the external API logic from database_refresh.py
         count = insert_exercises_if_not_exist()
         return jsonify(
@@ -322,8 +324,12 @@ def api_get_exercise_details(name):
 
         exercise = None
         for ex in all_exercises:
-            ex_name = ex.get("name", "").lower()
-            if ex_name == norm_query or ex.get("name") == name:
+            ex_name = (ex.get("exercise_name") or ex.get("name", "")).lower()
+            if (
+                ex_name == norm_query
+                or ex.get("exercise_name") == name
+                or ex.get("name") == name
+            ):
                 exercise = ex
                 break
 
@@ -366,7 +372,7 @@ def api_add_body_part(user):
         for bp in existing_body_parts:
             bp_name = bp.get("name", "").lower()
             # Check if user already owns this body part
-            if bp_name == norm_name and bp.get("user_id") == user_id:
+            if bp_name == norm_name and bp.get("userId") == user_id:
                 return (
                     jsonify(
                         {"error": "This body part already exists in your collection."}
@@ -411,7 +417,7 @@ def api_add_equipment(user):
         for eq in existing_equipment:
             eq_name = eq.get("name", "").lower()
             # Check if user already owns this equipment
-            if eq_name == norm_name and eq.get("user_id") == user_id:
+            if eq_name == norm_name and eq.get("userId") == user_id:
                 return (
                     jsonify(
                         {"error": "This equipment already exists in your collection."}
@@ -439,8 +445,8 @@ def api_delete_exercise(name):
     if db is None:
         return jsonify({"error": "Database not connected."}), 500
     try:
-        # Delete by canonical field `name`
-        result = db.exercises.delete_one({"name": name})
+        # Delete by canonical field `exercise_name`
+        result = db.exercises.delete_one({"exercise_name": name})
         if result.deleted_count == 1:
             return jsonify({"message": f"Exercise '{name}' deleted successfully."})
         return jsonify({"error": "Exercise not found."}), 404
@@ -464,54 +470,29 @@ def api_delete_body_part(user, name):
         # Normalize name to match how it's stored (lowercase)
         norm_name = name.strip().lower()
 
-        app.logger.info(
-            f"Delete body part request: name='{name}', norm_name='{norm_name}', user_id={user_id}"
-        )
-
-        # Check if this is public data (user_id="public") - case insensitive search
-        public_body_part = db.body_parts.find_one(
-            {"name": {"$regex": f"^{norm_name}$", "$options": "i"}, "user_id": "public"}
-        )
-
-        app.logger.info(f"Public body part search result: {public_body_part}")
-
+        # Check if this is public data (userId="public")
+        public_body_part = db.body_parts.find_one({"name": norm_name, "userId": "public"})
+        
         if public_body_part:
             # Public data: add to hidden_items instead of deleting
-            app.logger.info(f"Hiding public body part '{norm_name}' for user {user_id}")
             db.hidden_items.update_one(
-                {"user_id": user_id, "item_type": "body_part", "item_name": norm_name},
-                {
-                    "$set": {
-                        "user_id": user_id,
-                        "item_type": "body_part",
-                        "item_name": norm_name,
-                        "hidden_at": datetime.utcnow(),
-                    }
-                },
-                upsert=True,
+                {"userId": user_id, "itemType": "body_part", "itemName": norm_name},
+                {"$set": {"userId": user_id, "itemType": "body_part", "itemName": norm_name, "hiddenAt": datetime.utcnow()}},
+                upsert=True
             )
-            return jsonify(
-                {"message": f"Body part '{name}' hidden from your view successfully."}
-            )
+            return jsonify({"message": f"Body part '{name}' hidden from your view successfully."})
 
         # User's own data: actually delete it
-        app.logger.info(
-            f"Attempting to delete user body part '{norm_name}' for user {user_id}"
-        )
         result = user_data_manager.delete_body_part(norm_name, user_id)
 
         if not result["success"]:
-            app.logger.warning(f"Body part '{norm_name}' not found for user {user_id}")
-            return (
-                jsonify({"error": f"Body part '{name}' not found in your collection."}),
-                404,
-            )
+            return jsonify({"error": result.get("error", "Body part not found in your collection.")}), 404
 
         # Cascade delete: Remove user's exercises that use this body part
         # Only delete exercises owned by this user
         exercises_deleted = db.exercises.delete_many(
             {
-                "user_id": user_id,
+                "userId": user_id,
                 "$or": [
                     {"body_part": {"$regex": f"^{norm_name}$", "$options": "i"}},
                     {"bodyPart": {"$regex": f"^{norm_name}$", "$options": "i"}},
@@ -544,54 +525,29 @@ def api_delete_equipment(user, name):
         # Normalize name to match how it's stored (lowercase)
         norm_name = name.strip().lower()
 
-        app.logger.info(
-            f"Delete equipment request: name='{name}', norm_name='{norm_name}', user_id={user_id}"
-        )
-
-        # Check if this is public data (user_id="public") - case insensitive search
-        public_equipment = db.equipment.find_one(
-            {"name": {"$regex": f"^{norm_name}$", "$options": "i"}, "user_id": "public"}
-        )
-
-        app.logger.info(f"Public equipment search result: {public_equipment}")
-
+        # Check if this is public data (userId="public")
+        public_equipment = db.equipment.find_one({"name": norm_name, "userId": "public"})
+        
         if public_equipment:
             # Public data: add to hidden_items instead of deleting
-            app.logger.info(f"Hiding public equipment '{norm_name}' for user {user_id}")
             db.hidden_items.update_one(
-                {"user_id": user_id, "item_type": "equipment", "item_name": norm_name},
-                {
-                    "$set": {
-                        "user_id": user_id,
-                        "item_type": "equipment",
-                        "item_name": norm_name,
-                        "hidden_at": datetime.utcnow(),
-                    }
-                },
-                upsert=True,
+                {"userId": user_id, "itemType": "equipment", "itemName": norm_name},
+                {"$set": {"userId": user_id, "itemType": "equipment", "itemName": norm_name, "hiddenAt": datetime.utcnow()}},
+                upsert=True
             )
-            return jsonify(
-                {"message": f"Equipment '{name}' hidden from your view successfully."}
-            )
+            return jsonify({"message": f"Equipment '{name}' hidden from your view successfully."})
 
         # User's own data: actually delete it
-        app.logger.info(
-            f"Attempting to delete user equipment '{norm_name}' for user {user_id}"
-        )
         result = user_data_manager.delete_equipment(norm_name, user_id)
 
         if not result["success"]:
-            app.logger.warning(f"Equipment '{norm_name}' not found for user {user_id}")
-            return (
-                jsonify({"error": f"Equipment '{name}' not found in your collection."}),
-                404,
-            )
+            return jsonify({"error": result.get("error", "Equipment not found in your collection.")}), 404
 
         # Cascade delete: Remove user's exercises that use this equipment
         # Only delete exercises owned by this user
         exercises_deleted = db.exercises.delete_many(
             {
-                "user_id": user_id,
+                "userId": user_id,
                 "equipment": {"$regex": f"^{norm_name}$", "$options": "i"},
             }
         )

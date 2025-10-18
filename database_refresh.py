@@ -43,29 +43,35 @@ def insert_exercises_if_not_exist():
 
         exercises_collection = db["exercises"]
 
-        # We must drop the conflicting index only if it exists
+        # Drop old indexes if they exist
         try:
-            # Drop the problematic index created on the old API field names ('name', 'bodyPart')
             exercises_collection.drop_index("unique_exercise_index")
-            print("Dropped conflicting Atlas index.")
+            print("Dropped conflicting Atlas index: unique_exercise_index")
         except Exception:
-            # Safely ignore if the index doesn't exist or drop failed
             pass
 
-        # 2. Create the NEW, CORRECT Unique Index using application field names
+        try:
+            exercises_collection.drop_index("unique_app_index")
+            print("Dropped old index: unique_app_index")
+        except Exception:
+            pass
+
+        # Create the unique index matching Atlas: (name, body_part, equipment, user_id)
         try:
             exercises_collection.create_index(
                 [
-                    ("exercise_name", ASCENDING),
+                    ("name", ASCENDING),
                     ("body_part", ASCENDING),
                     ("equipment", ASCENDING),
+                    ("user_id", ASCENDING),
                 ],
                 unique=True,
-                name="unique_app_index",
+                name="unique_exercises_index",
             )
-            print("Successfully created final unique_app_index.")
+            print(
+                "Successfully created unique_exercises_index with (name, body_part, equipment, user_id)."
+            )
         except Exception as e:
-            # This is expected if the index already exists from a previous successful run
             print(
                 f"Warning: Index creation skipped/failed, likely because it already exists: {e}"
             )
@@ -103,15 +109,14 @@ def insert_exercises_if_not_exist():
                 if not exercise.get("name") or not exercise.get("bodyPart"):
                     continue
 
-                # --- MAPPING: STRICTLY ONLY THE 8 REQUESTED FIELDS (plus app keys) ---
-                # Preserve original display name, but also add normalized fields
+                # --- MAPPING: Use snake_case field names matching Atlas indexes ---
+                # Store normalized name (lowercase) as the canonical 'name' field
                 orig_name = exercise.get("name") or ""
                 orig_body = exercise.get("bodyPart") or ""
                 orig_equip = exercise.get("equipment") or ""
 
                 mapped_exercise = {
-                    "exercise_name": orig_name,
-                    # Normalized canonical fields used for uniqueness/indexing
+                    # Use 'name' as the canonical field (normalized, lowercase)
                     "name": orig_name.strip().lower(),
                     "body_part": orig_body.strip().lower(),
                     "equipment": orig_equip.strip().lower(),
@@ -121,6 +126,7 @@ def insert_exercises_if_not_exist():
                     "description": exercise.get("description"),
                     "difficulty": exercise.get("difficulty"),
                     "id": exercise.get("id"),
+                    "user_id": "public",  # Public data from API has "public" user_id
                 }
                 # --- END MAPPING ---
 
@@ -172,11 +178,30 @@ def insert_exercises_if_not_exist():
                 print(
                     "Post-refresh: syncing distinct body_part and equipment to management collections..."
                 )
+
+                # Drop old indexes without user_id
+                try:
+                    db.body_parts.drop_index("unique_body_parts_name")
+                    print("Dropped old body_parts index without user_id")
+                except Exception:
+                    pass
+
+                try:
+                    db.equipment.drop_index("unique_equipment_name")
+                    print("Dropped old equipment index without user_id")
+                except Exception:
+                    pass
+
+                # Create compound indexes with user_id matching Atlas
                 db.body_parts.create_index(
-                    [("name", ASCENDING)], unique=True, name="unique_body_parts_name"
+                    [("name", ASCENDING), ("user_id", ASCENDING)],
+                    unique=True,
+                    name="unique_body_part_index",
                 )
                 db.equipment.create_index(
-                    [("name", ASCENDING)], unique=True, name="unique_equipment_name"
+                    [("name", ASCENDING), ("user_id", ASCENDING)],
+                    unique=True,
+                    name="unique_equipment_index",
                 )
 
                 body_parts = [bp for bp in db.exercises.distinct("body_part") if bp]
@@ -184,16 +209,20 @@ def insert_exercises_if_not_exist():
 
                 for bp in body_parts:
                     db.body_parts.update_one(
-                        {"name": bp}, {"$setOnInsert": {"name": bp}}, upsert=True
+                        {"name": bp, "user_id": "public"},
+                        {"$setOnInsert": {"name": bp, "user_id": "public"}},
+                        upsert=True,
                     )
 
                 for eq in equipment_vals:
                     db.equipment.update_one(
-                        {"name": eq}, {"$setOnInsert": {"name": eq}}, upsert=True
+                        {"name": eq, "user_id": "public"},
+                        {"$setOnInsert": {"name": eq, "user_id": "public"}},
+                        upsert=True,
                     )
 
                 print(
-                    f"Synced {len(body_parts)} body_parts and {len(equipment_vals)} equipment entries."
+                    f"Synced {len(body_parts)} body_parts and {len(equipment_vals)} equipment entries with user_id='public'."
                 )
         except Exception as e:
             print(f"Warning: Failed to sync management collections in finally: {e}")

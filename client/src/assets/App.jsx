@@ -50,6 +50,17 @@ function AppContent() {
     </div>
   );
 
+  const header = document.getElementById('auth-header-simple');
+  function colapseHeader(){
+    if (window.scrollY > 50) {
+      header.classList.add('collapse');
+    } else {
+      header.classList.remove('collapse');
+    }
+  }
+  
+  window.addEventListener('scroll', colapseHeader);
+
   return (
     <div className="App">
       {/* Header */}

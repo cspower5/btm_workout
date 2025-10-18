@@ -1,0 +1,27 @@
+[
+  {
+    "_id": "68eadcdad5b7052b28de345c",
+    "name": "Dumbbell",
+    "user_id": "68eadcdad5b7052b28de3455"
+  },
+  {
+    "_id": "68eadcdad5b7052b28de345e",
+    "name": "Kettlebell",
+    "user_id": "68eadcdad5b7052b28de3455"
+  },
+  {
+    "_id": "68eadcdad5b7052b28de3460",
+    "name": "Cable",
+    "user_id": "68eadcdad5b7052b28de3455"
+  },
+  {
+    "_id": "68eadcdad5b7052b28de345d",
+    "name": "Barbell",
+    "user_id": "68eadcdad5b7052b28de3455"
+  },
+  {
+    "_id": "68eadcdad5b7052b28de345f",
+    "name": "Body Weight",
+    "user_id": "68eadcdad5b7052b28de3455"
+  }
+]

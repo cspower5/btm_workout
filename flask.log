@@ -1,5 +1,5 @@
 nohup: ignoring input
-⚠️ Warning: Missing MONGO_USER/MONGO_PASS/MONGO_HOST; falling back to localhost without auth for local/test usage.
+Connecting with MONGO_URI (Atlas/Deployment).
 ✅ Successfully connected to MongoDB database: btm_workout_db
  * Serving Flask app 'flask_server'
  * Debug mode: on
@@ -8,10 +8,5 @@ nohup: ignoring input
 [33mPress CTRL+C to quit[0m
  * Restarting with stat
  * Debugger is active!
- * Debugger PIN: 922-527-217
-127.0.0.1 - - [07/Oct/2025 22:43:30] "GET /api/v1/health HTTP/1.1" 200 -
-127.0.0.1 - - [07/Oct/2025 22:43:39] "[31m[1mGET /api/v1/auth/verify HTTP/1.1[0m" 401 -
-127.0.0.1 - - [07/Oct/2025 22:43:51] "[31m[1mPOST /api/v1/auth/login HTTP/1.1[0m" 401 -
-127.0.0.1 - - [07/Oct/2025 22:43:57] "[35m[1mPOST /api/v1/auth/register HTTP/1.1[0m" 201 -
-127.0.0.1 - - [07/Oct/2025 22:44:05] "GET /api/v1/auth/verify HTTP/1.1" 200 -
-127.0.0.1 - - [07/Oct/2025 22:44:19] "[35m[1mPOST /api/v1/insert_exercise HTTP/1.1[0m" 500 -
+ * Debugger PIN: 369-280-260
+127.0.0.1 - - [17/Oct/2025 18:51:18] "GET /v1/health HTTP/1.1" 200 -
