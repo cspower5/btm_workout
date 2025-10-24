@@ -32,23 +32,37 @@ function AppContent() {
   );
 
   // Popout menu for mobile
-  const MobileMenu = ({ open, onClose }) => (
-    <div className={`mobile-menu-overlay${open ? ' open' : ''}`} onClick={onClose}>
-      <nav className="mobile-menu" onClick={e => e.stopPropagation()}>
-        <ul>
-          <li><Link to="/home" onClick={onClose}>Home</Link></li>
-          <li><Link to="/workout" onClick={onClose}>Generate Workout</Link></li>
-          <li><Link to="/add-exercise" onClick={onClose}>Add Exercise</Link></li>
-          <li><Link to="/add-body-part" onClick={onClose}>Add Body Part</Link></li>
-          <li><Link to="/add-equipment" onClick={onClose}>Add Equipment</Link></li>
-          <li><Link to="/manage-body-parts" onClick={onClose}>Manage Body Parts</Link></li>
-          <li><Link to="/manage-equipment" onClick={onClose}>Manage Equipment</Link></li>
-          <li><Link to="/manage-exercises" onClick={onClose}>Manage Exercises</Link></li>
-          <li><button onClick={handleLogout} className="logout-btn">Log Out</button></li>
-        </ul>
-      </nav>
-    </div>
-  );
+  const MobileMenu = ({ open, onClose }) => {
+    const handleLinkClick = (e) => {
+      // Don't close immediately - let navigation happen first
+      onClose();
+    };
+
+    const handleOverlayClick = (e) => {
+      // Only close if clicking the overlay background, not the menu itself
+      if (e.target.classList.contains('mobile-menu-overlay')) {
+        onClose();
+      }
+    };
+
+    return (
+      <div className={`mobile-menu-overlay${open ? ' open' : ''}`} onClick={handleOverlayClick}>
+        <nav className="mobile-menu">
+          <ul>
+            <li><Link to="/home" onClick={handleLinkClick}>Home</Link></li>
+            <li><Link to="/workout" onClick={handleLinkClick}>Generate Workout</Link></li>
+            <li><Link to="/add-exercise" onClick={handleLinkClick}>Add Exercise</Link></li>
+            <li><Link to="/add-body-part" onClick={handleLinkClick}>Add Body Part</Link></li>
+            <li><Link to="/add-equipment" onClick={handleLinkClick}>Add Equipment</Link></li>
+            <li><Link to="/manage-body-parts" onClick={handleLinkClick}>Manage Body Parts</Link></li>
+            <li><Link to="/manage-equipment" onClick={handleLinkClick}>Manage Equipment</Link></li>
+            <li><Link to="/manage-exercises" onClick={handleLinkClick}>Manage Exercises</Link></li>
+            <li><button onClick={handleLogout} className="logout-btn">Log Out</button></li>
+          </ul>
+        </nav>
+      </div>
+    );
+  };
 
   const header = document.getElementById('auth-header-simple');
   function colapseHeader(){
@@ -145,12 +159,6 @@ function AppContent() {
               </ul>
             </nav>
           )}
-          {isAuthenticated && (
-            <div className="mobile-hamburger">
-              <Hamburger open={mobileMenuOpen} onToggle={toggleMobileMenu} />
-            </div>
-          )}
-          {isAuthenticated && <MobileMenu open={mobileMenuOpen} onClose={closeMobileMenu} />}
           <div className="footer-logo">
             <img src={logoPng} alt="BTM Workout Logo" />
           </div>

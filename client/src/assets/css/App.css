@@ -1,6 +1,6 @@
 /* Hamburger icon styles */
 .hamburger {
-  display: none;
+  display: block; /* Always render it */
   background: none;
   border: none;
   cursor: pointer;
@@ -84,6 +84,7 @@
   z-index: 1400;
   transition: transform 0.3s ease;
   transform: translateX(100%);
+  overflow-y: auto;
 }
 .mobile-menu-overlay.open .mobile-menu {
   transform: translateX(0);
@@ -107,6 +108,8 @@
   width: 100%;
   text-align: left;
   cursor: pointer;
+  pointer-events: auto;
+  display: block;
 }
 .mobile-menu button.logout-btn {
   color: #fff;
@@ -114,28 +117,76 @@
   background: #dc3545;
   border-radius: 6px;
   margin-top: 1rem;
+  padding: 0.75rem;
 }
 .mobile-hamburger {
-  display: none;
+  display: none; /* Hidden by default */
 }
 
 @media (max-width: 768px) {
-  .desktop-nav {
+  /* CRITICAL: Hide desktop nav, show hamburger menu */
+  .header-nav.desktop-nav,
+  .App-header .desktop-nav {
     display: none !important;
   }
+  
   .mobile-hamburger {
     display: block !important;
-    position: absolute;
-    top: 1.2rem;
-    right: 1.2rem;
-    z-index: 1200;
   }
-  .footer-nav .mobile-hamburger {
-    position: static;
-    margin: 0 auto;
-    top: auto;
-    right: auto;
-    left: auto;
+  
+  /* Hide footer navigation on mobile - only show logo */
+  .footer-nav nav {
+    display: none !important;
+  }
+  
+  /* Adjust header for mobile - more compact */
+  .App-header {
+    min-height: 70px;
+    padding: 0.5rem 1rem;
+    gap: 0.25rem;
+  }
+  
+  .App-header h1 {
+    font-size: 1rem;
+  }
+  
+  .header-subtitle {
+    font-size: 0.65rem;
+    margin: 0;
+  }
+  
+  /* Adjust main content padding for mobile */
+  main {
+    padding-top: 90px !important; /* Increased for mobile header */
+    padding-bottom: 270px !important;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+  
+  /* User info for mobile */
+  .user-info-section {
+    top: 0.5rem;
+    right: 3.5rem; /* Make room for hamburger */
+    gap: 0.25rem;
+  }
+  
+  .username {
+    font-size: 0.7rem;
+  }
+  
+  .logout-btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.65rem;
+  }
+  
+  /* Footer logo sizing for mobile */
+  .footer-logo img {
+    height: 240px !important; /* Match auth pages mobile */
+  }
+  
+  /* Adjust footer padding */
+  .footer-nav {
+    padding: 0.5rem !important;
   }
 }
 :root {
@@ -192,46 +243,48 @@ body {
 .App {
   display: flex;
   flex-direction: column;
-  height: 100vh; /* Exact viewport height, not min-height */
+  min-height: 100vh;
   text-align: center;
-  overflow: hidden; /* Prevent scrolling */
 }
 
 .App-header {
   background-color: var(--header-background);
-  min-height: 140px; /* More reasonable header height */
-  display: grid;
-  grid-template-rows: auto auto auto;
-  grid-template-columns: 1fr;
-  grid-template-areas: 
-    "user-info"
-    "logo"
-    "nav";
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.3rem; /* Reduced gap for tighter layout */
+  justify-content: center;
+  gap: 0.5rem;
   font-size: calc(10px + 2vmin);
   color: var(--header-text-color);
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  z-index: var(--z-header);
-  padding: 0.8rem; /* Reduced padding */
+  z-index: 1000;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Logo gets center stage - now the main focus */
 .header-brand {
-  grid-area: logo;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-self: center;
+  text-align: center;
+  max-width: 100%;
 }
 
-/* Navigation at the bottom of header */
+/* Navigation - desktop horizontal menu */
 .header-nav {
-  grid-area: nav;
-  justify-self: center;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* Desktop navigation */
+.header-nav.desktop-nav {
+  display: flex;
 }
 
 .nav-links {
@@ -239,7 +292,7 @@ body {
   list-style: none;
   margin: 0;
   padding: 0;
-  gap: 1.5rem;
+  gap: 1rem;
   flex-wrap: wrap;
   justify-content: center;
 }
@@ -247,11 +300,12 @@ body {
 .nav-links a {
   color: var(--header-text-color);
   text-decoration: none;
-  font-size: 1.3rem; /* Increased from 1.1rem for even better readability */
+  font-size: 1rem;
   font-weight: 500;
-  padding: 0.5rem 0.75rem;
+  padding: 0.4rem 0.6rem;
   border-radius: calc(var(--border-radius) / 2);
   transition: background-color 0.2s;
+  white-space: nowrap;
 }
 
 .nav-links a:hover {
@@ -260,7 +314,6 @@ body {
 
 /* User info positioned in upper right corner */
 .user-info-section {
-  grid-area: user-info;
   position: absolute;
   top: 1rem;
   right: 1rem;
@@ -272,21 +325,22 @@ body {
 }
 
 .App-header h1 {
-  margin: 0 0 0.5rem 0;
+  margin: 0;
   font-size: 1.2rem;
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.2;
 }
 
 .header-subtitle {
-  margin: 0;
-  font-size: 0.9rem;
+  margin: 0.25rem auto 0;
+  font-size: 0.75rem;
   font-weight: 400;
   line-height: 1.3;
   color: rgba(255, 255, 255, 0.9);
   font-style: italic;
-  max-width: 600px;
+  max-width: 700px;
   text-align: center;
+  padding: 0 1rem;
 }
 
 /* Professional logo sizing - natural dimensions approach */
@@ -304,9 +358,9 @@ body {
 
 .username {
   color: var(--header-text-color);
-  font-size: 0.9rem; /* Increased from 0.75rem for better readability */
-  font-weight: 400; /* Lighter weight */
-  text-align: right; /* Right-aligned */
+  font-size: 0.9rem;
+  font-weight: 400;
+  text-align: right;
   margin: 0;
 }
 
@@ -314,9 +368,9 @@ body {
   background-color: rgba(255, 255, 255, 0.2);
   color: var(--header-text-color);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 0.4rem 0.8rem; /* Smaller padding */
+  padding: 0.4rem 0.8rem;
   border-radius: calc(var(--border-radius) / 2);
-  font-size: 0.7rem; /* Smaller font size */
+  font-size: 0.8rem;
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s;
@@ -326,322 +380,30 @@ body {
   background-color: rgba(255, 255, 255, 0.3);
 }
 
-@media (max-width: 600px) {
-  .App-header {
-    min-height: 120px; /* Smaller mobile header */
-    grid-template-rows: auto auto auto;
-    grid-template-columns: 1fr;
-    grid-template-areas: 
-      "user-info"
-      "logo"
-      "nav";
-    gap: 0.3rem;
-    padding: 0.5rem;
-  }
-
-  .header-brand {
-    justify-self: center;
-  }
-
-  .header-nav {
-    justify-self: center;
-  }
-
-  .nav-links {
-    gap: 0.5rem;
-    font-size: 0.8rem;
-  }
-
-  .nav-links a {
-    padding: 0.3rem 0.5rem;
-    font-size: 1.1rem; /* Increased from 0.9rem for mobile */
-  }
-
-  .App-header h1 {
-    font-size: 1rem;
-  }
-
-  /* User info section for mobile - keep in upper right */
-  .user-info-section {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 0.3rem;
-  }
-
-  .username {
-    font-size: 0.8rem; /* Increased from 0.7rem for mobile */
-    text-align: right;
-  }
-
-  .logout-btn {
-    padding: 0.2rem 0.5rem;
-    font-size: 0.65rem;
-  }
-
-  /* Mobile main content padding - each page handles its own */
-  main { 
-    padding-top: 0 !important; /* Removed global padding - each page handles its own spacing */
-    padding-bottom: 56px !important;
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-  
-  /* Auth pages use same spacing */
-  main .auth-page-container {
-    padding-top: var(--header-height);
-  }
-
-  /* when open, show the nav as a vertical overlay list for easier tapping */
-  .header-nav.open nav ul {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem; /* Increase gap for tap targets */
-    padding: 1rem; /* Better padding inside the overlay */
-    background: none; /* Remove background gradient */
-    border-radius: 0; /* Remove border radius */
-    height: auto; /* Don't force 100% height here */
-    /* gap: 0.25rem;
-    padding: 0.5rem 0.25rem;
-    background: linear-gradient(180deg, rgba(0,0,0,0.05), rgba(0,0,0,0.0));
-    border-radius: 6px;
-    height: 100%; */
-  }
-
-  .header-nav.open nav li { margin: 0; }
-  .header-nav.open nav a { display: block; padding: 0.5rem 0.6rem; font-size: 0.95rem; }
-
-  .App-header h1 {
-    font-size: 1.2rem; /* smaller heading on mobile */
-    line-height: 1.05;
-  }
-
-  .header-nav nav ul {
-    /* Keep nav items horizontal and force a single row; each item stretches
-       so links fill the top bar. On very small screens we scale sizes down
-       rather than stacking to preserve the desktop layout visually. */
-    flex-direction: column;
-    gap: 0.35rem;
-    align-items: stretch;
-    width: 100%;
-    flex-wrap: nowrap;
-  }
-
-  .header-nav nav li {
-    /* Keep nav horizontal on small screens and stretch items across the width */
-    flex-direction: row;
-    gap: 0.25rem;
-    align-items: center;
-    width: 100%;
-    justify-content: space-between;
-    flex-wrap: nowrap;
-  }
-
-  .footer-nav {
-    position: fixed;
-    left: 0; 
-    right: 0; 
-    bottom: 0; 
-    z-index: var(--z-header);
-    padding: var(--footer-nav-padding);
-    min-height: var(--footer-nav-height);
-  }
-
-  /* Mobile navigation layout using CSS custom properties */
-  .footer-nav nav ul {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: center;
-    width: 100%;
-    gap: var(--nav-item-gap);
-    flex-wrap: nowrap;
-  }
-
-  .footer-nav nav li,
-  .header-nav nav li {
-    flex: 0 0 auto;
-    margin: 0 var(--nav-item-gap);
-    text-align: center;
-    padding: 0;
-  }
-  
-  /* Compact navigation anchors with proper sizing */
-  .header-nav a, .footer-nav a {
-    display: inline-block;
-    padding: var(--nav-item-padding);
-    font-size: var(--nav-font-size-mobile);
-    white-space: nowrap;
-  }
-  
-  /* Navigation layout distribution */
-  .header-nav nav ul, .footer-nav nav ul { 
-    display: flex; 
-  }
-  
-  .header-nav nav li, .footer-nav nav li { 
-    flex: 1 1 0; 
-  }
-  
-  .header-nav nav a, .footer-nav nav a { 
-    display: block; 
-    width: 100%; 
-  }
-  .workout-list {
-    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)) !important;
-    gap: 0.25rem !important;
-    padding: 0 0.15rem !important;
-  }
-  .exercise-card {
-    padding: 0.12rem !important;
-    font-size: 0.7rem !important;
-    min-height: 0 !important; /* allow aspect-ratio to control size */
-  }
-  
-  /* Add padding to main so content isn't hidden behind fixed header/footer */
-  body main,
-  main.main-content,
-  main { 
-    padding-top: 0 !important; /* Removed global padding - each page handles its own spacing */
-    padding-bottom: 56px !important;
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-  
-  /* Special spacing for auth pages */
-  main .auth-page-container {
-    padding-top: 400px !important; /* Increased to give proper space below header */
-  }
-  
-  /* Landscape phones: make footer non-fixed so it pushes content (avoid overlay and extra scroll) */
-  @media (orientation: landscape) {
-    .footer-nav { position: relative !important; left: auto !important; right: auto !important; bottom: auto !important; padding: 0.2rem 0.3rem !important; }
-    main { padding-bottom: 20px !important; }
-  }
+/* Main content area - scrollable */
+main {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-top: 160px; /* Increased space for fixed header with navigation */
+  padding-bottom: 380px; /* Space for fixed footer with logo */
+  padding-left: 1rem;
+  padding-right: 1rem;
+  box-sizing: border-box;
 }
 
-/* Ensure header nav matches footer nav in narrow landscape viewports
-   (centered, compressed, no-wrap). These rules are high-specificity and
-   appended here so they override other mobile rules. */
-@media (orientation: landscape) and (max-width: 900px) {
-  /* Make header area slightly tighter to free horizontal space */
-  .App-header { padding-left: 8px !important; padding-right: 8px !important; }
-
-  /* Force header nav to center and match footer sizing */
-  .header-nav,
-  .header-nav nav ul { 
-    display: flex !important; 
-    justify-content: center !important; 
-    align-items: center !important; 
-    gap: 6px !important; 
-    flex-wrap: nowrap !important; 
-  }
-
-  .header-nav nav li { 
-    flex: 0 0 auto !important; 
-    margin: 0 !important; 
-    padding: 0 !important; 
-  }
-
-  .header-nav a { 
-    font-size: 0.5rem !important; 
-    padding: 3px 6px !important; 
-    white-space: nowrap !important; 
-    display: inline-block !important; 
-  }
-
-  /* Reduce title slightly in landscape to give links more room */
-  .App-header h1 { font-size: 1.4rem !important; }
-
-  /* Ensure footer remains centered and uses same sizing */
-  .footer-nav nav ul { justify-content: center !important; gap: 6px !important; flex-wrap: nowrap !important; }
-  .footer-nav a { font-size: 0.5rem !important; padding: 3px 6px !important; }
-}
-
-/* Source-level final landscape override (highest specificity) */
-@media (orientation: landscape) and (max-width: 900px) {
-  .header-nav nav ul { 
-    justify-content: center !important; 
-    gap: 4px !important; 
-    flex-wrap: nowrap !important;
-  }
-  .header-nav nav li { 
-    flex: 0 0 auto !important; 
-    margin: 0 !important; 
-    padding: 0 !important;
-  }
-  .header-nav a { 
-    font-size: 0.46rem !important; 
-    padding: 2px 6px !important; 
-    white-space: nowrap !important; 
-    display: inline-block !important;
-  }
-  .App-header h1 { 
-    font-size: 1.1rem !important; 
-  }
-}
-
-/* Increase header/banner thickness on wide landscape displays (min-width: 900px) */
-@media (min-width: 900px) and (orientation: landscape) {
-  .App-header {
-    /* make the blue banner noticeably thicker in landscape */
-    min-height: 200px !important;
-    height: 200px !important;
-    padding-top: 1.25rem !important;
-    padding-bottom: 1.25rem !important;
-  }
-
-  .App-header h1 {
-    font-size: 2.0rem !important; /* slightly larger title to match taller banner */
-    line-height: 1.05 !important;
-    margin-top: 0.25rem !important;
-  }
-}
-
-/* Extra-small devices: tighten spacing and font sizes further */
-@media (max-width: 420px) {
-  .App-header {
-    min-height: 84px;
-    padding: 0.5rem 0.5rem;
-  }
-  .App-header h1 {
-    font-size: 1.0rem;
-  }
-  .header-nav a {
-    font-size: 0.95rem;
-    padding: 0.4rem 0.25rem;
-    display: block;
-  }
-  .controls .form-fields {
-    flex-direction: column;
-    gap: 0.75rem;
-    align-items: stretch;
-  }
-  .controls label {
-    display: flex;
-    justify-content: space-between;
-    gap: 0.5rem;
-    align-items: center;
-  }
-}
-
-/* Removed duplicate main rule that was conflicting with header spacing */
-
-.header-nav {
-  padding-bottom: 0; 
-}
-
+/* Footer with fixed position */
 .footer-nav {
   background-color: var(--primary-color);
-  box-shadow: var(--box-shadow);
-  margin-top: 1.25rem;
-  /* do not force a large min-height; let content size naturally */
-  min-height: auto;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-header);
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* place the logo near top and links toward bottom when space allows */
+  justify-content: center;
   align-items: center;
   padding: 1rem;
 }
@@ -651,15 +413,15 @@ body {
   list-style: none;
   padding: 0;
   display: flex;
-  /* prefer space-between so items stretch across the bar; allow wrapping on smaller screens */
-  justify-content: space-between;
+  justify-content: center;
   flex-wrap: wrap;
   margin: 0;
+  gap: 1rem;
 }
 
 .footer-nav nav li,
 .header-nav nav li {
-  margin: 0 0.5rem;
+  margin: 0;
   flex: 0 1 auto;
 }
 
@@ -669,43 +431,142 @@ body {
   text-decoration: none;
   font-weight: bold;
   display: inline-block;
-  padding: 0.35rem 0.5rem;
-  font-size: 1.2rem;  /* Increased from 1rem for even better readability */
+  padding: 0.5rem 0.75rem;
+  font-size: 1.1rem;
+  border-radius: 6px;
+  transition: background-color 0.2s;
 }
 
 .footer-nav a:hover,
 .header-nav a:hover {
-  text-decoration: underline;
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .footer-logo {
-  margin: 0.5rem 0; /* Reduced margin to save space */
+  margin: 0.5rem 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: transparent !important; /* Ensure container has no background */
 }
 
 .footer-logo img {
-  height: 450px; /* Even bigger - increased from 350px */
-  width: auto; /* Maintain aspect ratio */
-  opacity: 1; /* Full opacity for the new logo */
+  height: 320px; /* Match auth pages */
+  width: auto;
+  opacity: 0.9;
   transition: opacity 0.3s ease;
-  background: transparent !important; /* Force transparent background */
-  border: none !important; /* Remove any borders */
-  box-shadow: none !important; /* Remove any shadows */
-  border-radius: 0 !important; /* Remove any border radius that might show corners */
-  filter: drop-shadow(0 0 0 transparent); /* Remove any white background with filter */
 }
 
 .footer-logo img:hover {
-  opacity: 1; /* Full opacity on hover */
+  opacity: 1;
 }
 
-main {
-  flex: 1;
-  overflow-y: auto; /* Allow scrolling within main content only */
-  /* Removed conflicting padding - header spacing handled elsewhere */
+@media (max-width: 600px) {
+  .App-header {
+    min-height: 65px;
+    padding: 0.5rem;
+  }
+
+  .App-header h1 {
+    font-size: 0.9rem;
+  }
+  
+  .header-subtitle {
+    font-size: 0.6rem;
+    display: none; /* Hide subtitle on very small screens */
+  }
+
+  /* User info section for mobile - keep in upper right */
+  .user-info-section {
+    top: 0.5rem;
+    right: 3rem;
+    gap: 0.2rem;
+  }
+
+  .username {
+    font-size: 0.65rem;
+  }
+
+  .logout-btn {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.6rem;
+  }
+
+  /* Main content padding */
+  main { 
+    padding-top: 80px !important; /* Adjusted for smaller header */
+    padding-bottom: 270px !important;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+  
+  /* Footer logo slightly smaller on very small screens */
+  .footer-logo img {
+    height: 200px !important;
+  }
+}
+
+/* Landscape Mobile */
+@media (max-height: 600px) and (orientation: landscape) {
+  .App-header {
+    min-height: 45px;
+    padding: 0.3rem;
+  }
+  
+  .App-header h1 {
+    font-size: 0.75rem;
+  }
+  
+  .header-subtitle {
+    display: none; /* Hide subtitle in landscape */
+  }
+  
+  .user-info-section {
+    top: 0.3rem;
+    right: 3rem;
+  }
+  
+  .username {
+    font-size: 0.55rem;
+  }
+  
+  .logout-btn {
+    padding: 0.15rem 0.3rem;
+    font-size: 0.5rem;
+  }
+  
+  main {
+    padding-top: 70px !important; /* Reduced for compact landscape header */
+    padding-bottom: 130px !important; /* Reduced for smaller footer */
+  }
+  
+  .footer-logo img {
+    height: 100px !important; /* Much smaller logo in landscape */
+  }
+  
+  .footer-nav {
+    padding: 0.3rem !important;
+  }
+  
+  /* Hide footer navigation in landscape mode */
+  .footer-nav nav {
+    display: none !important;
+  }
+  
+  /* Force navigation to be very compact in landscape */
+  .nav-links {
+    gap: 0.3rem;
+  }
+  
+  .nav-links a {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.3rem;
+  }
+}
+
+/* Removed duplicate main rule that was conflicting with header spacing */
+
+.header-nav {
+  padding-bottom: 0; 
 }
 
 .controls {
@@ -748,9 +609,4 @@ footer {
   padding: 1rem;
   background-color: var(--secondary-color);
   color: white;
-}
-
-/* Mobile styles for auth elements (responsive design handled in main media query) */
-@media (max-width: 768px) {
-  /* Additional mobile-specific styles can go here if needed */
 }

@@ -62,7 +62,7 @@
 /* Feature cards grid */
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Smaller cards - reduced from 450px */
+  grid-template-columns: repeat(3, 1fr); /* Always 3 columns on desktop */
   gap: 1rem; /* Further reduced gap for tighter layout */
   width: 100%;
   max-width: 1200px; /* Reduced max width - was 1600px */
@@ -160,7 +160,7 @@
   }
 
   .features-grid {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Slightly smaller minmax for mobile */
+    grid-template-columns: 1fr; /* Single column stacked on mobile */
     gap: 1rem; /* Same as desktop */
     margin: 0; /* Same as desktop */
   }
@@ -190,5 +190,45 @@
   .feature-card {
     padding: 1.2rem 0.8rem; /* Slightly smaller padding for very small screens */
     min-height: 120px; /* Slightly shorter on very small screens */
+  }
+}
+
+/* Landscape mode - make everything much more compact */
+@media (max-height: 600px) and (orientation: landscape) {
+  .home-container {
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+
+  .home-container > h2 {
+    font-size: 1.2rem;
+    margin: 0 0 0.25rem 0;
+  }
+
+  .home-container > p {
+    font-size: 0.75rem;
+    margin: 0 0 0.25rem 0;
+    line-height: 1.2;
+  }
+
+  .features-grid {
+    grid-template-columns: repeat(3, 1fr); /* 3 columns in landscape */
+    gap: 0.5rem;
+    max-width: 100%;
+  }
+
+  .feature-card {
+    padding: 0.5rem;
+    min-height: 80px; /* Very compact cards */
+  }
+
+  .feature-card h3 {
+    font-size: 1rem;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .feature-card p {
+    font-size: 0.7rem;
+    line-height: 1.3;
   }
 }
