@@ -6,109 +6,101 @@
 .auth-header-simple {
   background-color: #2196F3;
   color: white;
-  padding: 2rem 0; /* Increased padding for taller header */
+  padding: 1.5rem 1rem;
   text-align: center;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
-  height: 350px;
-  transition: height 0.3s ease, background-color 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.auth-header-simple.collapse{
-  height: 100px;
+.auth-header-simple.collapse {
+  padding: 1rem;
 }
 
 .auth-header-simple .header-brand .header-title {
   margin: 0;
-  font-size: 2.2rem; /* Much bigger lettering */
+  font-size: 1.5rem;
   font-weight: 700;
   line-height: 1.2;
 }
 
 .auth-header-simple .header-subtitle {
-  margin: 0.5rem 0 0 0;
-  font-size: 1.1rem;
+  margin: 0.5rem auto 0;
+  font-size: 0.9rem;
   font-weight: 400;
   line-height: 1.3;
   color: rgba(255, 255, 255, 0.9);
   font-style: italic;
   max-width: 700px;
-  margin-left: auto;
-  margin-right: auto;
+  padding: 0 1rem;
 }
 
 .auth-footer-simple {
-  background-color: #2196F3; /* Match header blue color */
-  color: white; /* White text like header */
-  padding: 1.5rem 0; /* Slightly taller footer */
+  background-color: #2196F3;
+  color: white;
+  padding: 0.75rem 1rem;
   text-align: center;
-  /* position: fixed;
+  position: fixed;
   bottom: 0;
   left: 0;
-  right: 0; */
+  right: 0;
   z-index: 1000;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .auth-footer-simple p {
   margin: 0;
-  font-size: 1rem; /* Slightly bigger footer text */
-  font-weight: 500; /* Medium weight for better visibility */
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
-/* Auth Footer Logo - same size as main app footer */
+/* Auth Footer Logo */
 .auth-footer-logo {
-  margin: 0.5rem 0; /* Space above and below the logo */
+  margin: 0.5rem 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: transparent !important; /* Ensure container has no background */
 }
 
 .auth-footer-logo img {
-  height: 450px; /* Same size as main app footer logo */
-  width: auto; /* Maintain aspect ratio */
-  opacity: 1; /* Full opacity for the logo */
+  height: 320px;
+  width: auto;
+  opacity: 0.9;
   transition: opacity 0.3s ease;
-  background: transparent !important; /* Force transparent background */
-  border: none !important; /* Remove any borders */
-  box-shadow: none !important; /* Remove any shadows */
-  border-radius: 0 !important; /* Remove any border radius that might show corners */
-  filter: drop-shadow(0 0 0 transparent); /* Remove any white background with filter */
 }
 
 .auth-footer-logo img:hover {
-  opacity: 1; /* Full opacity on hover */
+  opacity: 1;
 }
 
 /* Auth Page Layout */
 .auth-page {
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
-  align-items: flex-start; /* Use flex-start to manually position */
+  align-items: center;
   justify-content: center;
   padding: 1rem;
-  padding-top: 15rem; /* Moved forms down even more */
-  padding-bottom: 5rem; /* Space for footer with large logo */
+  padding-top: 140px; /* Space for fixed header */
+  padding-bottom: 370px; /* Space for fixed footer with large logo */
   background: linear-gradient(135deg, #BBDEFB 0%, #FFFFFF 100%);
   box-sizing: border-box;
-  position: relative;
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 .auth-container {
   width: 100%;
-  max-width: 600px; /* Increased from 400px to make it wider */
-  max-height: calc(100vh - 2rem); /* Ensure container fits within viewport */
+  max-width: 600px;
+  max-height: calc(100vh - 510px); /* Viewport height minus header and footer with large logo */
   background-color: #FFFFFF;
   border-radius: 12px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  padding: 1.25rem 2.5rem; /* Increased top/bottom padding for better spacing */
+  padding: 2rem;
   box-sizing: border-box;
-  position: relative;
-  overflow-y: auto; /* Allow internal scrolling if needed */
+  overflow-y: auto; /* Enable scrolling within container */
+  overflow-x: hidden;
 }
 
 /* Auth Header */
@@ -354,72 +346,149 @@
 /* Mobile Responsive */
 @media (max-width: 600px) {
   .auth-header-simple {
-    padding: 1.5rem 0; /* Slightly smaller but still tall on mobile */
+    padding: 1rem;
   }
   
   .auth-header-simple .header-brand .header-title {
-    font-size: 1.8rem; /* Smaller but still big on mobile */
+    font-size: 1.25rem;
+  }
+  
+  .auth-header-simple .header-subtitle {
+    font-size: 0.8rem;
   }
   
   .auth-page {
     padding: 0.5rem;
-    padding-top: 6rem; /* Adjust for mobile header height */
-    padding-bottom: 4.5rem; /* Adjust for mobile footer */
-    height: 100vh;
-    overflow: hidden;
+    padding-top: 120px; /* Adjust for mobile header */
+    padding-bottom: 290px; /* Adjust for mobile footer with larger logo */
   }
   
   .auth-container {
-    padding: 1rem 1.5rem; /* Reduced top/bottom padding, maintain side padding */
-    max-width: 95%; /* Use more width on mobile */
-    max-height: calc(100vh - 10.5rem); /* Adjust for fixed header/footer */
-    margin: 0;
+    padding: 1.5rem;
+    max-width: 100%;
+    max-height: calc(100vh - 410px); /* Adjust for mobile fixed header/footer with larger logo */
   }
   
   .auth-title {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
+  }
+  
+  .auth-subtitle {
+    font-size: 0.75rem;
+  }
+  
+  .auth-description {
+    padding: 0.75rem;
+  }
+  
+  .auth-description h3 {
+    font-size: 1rem;
+  }
+  
+  .auth-description p {
+    font-size: 0.8rem;
+  }
+  
+  .auth-footer-simple {
+    padding: 0.5rem;
+  }
+  
+  .auth-footer-logo img {
+    height: 240px; /* Doubled mobile logo size */
   }
 }
 
 /* Landscape Mobile */
 @media (max-height: 600px) and (orientation: landscape) {
   .auth-header-simple {
-    padding: 0.5rem 0; /* Smaller header padding */
+    padding: 0.5rem;
   }
   
   .auth-header-simple .header-brand .header-title {
-    font-size: 1.1rem; /* Even smaller for landscape */
+    font-size: 1rem;
+  }
+  
+  .auth-header-simple .header-subtitle {
+    font-size: 0.7rem;
   }
   
   .auth-footer-simple {
-    padding: 0.5rem 0; /* Smaller footer padding */
+    padding: 0.5rem;
+  }
+  
+  .auth-footer-simple p {
+    font-size: 0.75rem;
+  }
+  
+  .auth-footer-logo img {
+    height: 200px; /* Doubled landscape logo size */
   }
   
   .auth-page {
     padding: 0.5rem;
-    padding-top: 3.5rem; /* Adjust for smaller landscape header */
-    padding-bottom: 3rem; /* Adjust for smaller landscape footer */
-    height: 100vh;
-    overflow: hidden;
+    padding-top: 70px; /* Adjust for smaller landscape header */
+    padding-bottom: 230px; /* Adjust for larger logo in landscape */
   }
   
   .auth-container {
     padding: 1rem;
-    max-height: calc(100vh - 6.5rem); /* Adjust for smaller fixed header/footer */
-    margin: 0;
+    max-height: calc(100vh - 300px); /* Adjust for larger logo in landscape */
   }
   
   .auth-header {
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
   }
   
   .auth-title {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     margin-bottom: 0.25rem;
+  }
+  
+  .auth-subtitle {
+    font-size: 0.7rem;
+  }
+  
+  .auth-description {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+  }
+  
+  .auth-description h3 {
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .auth-description p {
+    font-size: 0.7rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .auth-features {
+    gap: 0.25rem;
+  }
+  
+  .feature-item {
+    font-size: 0.65rem;
   }
   
   .auth-form {
     gap: 0.5rem;
+  }
+  
+  .auth-form .form-label {
+    font-size: 0.75rem;
+  }
+  
+  .auth-form .form-input {
+    padding: 0.5rem;
+    font-size: 0.85rem;
+    min-height: 36px;
+  }
+  
+  .auth-submit {
+    padding: 0.5rem;
+    font-size: 0.85rem;
+    min-height: 38px;
   }
   
   .auth-options {
@@ -428,7 +497,7 @@
   }
   
   .auth-links {
-    margin-top: 1rem;
+    margin-top: 0.75rem;
     padding-top: 0.5rem;
   }
 }
