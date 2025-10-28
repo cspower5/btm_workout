@@ -15,21 +15,22 @@
 
 /* Page title styling */
 .workout-page-title {
-  font-size: 1.8rem; /* Even smaller for compact layout */
+  font-size: 2rem; /* Larger, more readable */
   font-weight: 700;
-  margin: 0 0 0.25rem 0; /* Minimal margins */
+  margin: 0 0 0.5rem 0;
   color: var(--primary-color);
   text-align: center;
-  flex-shrink: 0; /* Don't shrink */
+  flex-shrink: 0;
 }
 
 .workout-page-subtitle {
-  font-size: 0.9rem; /* Smaller for compact layout */
-  margin: 0 0 0.5rem 0; /* Minimal margins */
+  font-size: 1rem; /* Larger, more readable */
+  margin: 0 0 1rem 0;
   color: var(--secondary-color);
   text-align: center;
-  max-width: 600px;
-  flex-shrink: 0; /* Don't shrink */
+  max-width: 700px;
+  line-height: 1.5;
+  flex-shrink: 0;
 }
 
 .controls {
@@ -63,7 +64,7 @@
 }
 
 .controls label {
-  font-size: 1.2rem; /* Larger labels */
+  font-size: 1.1rem; /* Readable but not too large */
   font-weight: 600;
   color: var(--primary-color);
   display: flex;
@@ -75,12 +76,12 @@
 
 .controls input,
 .controls select {
-  padding: 0.75rem 1rem; /* More generous padding */
+  padding: 0.75rem 1rem;
   border-radius: var(--border-radius);
   border: 2px solid #E0E0E0;
   margin: 0;
   font-size: 1rem;
-  min-width: 180px;
+  min-width: 200px; /* Wider for better readability */
   transition: all 0.2s ease;
 }
 
@@ -228,8 +229,8 @@
 
 .workout-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Smaller minimum for more tiles */
-  gap: 1.5rem; /* Slightly smaller gap */
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Much smaller tiles */
+  gap: 1rem; /* Tighter gap */
   max-width: 1400px; /* Wider container to accommodate 4+ tiles */
   width: 100%;
   justify-content: center;
@@ -243,14 +244,14 @@
 
 /* When there are 4 or more tiles, make them smaller */
 .workout-list:has(:nth-child(4)) {
-  grid-template-columns: repeat(auto-fit, minmax(250px, 300px)); /* Smaller tiles for 4+ */
-  gap: 1rem; /* Tighter spacing */
+  grid-template-columns: repeat(auto-fit, minmax(180px, 250px)); /* Smaller tiles for 4+ */
+  gap: 0.75rem; /* Tighter spacing */
 }
 
 /* When there are 8 or more tiles, make them even smaller for 5 across */
 .workout-list:has(:nth-child(8)) {
-  grid-template-columns: repeat(auto-fit, minmax(200px, 250px)); /* Even smaller for 5+ tiles */
-  gap: 0.75rem; /* Even tighter spacing */
+  grid-template-columns: repeat(auto-fit, minmax(160px, 220px)); /* Even smaller for 5+ tiles */
+  gap: 0.5rem; /* Even tighter spacing */
   max-width: 1500px; /* Wider container for 5 tiles */
 }
 
@@ -271,33 +272,37 @@
   background-color: var(--card-background);
   border-radius: var(--border-radius);
   box-shadow: var(--box-shadow);
-  padding: 2rem 1.5rem; /* More generous padding */
+  padding: 1.5rem 1rem; /* Better padding for readability */
   text-align: left;
   cursor: pointer;
   height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start; /* Align content to top */
+  justify-content: flex-start;
   border: 2px solid transparent;
   transition: all 0.3s ease;
-  min-height: 180px; /* Consistent height */
+  min-height: 160px; /* Taller for better readability */
 }
 
 .exercise-card:hover {
   border-color: var(--primary-color);
-  box-shadow: 0 8px 20px rgba(0, 123, 255, 0.15); /* Match Home page shadow */
+  box-shadow: 0 8px 20px rgba(0, 123, 255, 0.15);
 }
 
 .exercise-card h3 {
   color: var(--primary-color);
-  margin: 0 0 1.5rem 0;
+  margin: 0 0 1rem 0; /* More spacing */
   text-align: center;
-  font-size: 1.3rem;
+  font-size: 1.15rem; /* Larger, more readable */
   font-weight: 600;
+  line-height: 1.3;
 }
 
 .exercise-card p {
-  margin: 0.5rem 0;
+  margin: 0.4rem 0; /* Better spacing */
+  font-size: 0.95rem; /* More readable */
+  line-height: 1.5;
+}
   text-align: left;
   width: 100%;
   font-size: 1rem;
@@ -309,6 +314,28 @@
   font-weight: 600;
 }
 
+/* Tablet adjustments (iPads) */
+@media (max-width: 1024px) {
+  .workout-list {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Balanced size */
+    gap: 1rem;
+  }
+
+  .exercise-card {
+    padding: 1.2rem 0.9rem;
+    min-height: 140px;
+  }
+
+  .exercise-card h3 {
+    font-size: 1.05rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .exercise-card p {
+    font-size: 0.9rem;
+  }
+}
+
 /* Mobile adjustments */
 @media (max-width: 768px) {
   .workout-page-container {
@@ -318,24 +345,24 @@
   }
 
   .workout-page-title {
-    font-size: 1.8rem;
-    margin-bottom: 1rem;
+    font-size: 1.8rem; /* Larger for better readability */
+    margin-bottom: 0.75rem;
   }
 
   .workout-page-subtitle {
-    font-size: 1rem;
-    margin-bottom: 1.5rem;
+    font-size: 1rem; /* Larger for better readability */
+    margin-bottom: 1.25rem;
   }
 
   .controls {
-    padding: 1.5rem;
-    margin-bottom: 2rem;
+    padding: 1.5rem 1rem; /* More padding */
+    margin-bottom: 1.5rem;
     max-width: 100%;
   }
 
   .form-fields {
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1.5rem; /* More spacing */
     width: 100%;
     align-items: center;
   }
@@ -343,63 +370,129 @@
   .controls label {
     width: 100%;
     text-align: center;
-    font-size: 1.1rem;
+    font-size: 1.2rem; /* Larger labels */
   }
 
   .controls input,
   .controls select {
     width: 100%;
-    max-width: 280px;
+    max-width: 300px; /* Wider for readability */
     font-size: 16px; /* Prevent zoom on iOS */
+    padding: 0.85rem 1rem; /* More padding */
   }
 
   .controls button {
     padding: 1rem 2rem;
-    min-width: 180px;
+    min-width: 200px; /* Wider button */
+    font-size: 1.1rem; /* Larger text */
   }
 
   /* Make number input container more mobile-friendly */
   .number-input-container {
     margin: 0;
-    width: 120px; /* Match our main design */
-    height: 44px; /* Match main design height */
+    width: 120px;
+    height: 44px;
     overflow: visible;
     flex-shrink: 0;
   }
 
   .number-btn {
-    width: 40px; /* Same as main design - equal width */
-    height: 44px; /* Match main design */
-    font-size: 0.9rem; /* Match main design */
+    width: 40px;
+    height: 44px;
+    font-size: 0.9rem;
     padding: 0;
   }
 
   .number-display {
-    font-size: 0.9rem; /* Match main design */
+    font-size: 0.9rem;
     padding: 0;
-    height: 44px; /* Match main design */
+    height: 44px;
     line-height: 1;
-    width: 40px; /* Same as buttons - equal width */
+    width: 40px;
   }
 
   .workout-list {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 1rem; /* More spacing */
     padding: 0 0.5rem;
   }
 
   .exercise-card {
-    padding: 1.5rem 1rem;
-    min-height: 160px;
+    padding: 1.25rem 1rem; /* Better padding */
+    min-height: 140px; /* Taller cards */
   }
 
   .exercise-card h3 {
-    font-size: 1.2rem;
-    margin-bottom: 1rem;
+    font-size: 1.1rem; /* Larger heading */
+    margin-bottom: 0.75rem;
   }
 
   .exercise-card p {
-    font-size: 0.9rem;
+    font-size: 0.9rem; /* Larger text */
+    margin: 0.35rem 0;
+  }
+}
+
+/* Landscape mode - very compact tiles */
+@media (max-height: 600px) and (orientation: landscape) {
+  .workout-page-container {
+    padding: 0.5rem;
+  }
+
+  .workout-page-title {
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .workout-page-subtitle {
+    font-size: 0.7rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .controls {
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    gap: 0.5rem;
+  }
+
+  .controls label {
+    font-size: 0.8rem;
+    gap: 0.5rem;
+  }
+
+  .controls input,
+  .controls select {
+    padding: 0.4rem;
+    font-size: 0.75rem;
+    min-width: 120px;
+  }
+
+  .controls button {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    min-width: 120px;
+  }
+
+  .workout-list {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* Much smaller tiles */
+    gap: 0.4rem;
+    padding: 0 0.5rem;
+  }
+
+  .exercise-card {
+    padding: 0.5rem 0.4rem;
+    min-height: 80px;
+  }
+
+  .exercise-card h3 {
+    font-size: 0.75rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .exercise-card p {
+    font-size: 0.65rem;
+    margin: 0.15rem 0;
+    line-height: 1.2;
   }
 }
 
